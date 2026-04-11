@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Interactive visualisations for the deterministic algorithms and data structures that make marketing LLM agents fast, safe, and scalable."
+    />
+    <title>AI Harness Lab</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2307110f'/%3E%3Cpath d='M8 8h8v8H8zM16 8h8v8h-8zM8 16h8v8H8zM16 16h8v8h-8z' fill='%233ee58f'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="AI Harness Lab home">
+        <span class="brand-mark"></span>
+        <span>AI Harness Lab</span>
+      </a>
+      <nav class="topnav" aria-label="Page navigation">
+        <a href="#visualizer">Visualizer</a>
+        <a href="#stack-map">Stack map</a>
+        <a href="#build-notes">Build notes</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="intro" aria-labelledby="page-title">
+        <div class="intro-copy">
+          <h1 id="page-title">Algorithms inside marketing agents</h1>
+          <p>
+            Step through the deterministic core behind skills, MCP tools, plugins,
+            CLIs, and agent orchestration. Each animation uses the marketing data
+            shapes from the article: campaigns, crawls, reports, tool paths, and
+            incident clusters.
+          </p>
+        </div>
+        <div class="hero-algorithm" aria-label="Animated algorithm system overview">
+          <svg viewBox="0 0 900 280" role="img" aria-labelledby="hero-algorithm-title">
+            <title id="hero-algorithm-title">Animated deterministic algorithm pipeline</title>
+            <g class="hero-bars" aria-label="Binary search threshold bars">
+              <line x1="70" y1="136" x2="286" y2="136" class="hero-threshold"></line>
+              <rect x="76" y="158" width="24" height="42" rx="5"></rect>
+              <rect x="108" y="144" width="24" height="56" rx="5"></rect>
+              <rect x="140" y="118" width="24" height="82" rx="5"></rect>
+              <rect x="172" y="102" width="24" height="98" rx="5"></rect>
+              <rect x="204" y="74" width="24" height="126" rx="5" class="active"></rect>
+              <rect x="236" y="58" width="24" height="142" rx="5"></rect>
+              <rect x="268" y="66" width="24" height="134" rx="5"></rect>
+              <g class="hero-cursor">
+                <path d="M216 50v20M204 70h24"></path>
+                <text x="216" y="38">threshold found</text>
+              </g>
+            </g>
+
+            <g class="hero-nodes" aria-label="Breadth-first crawl nodes">
+              <line x1="450" y1="60" x2="396" y2="128"></line>
+              <line x1="450" y1="60" x2="450" y2="128"></line>
+              <line x1="450" y1="60" x2="504" y2="128"></line>
+              <line x1="396" y1="128" x2="366" y2="202"></line>
+              <line x1="396" y1="128" x2="426" y2="202"></line>
+              <line x1="504" y1="128" x2="474" y2="202"></line>
+              <line x1="504" y1="128" x2="534" y2="202"></line>
+              <circle cx="450" cy="60" r="18"></circle>
+              <circle cx="396" cy="128" r="18"></circle>
+              <circle cx="450" cy="128" r="18"></circle>
+              <circle cx="504" cy="128" r="18"></circle>
+              <circle cx="366" cy="202" r="18"></circle>
+              <circle cx="426" cy="202" r="18"></circle>
+              <circle cx="474" cy="202" r="18"></circle>
+              <circle cx="534" cy="202" r="18"></circle>
+            </g>
+
+            <g class="hero-route" aria-label="Cheapest tool path">
+              <line x1="632" y1="92" x2="714" y2="54"></line>
+              <line x1="632" y1="92" x2="714" y2="132"></line>
+              <line x1="714" y1="54" x2="792" y2="92" class="best"></line>
+              <line x1="714" y1="132" x2="792" y2="92"></line>
+              <line x1="792" y1="92" x2="830" y2="184" class="best"></line>
+              <circle cx="632" cy="92" r="20"></circle>
+              <circle cx="714" cy="54" r="20" class="best-node"></circle>
+              <circle cx="714" cy="132" r="20"></circle>
+              <circle cx="792" cy="92" r="20" class="best-node"></circle>
+              <circle cx="830" cy="184" r="20" class="best-node"></circle>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <section class="workspace" id="visualizer" aria-label="Algorithm visualizer">
+        <aside class="catalogue" aria-label="Algorithm catalogue">
+          <div class="catalogue-head">
+            <p class="eyebrow">Operations</p>
+            <h2>Choose a pattern</h2>
+          </div>
+          <div class="filters" id="filters"></div>
+          <div class="algorithm-list" id="algorithm-list"></div>
+        </aside>
+
+        <section class="stage" aria-live="polite">
+          <div class="stage-head">
+            <div>
+              <p class="eyebrow" id="operation-label">Find</p>
+              <h2 id="algorithm-title">Binary Search</h2>
+              <p id="algorithm-summary"></p>
+            </div>
+            <div class="step-meter">
+              <span id="step-index">1</span>
+              <span>/</span>
+              <span id="step-total">1</span>
+            </div>
+          </div>
+
+          <div class="controls" aria-label="Animation controls">
+            <button id="reset-button" type="button">Reset</button>
+            <button id="prev-button" type="button">Back</button>
+            <button id="play-button" type="button" class="primary">Play</button>
+            <button id="next-button" type="button">Next</button>
+            <label>
+              Speed
+              <input id="speed-control" type="range" min="500" max="1800" value="1050" />
+            </label>
+          </div>
+
+          <div class="stage-grid">
+            <article class="panel visual-panel">
+              <div class="panel-title">
+                <span>Animation</span>
+                <strong id="state-label">Ready</strong>
+              </div>
+              <div id="visualization" class="visualization"></div>
+            </article>
+
+            <article class="panel code-panel">
+              <div class="panel-title">
+                <span>Reference code</span>
+                <strong id="complexity-label">O(log n)</strong>
+              </div>
+              <pre><code id="code-view"></code></pre>
+            </article>
+          </div>
+
+          <div class="explain-row">
+            <article class="panel">
+              <div class="panel-title">
+                <span>Current step</span>
+              </div>
+              <p id="step-note"></p>
+            </article>
+            <article class="panel">
+              <div class="panel-title">
+                <span>Why it helps LLM apps</span>
+              </div>
+              <p id="agent-use"></p>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <section class="stack-map" id="stack-map" aria-labelledby="stack-map-title">
+        <p class="eyebrow">From the article series</p>
+        <h2 id="stack-map-title">Where each structure sits in the agent stack</h2>
+        <div class="stack-grid">
+          <article>
+            <h3>Skills</h3>
+            <p>BFS, DFS, topological sort, Bloom filters, and circular buffers keep workflow steps explicit and bounded.</p>
+          </article>
+          <article>
+            <h3>MCP tools</h3>
+            <p>Binary search, heaps, Rabin-Karp, and deduplication gates make structured tool responses fast and auditable.</p>
+          </article>
+          <article>
+            <h3>Plugins</h3>
+            <p>Plugin packages rely on memory windows, indexes, dependency graphs, and portable execution rules.</p>
+          </article>
+          <article>
+            <h3>Orchestration</h3>
+            <p>Topological sort, Dijkstra, and Union-Find turn multi-agent work into schedulable paths and explainable clusters.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="build-notes" id="build-notes" aria-labelledby="build-notes-title">
+        <div>
+          <p class="eyebrow">Implementation notes</p>
+          <h2 id="build-notes-title">How this mirrors the reference pattern</h2>
+        </div>
+        <p>
+          The Algomaster reference uses a catalogue of algorithms and an individual
+          workspace for each animation: input examples, code, a visual state, and
+          a step counter. This site keeps that learning loop, but swaps textbook
+          examples for marketing-agent systems from the article.
+        </p>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
