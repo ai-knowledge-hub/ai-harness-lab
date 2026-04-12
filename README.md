@@ -30,7 +30,7 @@ pnpm install
 Run the Vite dev server:
 
 ```sh
-pnpm dev
+pnpm dev 
 ```
 
 Build for production:
