@@ -79,15 +79,14 @@ export function AlgorithmLabPage() {
           <div className="article-bridge" aria-label="Source analysis">
             <span className="manual-index">Source analysis</span>
             <p>
-              This module is the interactive companion to the AI News Hub essay
+              Interactive companion to the AI News Hub essay
               <strong>
                 {" "}
                 The Deterministic Core: Algorithms and Data Structures That Make
                 Marketing Agents Fast, Safe, and Scalable
               </strong>
-              . The article explains why these structures matter; this page lets
-              readers inspect them step by step using the same marketing-oriented
-              examples.
+              . The article makes the systems argument; this page shows the
+              mechanics step by step.
             </p>
             <a
               className="inline-link"

@@ -1357,7 +1357,7 @@ svg {
   gap: 18px;
   align-items: start;
   width: min(860px, 100%);
-  margin: 24px auto 0;
+  margin: 28px auto 38px;
   padding-top: 18px;
   border-top: 1px solid var(--line);
   text-align: left;
@@ -1378,7 +1378,7 @@ svg {
 .article-bridge .inline-link {
   grid-column: 2;
   justify-self: start;
-  margin-top: 2px;
+  margin-top: 8px;
 }
 
 .module-coming-soon {
