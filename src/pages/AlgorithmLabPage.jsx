@@ -3,6 +3,9 @@ import { algorithms, operations } from "../visualizers/algorithms-data";
 import { renderVisualization } from "../visualizers/renderers";
 import { HeroAlgorithm } from "../sections/HeroAlgorithm";
 
+const ARTICLE_URL =
+  "https://ai-news-hub.performics-labs.com/analysis/deterministic-core-algorithms-data-structures-marketing-agents";
+
 function CodeView({ lines, activeLine }) {
   return (
     <pre>
@@ -73,6 +76,28 @@ export function AlgorithmLabPage() {
             shapes from the article: campaigns, crawls, reports, tool paths, and
             incident clusters.
           </p>
+          <div className="article-bridge" aria-label="Source analysis">
+            <span className="manual-index">Source analysis</span>
+            <p>
+              This module is the interactive companion to the AI News Hub essay
+              <strong>
+                {" "}
+                The Deterministic Core: Algorithms and Data Structures That Make
+                Marketing Agents Fast, Safe, and Scalable
+              </strong>
+              . The article explains why these structures matter; this page lets
+              readers inspect them step by step using the same marketing-oriented
+              examples.
+            </p>
+            <a
+              className="inline-link"
+              href={ARTICLE_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the full analysis
+            </a>
+          </div>
         </div>
         <HeroAlgorithm />
       </section>
@@ -220,7 +245,7 @@ export function AlgorithmLabPage() {
 
       <section className="stack-map" id="stack-map" aria-labelledby="stack-map-title">
         <div className="section-head">
-          <p className="eyebrow">From the article series</p>
+          <p className="eyebrow">From the source analysis</p>
           <h2 id="stack-map-title">Where each structure sits in the agent stack</h2>
         </div>
         <div className="manual-list stack-manual">
@@ -275,10 +300,11 @@ export function AlgorithmLabPage() {
         <div className="build-note-body">
           <span className="manual-index">01</span>
           <p>
-            The Algomaster reference uses a catalogue of algorithms and an individual
-            workspace for each animation: input examples, code, a visual state, and
-            a step counter. This site keeps that learning loop, but swaps textbook
-            examples for marketing-agent systems from the article.
+            The published analysis provides the systems argument and the six
+            operation model: find, explore, order, deduplicate, route, and
+            compress. This lab turns those categories into visual states, code
+            traces, and marketing-specific data examples that can be studied step
+            by step.
           </p>
         </div>
       </section>

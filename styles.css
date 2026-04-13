@@ -1351,6 +1351,36 @@ svg {
   line-height: 1.56;
 }
 
+.article-bridge {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  width: min(860px, 100%);
+  margin: 24px auto 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+}
+
+.article-bridge p {
+  max-width: none;
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.58;
+}
+
+.article-bridge strong {
+  color: var(--text);
+  font-weight: 720;
+}
+
+.article-bridge .inline-link {
+  grid-column: 2;
+  justify-self: start;
+  margin-top: 2px;
+}
+
 .module-coming-soon {
   width: min(1180px, calc(100% - 10vw));
   margin-bottom: 6vh;
@@ -1705,6 +1735,15 @@ svg {
   .module-hero {
     width: calc(100% - 10vw);
     padding-top: 56px;
+  }
+
+  .article-bridge {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .article-bridge .inline-link {
+    grid-column: auto;
   }
 }
 
