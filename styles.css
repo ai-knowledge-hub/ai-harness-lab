@@ -1017,7 +1017,7 @@ input[type="range"] {
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
   gap: 18px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .visual-panel {
@@ -1032,6 +1032,8 @@ input[type="range"] {
 }
 
 .panel {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   padding: 18px;
   box-shadow: none;
@@ -1071,8 +1073,10 @@ svg {
 }
 
 .code-panel pre {
+  flex: 1 1 auto;
   min-height: 500px;
-  max-height: 500px;
+  height: 100%;
+  max-height: none;
   margin: 0;
   overflow: auto;
   border: 1px solid var(--line);
