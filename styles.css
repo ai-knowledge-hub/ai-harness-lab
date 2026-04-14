@@ -146,9 +146,18 @@ a {
 }
 
 .topnav-secondary {
-  gap: 14px;
-  font-size: 0.72rem;
+  gap: 12px;
+  font-size: 0.7rem;
   letter-spacing: 0.08em;
+}
+
+.topnav-label {
+  color: var(--muted);
+  opacity: 0.72;
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 main {
