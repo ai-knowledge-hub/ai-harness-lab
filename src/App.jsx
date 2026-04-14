@@ -38,7 +38,8 @@ function Header() {
           </Link>
         </nav>
 
-        <nav className="topnav topnav-secondary" aria-label="Reference links">
+        <nav className="topnav topnav-secondary" aria-label="Ecosystem links">
+          <span className="topnav-label">Ecosystem</span>
           <a href="https://ai-news-hub.performics-labs.com/" target="_blank" rel="noreferrer">
             News Hub
           </a>
