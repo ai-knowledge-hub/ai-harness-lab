@@ -115,6 +115,51 @@ const code = {
     "    if rx == ry: return",
     "    attach smaller rank tree to larger rank tree",
   ],
+  approval: [
+    "state = 'proposed'",
+    "if policy.rejects(action):",
+    "    state = 'rejected'",
+    "elif action.requires_approval:",
+    "    state = 'awaiting_approval'",
+    "elif approver.accepts(action):",
+    "    state = 'approved'",
+    "state = 'executing'",
+    "state = execute(action)",
+  ],
+  tokenBucket: [
+    "tokens = min(capacity, tokens + elapsed * refill_rate)",
+    "if tokens >= request_cost:",
+    "    tokens -= request_cost",
+    "    allow(tool_call)",
+    "else:",
+    "    delay_until_refill(tool_call)",
+  ],
+  leaseQueue: [
+    "action = claim_next_approved_action(now)",
+    "if action.lock_expires_at > now:",
+    "    skip(action)",
+    "action.lock_token = uuid()",
+    "action.lock_expires_at = now + lease_seconds",
+    "heartbeat(action.lock_token)",
+    "execute(action)",
+    "release_or_fail(action)",
+  ],
+  permissionGraph: [
+    "principal = agent.identity",
+    "roles = resolve_roles(principal)",
+    "for rule in policy.rules:",
+    "    if rule.matches(principal, resource, action, context):",
+    "        decision = rule.effect",
+    "        break",
+    "return decision == 'allow'",
+  ],
+  hashChain: [
+    "previous_hash = log.tail_hash",
+    "event = canonical_json(action_record)",
+    "event_hash = sha256(previous_hash + event)",
+    "append({ event, previous_hash, event_hash })",
+    "verify by replaying hashes from genesis",
+  ],
 };
 
 export const operations = [
@@ -126,6 +171,7 @@ export const operations = [
   "Route",
   "Memory",
   "Security",
+  "Control",
 ];
 
 export const algorithms = [
@@ -316,6 +362,106 @@ export const algorithms = [
       { line: 6, label: "Merge third campaign", note: "Retargeting shares the same segment, so it joins the first root cause cluster.", groups: [["Spring Search", "Brand Display", "Retargeting"], ["New Customer"], ["Clearance"], ["Holiday Video"]] },
       { line: 6, label: "Broken landing page", note: "New Customer and Clearance share a broken landing page.", groups: [["Spring Search", "Brand Display", "Retargeting"], ["New Customer", "Clearance"], ["Holiday Video"]] },
       { line: 3, label: "Compressed result", note: "Six alerts reduce to three distinct root causes.", groups: [["Spring Search", "Brand Display", "Retargeting"], ["New Customer", "Clearance"], ["Holiday Video"]] },
+    ],
+  },
+  {
+    id: "approval",
+    title: "Approval State Machine",
+    operation: "Control",
+    short: "Action lifecycle gate",
+    complexity: "O(1) per transition",
+    summary:
+      "Move risky agent actions through explicit states so execution only happens after policy and approval checks.",
+    agentUse:
+      "A campaign agent can propose budget, bid, or publishing actions without being allowed to execute them until the harness records approval.",
+    code: code.approval,
+    steps: [
+      { line: 1, label: "Proposed", note: "The agent proposes a budget increase, but the action starts as a record, not an execution.", active: "proposed", approved: ["proposed"], action: "increase_budget" },
+      { line: 4, label: "Approval required", note: "Policy marks this as high risk because it changes spend.", active: "awaiting_approval", approved: ["proposed", "awaiting_approval"], action: "increase_budget" },
+      { line: 6, label: "Human review", note: "The approver checks rationale, account scope, and budget cap.", active: "approved", approved: ["proposed", "awaiting_approval", "approved"], action: "increase_budget" },
+      { line: 8, label: "Executing", note: "Only now can the harness call the media platform tool.", active: "executing", approved: ["proposed", "awaiting_approval", "approved", "executing"], action: "increase_budget" },
+      { line: 9, label: "Executed", note: "The action result is written back to the audit log.", active: "executed", approved: ["proposed", "awaiting_approval", "approved", "executing", "executed"], action: "increase_budget" },
+      { line: 2, label: "Rejected path", note: "If policy rejects the scope, the action never reaches execution.", active: "rejected", approved: ["proposed", "rejected"], action: "export_customer_data" },
+    ],
+  },
+  {
+    id: "tokenBucket",
+    title: "Token Bucket",
+    operation: "Control",
+    short: "Tool-call rate limiter",
+    complexity: "O(1) per request",
+    summary:
+      "Protect APIs, budgets, and model spend by allowing calls only when the gateway has enough capacity tokens.",
+    agentUse:
+      "A gateway can stop a reporting agent from hammering Google Ads, DV360, BigQuery, or a commerce API during a retry loop.",
+    code: code.tokenBucket,
+    steps: [
+      { line: 1, label: "Full bucket", note: "The gateway starts with five available tool-call tokens.", tokens: 5, capacity: 5, request: "Google Ads query", allowed: [] },
+      { line: 3, label: "Allow first call", note: "The Google Ads query costs one token and is allowed immediately.", tokens: 4, capacity: 5, request: "Google Ads query", allowed: ["Google Ads query"] },
+      { line: 3, label: "Burst traffic", note: "Three more campaign metric calls consume most of the remaining capacity.", tokens: 1, capacity: 5, request: "DV360 report", allowed: ["Google Ads query", "Meta query", "DV360 report", "BigQuery lookup"] },
+      { line: 5, label: "Throttle", note: "The next request needs two tokens, but only one is available, so the gateway delays it.", tokens: 1, capacity: 5, request: "full account export", allowed: ["Google Ads query", "Meta query", "DV360 report", "BigQuery lookup"], delayed: "full account export" },
+      { line: 1, label: "Refill", note: "Time passes and the bucket refills enough to safely run the delayed request.", tokens: 3, capacity: 5, request: "full account export", allowed: ["Google Ads query", "Meta query", "DV360 report", "BigQuery lookup"], delayed: null },
+      { line: 4, label: "Allow delayed call", note: "The export now runs without exceeding the API budget.", tokens: 1, capacity: 5, request: "full account export", allowed: ["Google Ads query", "Meta query", "DV360 report", "BigQuery lookup", "full account export"], delayed: null },
+    ],
+  },
+  {
+    id: "leaseQueue",
+    title: "Lease-Locked Queue",
+    operation: "Control",
+    short: "Single executor guarantee",
+    complexity: "O(log n) claim",
+    summary:
+      "Let workers claim approved actions with short leases so two agents do not execute the same action at once.",
+    agentUse:
+      "A runtime can safely run approved campaign actions in the background while recovering from worker crashes and duplicate scheduler ticks.",
+    code: code.leaseQueue,
+    steps: [
+      { line: 1, label: "Approved queue", note: "Three approved actions are ready, but none has a live lock yet.", active: "none", workers: [], actions: [["A1", "approved"], ["A2", "approved"], ["A3", "approved"]] },
+      { line: 4, label: "Worker claims A1", note: "Worker A atomically writes a lock token and lease expiry to action A1.", active: "A1", workers: ["worker-a"], actions: [["A1", "locked"], ["A2", "approved"], ["A3", "approved"]] },
+      { line: 2, label: "Worker B skips locked A1", note: "A second worker sees the live lease and cannot duplicate the action.", active: "A1", workers: ["worker-a", "worker-b"], actions: [["A1", "locked"], ["A2", "approved"], ["A3", "approved"]] },
+      { line: 6, label: "Heartbeat", note: "Worker A refreshes the lease while the media-platform tool call is still running.", active: "A1", workers: ["worker-a"], actions: [["A1", "heartbeat"], ["A2", "approved"], ["A3", "approved"]] },
+      { line: 8, label: "Release", note: "The action completes and the lock is released with an executed status.", active: "A1", workers: ["worker-a"], actions: [["A1", "executed"], ["A2", "approved"], ["A3", "approved"]] },
+      { line: 5, label: "Expired recovery", note: "If a worker crashes, the expired lease lets another worker reclaim the action later.", active: "A2", workers: ["worker-c"], actions: [["A1", "executed"], ["A2", "locked"], ["A3", "approved"]] },
+    ],
+  },
+  {
+    id: "permissionGraph",
+    title: "RBAC / ABAC Permission Graph",
+    operation: "Control",
+    short: "Scope resolver",
+    complexity: "O(R + E)",
+    summary:
+      "Combine roles and attributes to decide whether an agent can touch a specific account, data class, or action.",
+    agentUse:
+      "A gateway can let a reporting agent read campaign metrics while blocking customer exports or spend changes outside its assigned client scope.",
+    code: code.permissionGraph,
+    steps: [
+      { line: 1, label: "Agent identity", note: "The request starts from a named agent, not a human OAuth token.", active: "agent", allowed: ["agent"], decision: "pending", context: "client=Brand A" },
+      { line: 2, label: "Resolve role", note: "The agent maps to the campaign analyst role.", active: "role", allowed: ["agent", "role"], decision: "pending", context: "role=campaign_analyst" },
+      { line: 3, label: "Match resource", note: "The request targets a Google Ads account owned by Brand A.", active: "resource", allowed: ["agent", "role", "resource"], decision: "pending", context: "resource=google_ads_brand_a" },
+      { line: 4, label: "Check action", note: "Reading metrics is within the role and account scope.", active: "action", allowed: ["agent", "role", "resource", "action"], decision: "allow", context: "action=read_metrics" },
+      { line: 4, label: "Attribute block", note: "Exporting customer-level data fails because the data class is restricted.", active: "data", allowed: ["agent", "role", "resource"], blocked: ["data"], decision: "deny", context: "data_class=customer_level" },
+      { line: 7, label: "Return decision", note: "The gateway returns allow or deny before any platform tool runs.", active: "decision", allowed: ["agent", "role", "resource", "action", "decision"], blocked: ["data"], decision: "deny", context: "decision recorded" },
+    ],
+  },
+  {
+    id: "hashChain",
+    title: "Audit Hash Chain",
+    operation: "Control",
+    short: "Tamper-evident action log",
+    complexity: "O(n) verification",
+    summary:
+      "Link each audit event to the previous event hash so changed or deleted agent actions are detectable.",
+    agentUse:
+      "A governance layer can prove that campaign actions, approvals, tool calls, and results were not silently edited after execution.",
+    code: code.hashChain,
+    steps: [
+      { line: 1, label: "Genesis", note: "The audit log starts from a known initial hash.", active: 0, events: [["genesis", "0000", "a81c"]], broken: null },
+      { line: 2, label: "Approval event", note: "The approval record includes the previous hash before computing its own event hash.", active: 1, events: [["genesis", "0000", "a81c"], ["approved", "a81c", "b42e"]], broken: null },
+      { line: 3, label: "Tool call event", note: "The Google Ads tool call links to the approval event hash.", active: 2, events: [["genesis", "0000", "a81c"], ["approved", "a81c", "b42e"], ["tool_call", "b42e", "c90a"]], broken: null },
+      { line: 4, label: "Result event", note: "The executed result links to the tool call event.", active: 3, events: [["genesis", "0000", "a81c"], ["approved", "a81c", "b42e"], ["tool_call", "b42e", "c90a"], ["executed", "c90a", "d77f"]], broken: null },
+      { line: 5, label: "Replay verification", note: "Verification recomputes the chain and confirms every previous hash matches.", active: 3, events: [["genesis", "0000", "a81c"], ["approved", "a81c", "b42e"], ["tool_call", "b42e", "c90a"], ["executed", "c90a", "d77f"]], broken: null, verified: true },
+      { line: 5, label: "Tamper detected", note: "If the tool call event is edited later, the following hash no longer matches.", active: 2, events: [["genesis", "0000", "a81c"], ["approved", "a81c", "b42e"], ["tool_call_edited", "b42e", "9fff"], ["executed", "c90a", "d77f"]], broken: 3, verified: false },
     ],
   },
 ];

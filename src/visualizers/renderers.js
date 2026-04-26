@@ -313,6 +313,142 @@ function renderUnion(step) {
   `;
 }
 
+function renderApproval(step) {
+  const states = ["proposed", "awaiting_approval", "approved", "executing", "executed"];
+  const rejected = step.active === "rejected";
+  const stateMarkup = states
+    .map((state, index) => {
+      const active = step.active === state;
+      const complete = step.approved?.includes(state);
+      const x = 64 + index * 122;
+      return `<g>
+        ${index > 0 ? `<line x1="${x - 82}" y1="90" x2="${x - 36}" y2="90" stroke="${complete ? "var(--accent)" : "rgba(215,255,235,.2)"}" stroke-width="2"></line>` : ""}
+        <rect x="${x - 36}" y="54" width="72" height="72" rx="4" fill="${active ? "var(--accent)" : complete ? "rgba(62,229,143,.16)" : "rgba(255,255,255,.04)"}" stroke="rgba(215,255,235,.28)"></rect>
+        <text x="${x}" y="84" text-anchor="middle" fill="${active ? "#04100b" : "#edf8f2"}" font-size="10" font-weight="700">${state.split("_")[0]}</text>
+        <text x="${x}" y="101" text-anchor="middle" fill="${active ? "#04100b" : "#edf8f2"}" font-size="10">${state.split("_")[1] ?? ""}</text>
+      </g>`;
+    })
+    .join("");
+  return `
+    <svg viewBox="0 0 680 210" role="img">
+      ${stateMarkup}
+      <line x1="64" y1="130" x2="64" y2="168" stroke="${rejected ? "var(--bad)" : "rgba(215,255,235,.16)"}" stroke-width="2"></line>
+      <rect x="18" y="168" width="92" height="32" rx="4" fill="${rejected ? "rgba(255,107,107,.18)" : "rgba(255,255,255,.04)"}" stroke="${rejected ? "var(--bad)" : "rgba(215,255,235,.2)"}"></rect>
+      <text x="64" y="189" text-anchor="middle" fill="${rejected ? "var(--bad)" : "#9fb7ad"}" font-size="11" font-weight="700">rejected</text>
+    </svg>
+    <p class="viz-label">Action</p>
+    <div class="metric-list"><span class="pill ${rejected ? "warn" : "active"}">${step.action}</span><span class="pill">${step.active}</span></div>
+  `;
+}
+
+function renderTokenBucket(step) {
+  const tokens = Array.from({ length: step.capacity }, (_, index) => {
+    const filled = index < step.tokens;
+    return `<span class="token ${filled ? "filled" : ""}">${filled ? "●" : "○"}</span>`;
+  }).join("");
+  return `
+    <p class="viz-label">Gateway bucket</p>
+    <div class="token-bucket">${tokens}</div>
+    <p class="viz-label">Current request</p>
+    <div class="metric-list"><span class="pill ${step.delayed ? "warn" : "active"}">${step.request}</span><span class="pill">${step.delayed ? "delayed" : "eligible"}</span></div>
+    <p class="viz-label">Allowed calls</p>
+    <div class="cards">${step.allowed.map((item) => `<span class="campaign-card active">${item}</span>`).join("") || '<span class="campaign-card">No tool calls yet</span>'}</div>
+  `;
+}
+
+function renderLeaseQueue(step) {
+  const rows = step.actions
+    .map(([id, status]) => {
+      const active = id === step.active;
+      const locked = status === "locked" || status === "heartbeat";
+      const executed = status === "executed";
+      return `<div class="queue-row ${active ? "active" : ""}">
+        <span>${id}</span>
+        <strong>${status}</strong>
+        <em>${locked ? "lease live" : executed ? "done" : "claimable"}</em>
+      </div>`;
+    })
+    .join("");
+  return `
+    <div class="lease-board">${rows}</div>
+    <p class="viz-label">Workers</p>
+    <div class="metric-list">${step.workers.map((worker) => `<span class="pill active">${worker}</span>`).join("") || '<span class="pill">No active worker</span>'}</div>
+  `;
+}
+
+function renderPermissionGraph(step) {
+  const nodes = {
+    agent: [72, 150, "agent"],
+    role: [200, 80, "role"],
+    resource: [340, 80, "account"],
+    action: [488, 80, "action"],
+    data: [340, 220, "data"],
+    decision: [575, 150, "decision"],
+  };
+  const edges = [
+    ["agent", "role"],
+    ["role", "resource"],
+    ["resource", "action"],
+    ["resource", "data"],
+    ["action", "decision"],
+    ["data", "decision"],
+  ];
+  const edgeMarkup = edges
+    .map(([from, to]) => {
+      const [x1, y1] = nodes[from];
+      const [x2, y2] = nodes[to];
+      const blocked = step.blocked?.includes(from) || step.blocked?.includes(to);
+      const active = step.allowed?.includes(from) && step.allowed?.includes(to);
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${blocked ? "var(--bad)" : active ? "var(--accent)" : "rgba(215,255,235,.18)"}" stroke-width="${active || blocked ? 3 : 2}"></line>`;
+    })
+    .join("");
+  const nodeMarkup = Object.entries(nodes)
+    .map(([id, [x, y, label]]) => {
+      const active = step.active === id;
+      const allowed = step.allowed?.includes(id);
+      const blocked = step.blocked?.includes(id);
+      const fill = blocked
+        ? "rgba(255,107,107,.18)"
+        : active
+          ? "var(--accent)"
+          : allowed
+            ? "rgba(62,229,143,.13)"
+            : "rgba(255,255,255,.05)";
+      const stroke = blocked ? "var(--bad)" : allowed ? "rgba(62,229,143,.5)" : "rgba(215,255,235,.24)";
+      const text = active ? "#04100b" : "#edf8f2";
+      return `<g>
+        <rect x="${x - 46}" y="${y - 28}" width="92" height="56" rx="4" fill="${fill}" stroke="${stroke}"></rect>
+        <text x="${x}" y="${y + 4}" text-anchor="middle" fill="${text}" font-size="11" font-weight="700">${label}</text>
+      </g>`;
+    })
+    .join("");
+  return `
+    <svg viewBox="0 0 650 300" role="img">${edgeMarkup}${nodeMarkup}</svg>
+    <p class="viz-label">Context</p>
+    <div class="metric-list"><span class="pill">${step.context}</span><span class="pill ${step.decision === "deny" ? "warn" : step.decision === "allow" ? "active" : ""}">decision: ${step.decision}</span></div>
+  `;
+}
+
+function renderHashChain(step) {
+  const rows = step.events
+    .map(([event, previous, hash], index) => {
+      const active = index === step.active;
+      const broken = index === step.broken;
+      return `<div class="hash-row ${active ? "active" : ""} ${broken ? "broken" : ""}">
+        <span>${String(index).padStart(2, "0")}</span>
+        <strong>${event}</strong>
+        <em>prev ${previous}</em>
+        <code>${hash}</code>
+      </div>`;
+    })
+    .join("");
+  return `
+    <div class="hash-chain">${rows}</div>
+    <p class="viz-label">Verification</p>
+    <div class="metric-list"><span class="pill ${step.verified === false ? "warn" : "active"}">${step.verified === false ? "tamper detected" : step.verified ? "chain verified" : "building chain"}</span></div>
+  `;
+}
+
 const renderers = {
   binary: renderBinary,
   bfs: renderGraphTraversal,
@@ -324,6 +460,11 @@ const renderers = {
   buffer: renderBuffer,
   dijkstra: renderDijkstra,
   union: renderUnion,
+  approval: renderApproval,
+  tokenBucket: renderTokenBucket,
+  leaseQueue: renderLeaseQueue,
+  permissionGraph: renderPermissionGraph,
+  hashChain: renderHashChain,
 };
 
 export function renderVisualization(id, step) {
