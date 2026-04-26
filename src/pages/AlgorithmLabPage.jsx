@@ -5,6 +5,8 @@ import { HeroAlgorithm } from "../sections/HeroAlgorithm";
 
 const ARTICLE_URL =
   "https://ai-news-hub.performics-labs.com/analysis/deterministic-core-algorithms-data-structures-marketing-agents";
+const CONTROL_ARTICLE_URL =
+  "https://ai-news-hub.performics-labs.com/news/google-cloud-next-2026-marketing-commerce-adtech-impact";
 
 function CodeView({ lines, activeLine }) {
   return (
@@ -72,30 +74,44 @@ export function AlgorithmLabPage() {
           <h1 id="page-title">Algorithms inside marketing agents</h1>
           <p>
             Step through the deterministic core behind skills, MCP tools, plugins,
-            CLIs, and agent orchestration. Each animation uses the marketing data
-            shapes from the article: campaigns, crawls, reports, tool paths, and
-            incident clusters.
+            CLIs, agent orchestration, and governed control planes. Each animation
+            uses marketing system shapes: campaigns, crawls, reports, tool paths,
+            incident clusters, approvals, permission graphs, and audit logs.
           </p>
           <div className="article-bridge" aria-label="Source analysis">
-            <span className="manual-index">Source analysis</span>
-            <p>
-              Interactive companion to the AI News Hub essay
-              <strong>
-                {" "}
-                The Deterministic Core: Algorithms and Data Structures That Make
-                Marketing Agents Fast, Safe, and Scalable
-              </strong>
-              . The article makes the systems argument; this page shows the
-              mechanics step by step.
-            </p>
-            <a
-              className="inline-link"
-              href={ARTICLE_URL}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Read the full analysis
-            </a>
+            <span className="manual-index">Sources</span>
+            <div className="source-list">
+              <article className="source-row">
+                <div>
+                  <h2>The Deterministic Core</h2>
+                  <p>
+                    The systems argument for why marketing agents need explicit
+                    algorithms for finding, exploring, ordering, routing,
+                    deduplicating, and compressing work.
+                  </p>
+                </div>
+                <a className="inline-link" href={ARTICLE_URL} target="_blank" rel="noreferrer">
+                  Read algorithms essay
+                </a>
+              </article>
+              <article className="source-row">
+                <div>
+                  <h2>Google Cloud Next 2026</h2>
+                  <p>
+                    The control-plane source for the identity, gateway, policy,
+                    approval, and audit visualizers added to the Control group.
+                  </p>
+                </div>
+                <a
+                  className="inline-link muted-link"
+                  href={CONTROL_ARTICLE_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Read control-plane article
+                </a>
+              </article>
+            </div>
           </div>
         </div>
         <HeroAlgorithm />

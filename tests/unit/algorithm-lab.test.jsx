@@ -27,4 +27,34 @@ describe("AlgorithmLabPage", () => {
 
     expect(screen.getByText(/middle value is 5.80/i)).toBeInTheDocument();
   });
+
+  it("shows control algorithms for agent governance", () => {
+    render(
+      <MemoryRouter>
+        <AlgorithmLabPage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Control" }));
+
+    expect(
+      screen.getByRole("button", { name: /approval state machine/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /token bucket/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /lease-locked queue/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /rbac \/ abac permission graph/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /audit hash chain/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /lease-locked queue/i }));
+
+    expect(screen.getByRole("heading", { name: "Lease-Locked Queue" })).toBeInTheDocument();
+    expect(screen.getByText(/two agents do not execute the same action/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /audit hash chain/i }));
+
+    expect(screen.getByRole("heading", { name: "Audit Hash Chain" })).toBeInTheDocument();
+    expect(screen.getByText(/tamper-evident action log/i)).toBeInTheDocument();
+  });
 });
