@@ -162,6 +162,99 @@ const code = {
   ],
 };
 
+const algorithmContext = {
+  binary: {
+    why: "Binary search exists because ordered data should not be scanned one row at a time. Once the data is sorted, each comparison can discard half of the remaining search space.",
+    optimizes: "Fast lookup and boundary detection over sorted records.",
+    stillUsed: "Database indexes, log search, time-series thresholds, autocomplete, feature flags, and range queries.",
+    remember: "If the data is sorted and you need a target or crossing point, halve the search space instead of scanning.",
+  },
+  bfs: {
+    why: "Breadth-first search was built for exploring graphs level by level. It is useful when the nearest or highest-priority layer matters before deeper detail.",
+    optimizes: "Coverage by distance or hierarchy depth.",
+    stillUsed: "Web crawlers, shortest-path discovery in unweighted graphs, account audits, dependency maps, and queue-based workflows.",
+    remember: "Use BFS when breadth and priority by level matter more than following one path deeply.",
+  },
+  dfs: {
+    why: "Depth-first search exists for walking a structure by following one branch until it ends, then backtracking. It keeps memory small on deep structures.",
+    optimizes: "Deep traversal with a small active working set.",
+    stillUsed: "Repository scans, parsers, tree processing, cycle detection, dependency tracing, and backtracking systems.",
+    remember: "Use DFS when the useful answer may live deep inside one branch.",
+  },
+  rabin: {
+    why: "Rabin-Karp was created to make text search faster by comparing hashes of text windows instead of repeatedly comparing full strings.",
+    optimizes: "Multi-pattern matching across large text with cheap rolling updates.",
+    stillUsed: "Plagiarism detection, malware signatures, document scanning, search indexing, compliance checks, and prompt-injection filters.",
+    remember: "Use hashes to find likely matches quickly, then verify the actual text.",
+  },
+  heap: {
+    why: "Heaps solve the problem of repeatedly needing the next best or next smallest item without sorting the whole dataset every time.",
+    optimizes: "Priority access and streaming top-K selection.",
+    stillUsed: "Schedulers, priority queues, leaderboards, stream processing, pathfinding, and background job systems.",
+    remember: "Use a heap when you only need the best few items, not a fully sorted list.",
+  },
+  topo: {
+    why: "Topological sort exists because some tasks can only run after their prerequisites. It turns a dependency graph into a safe execution order.",
+    optimizes: "Dependency-aware scheduling and parallel execution waves.",
+    stillUsed: "Build systems, workflow engines, package managers, data pipelines, and multi-agent orchestration.",
+    remember: "If steps depend on other steps, schedule the graph before running the work.",
+  },
+  bloom: {
+    why: "Bloom filters were designed to answer a practical question with very little memory: have we probably seen this item before?",
+    optimizes: "Fast membership checks when exact storage would be too expensive.",
+    stillUsed: "CDNs, databases, crawlers, caches, stream deduplication, and large-scale filtering systems.",
+    remember: "A Bloom filter can say definitely not seen or probably seen, never definitely seen.",
+  },
+  buffer: {
+    why: "Circular buffers exist to keep a fixed-size rolling window without growing memory forever. New entries overwrite the oldest entries.",
+    optimizes: "Recent history with bounded memory and constant-time writes.",
+    stillUsed: "Telemetry, logs, audio buffers, monitoring windows, tool-call history, and embedded systems.",
+    remember: "Use a circular buffer when only the latest N items matter.",
+  },
+  dijkstra: {
+    why: "Dijkstra's algorithm was created to find the cheapest path through a weighted network where each step has a different cost.",
+    optimizes: "Lowest-cost routing when all edge costs are non-negative.",
+    stillUsed: "Network routing, maps, service planning, compiler optimization, dependency paths, and tool-chain selection.",
+    remember: "When every route has a cost, model the system as a graph and let the cheapest path win.",
+  },
+  union: {
+    why: "Union-Find exists to track which items belong to the same group while groups keep merging over time.",
+    optimizes: "Fast clustering and connectivity checks.",
+    stillUsed: "Network connectivity, image segmentation, graph algorithms, incident grouping, deduplication, and community detection.",
+    remember: "Use Union-Find when many small links need to become clear clusters.",
+  },
+  approval: {
+    why: "State machines formalize workflows that must move through allowed states. They prevent vague approval logic from becoming ad hoc conditionals.",
+    optimizes: "Predictable transitions, auditability, and blocked unsafe execution.",
+    stillUsed: "Payments, publishing systems, campaign approvals, CI/CD gates, ticketing workflows, and compliance systems.",
+    remember: "If an action has a lifecycle, make the states explicit.",
+  },
+  tokenBucket: {
+    why: "Token buckets were created for traffic shaping: allow short bursts while enforcing a sustained rate limit over time.",
+    optimizes: "Throughput control without banning reasonable bursts.",
+    stillUsed: "API gateways, rate limiters, ad platform integrations, model budgets, queue control, and network traffic management.",
+    remember: "Let work proceed only when the bucket has enough capacity tokens.",
+  },
+  leaseQueue: {
+    why: "Lease-locked queues solve the problem of multiple workers trying to run the same job while still recovering if one worker crashes.",
+    optimizes: "Single execution with crash recovery.",
+    stillUsed: "Distributed job queues, workflow engines, background workers, media operations, and scheduled automation.",
+    remember: "Claim work with an expiring lease so duplicate workers cannot execute it at the same time.",
+  },
+  permissionGraph: {
+    why: "RBAC and ABAC systems were created to make access decisions explicit across users, roles, resources, actions, and context.",
+    optimizes: "Fine-grained authorization before a tool or data source is touched.",
+    stillUsed: "Cloud IAM, enterprise apps, data platforms, agent gateways, CRM controls, and regulated workflows.",
+    remember: "Resolve identity, resource, action, and context before allowing a tool call.",
+  },
+  hashChain: {
+    why: "Hash chains make tampering visible by linking each record to the hash of the record before it.",
+    optimizes: "Integrity checks for ordered logs.",
+    stillUsed: "Audit trails, ledgers, append-only logs, supply-chain records, deployment provenance, and security monitoring.",
+    remember: "If changing one event breaks the following hash, silent edits become detectable.",
+  },
+};
+
 export const operations = [
   "All",
   "Find",
@@ -174,7 +267,7 @@ export const operations = [
   "Control",
 ];
 
-export const algorithms = [
+const algorithmItems = [
   {
     id: "binary",
     title: "Binary Search",
@@ -465,3 +558,8 @@ export const algorithms = [
     ],
   },
 ];
+
+export const algorithms = algorithmItems.map((item) => ({
+  ...item,
+  context: algorithmContext[item.id],
+}));
