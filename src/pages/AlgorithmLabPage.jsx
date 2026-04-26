@@ -29,12 +29,38 @@ function CodeView({ lines, activeLine }) {
   );
 }
 
+function ContextView({ context }) {
+  const rows = [
+    ["Why it exists", context.why],
+    ["What it optimizes", context.optimizes],
+    ["Still used in", context.stillUsed],
+    ["Remember", context.remember],
+  ];
+
+  return (
+    <article className="panel context-panel">
+      <div className="panel-title">
+        <span>Practical context</span>
+      </div>
+      <div className="context-grid">
+        {rows.map(([label, copy]) => (
+          <section className="context-row" key={label}>
+            <span className="meta-label">{label}</span>
+            <p>{copy}</p>
+          </section>
+        ))}
+      </div>
+    </article>
+  );
+}
+
 export function AlgorithmLabPage() {
   const [filter, setFilter] = useState("All");
   const [currentId, setCurrentId] = useState("binary");
   const [stepIndex, setStepIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1050);
+  const [viewMode, setViewMode] = useState("run");
 
   const currentAlgorithm = useMemo(
     () => algorithms.find((item) => item.id === currentId) ?? algorithms[0],
@@ -170,91 +196,117 @@ export function AlgorithmLabPage() {
               <h2>{currentAlgorithm.title}</h2>
               <p>{currentAlgorithm.summary}</p>
             </div>
-            <div className="step-meter">
-              <span>{stepIndex + 1}</span>
-              <span>/</span>
-              <span>{currentAlgorithm.steps.length}</span>
+            <div className="stage-meta">
+              <div className="mode-tabs" aria-label="Algorithm view">
+                {["run", "context"].map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    className={viewMode === mode ? "active" : ""}
+                    aria-pressed={viewMode === mode}
+                    onClick={() => {
+                      setViewMode(mode);
+                      if (mode === "context") setPlaying(false);
+                    }}
+                  >
+                    {mode === "run" ? "Run" : "Context"}
+                  </button>
+                ))}
+              </div>
+              {viewMode === "run" && (
+                <div className="step-meter">
+                  <span>{stepIndex + 1}</span>
+                  <span>/</span>
+                  <span>{currentAlgorithm.steps.length}</span>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="controls" aria-label="Animation controls">
-            <div className="control-group">
-              <button type="button" onClick={() => setStepIndex(0)}>
-                Reset
-              </button>
-              <button
-                type="button"
-                onClick={() => setStepIndex((previous) => Math.max(0, previous - 1))}
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                className="primary"
-                onClick={() => setPlaying((previous) => !previous)}
-              >
-                {playing ? "Pause" : "Play"}
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setStepIndex((previous) =>
-                    Math.min(currentAlgorithm.steps.length - 1, previous + 1),
-                  )
-                }
-              >
-                Next
-              </button>
-            </div>
-            <label className="speed-control">
-              <span>Speed</span>
-              <input
-                type="range"
-                min="500"
-                max="1800"
-                value={speed}
-                onChange={(event) => setSpeed(Number(event.target.value))}
-              />
-            </label>
-          </div>
+          {viewMode === "run" ? (
+            <>
+              <div className="controls" aria-label="Animation controls">
+                <div className="control-group">
+                  <button type="button" onClick={() => setStepIndex(0)}>
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStepIndex((previous) => Math.max(0, previous - 1))}
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    className="primary"
+                    onClick={() => setPlaying((previous) => !previous)}
+                  >
+                    {playing ? "Pause" : "Play"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setStepIndex((previous) =>
+                        Math.min(currentAlgorithm.steps.length - 1, previous + 1),
+                      )
+                    }
+                  >
+                    Next
+                  </button>
+                </div>
+                <label className="speed-control">
+                  <span>Speed</span>
+                  <input
+                    type="range"
+                    min="500"
+                    max="1800"
+                    value={speed}
+                    onChange={(event) => setSpeed(Number(event.target.value))}
+                  />
+                </label>
+              </div>
 
-          <div className="stage-grid">
-            <article className="panel visual-panel">
-              <div className="panel-title">
-                <span>Animation</span>
-                <strong>{currentStep.label}</strong>
-              </div>
-              <div
-                className="visualization"
-                dangerouslySetInnerHTML={{
-                  __html: renderVisualization(currentAlgorithm.id, currentStep),
-                }}
-              />
-            </article>
+              <div className="stage-grid">
+                <article className="panel visual-panel">
+                  <div className="panel-title">
+                    <span>Animation</span>
+                    <strong>{currentStep.label}</strong>
+                  </div>
+                  <div
+                    className="visualization"
+                    dangerouslySetInnerHTML={{
+                      __html: renderVisualization(currentAlgorithm.id, currentStep),
+                    }}
+                  />
+                </article>
 
-            <article className="panel code-panel">
-              <div className="panel-title">
-                <span>Reference code</span>
-                <strong>{currentAlgorithm.complexity}</strong>
+                <article className="panel code-panel">
+                  <div className="panel-title">
+                    <span>Reference code</span>
+                    <strong>{currentAlgorithm.complexity}</strong>
+                  </div>
+                  <CodeView lines={currentAlgorithm.code} activeLine={currentStep.line} />
+                </article>
               </div>
-              <CodeView lines={currentAlgorithm.code} activeLine={currentStep.line} />
-            </article>
-          </div>
 
-          <div className="explain-row">
-            <article className="panel">
-              <div className="panel-title">
-                <span>Current step</span>
+              <div className="explain-row">
+                <article className="panel">
+                  <div className="panel-title">
+                    <span>Current step</span>
+                  </div>
+                  <p>{currentStep.note}</p>
+                </article>
+                <article className="panel">
+                  <div className="panel-title">
+                    <span>Why it helps LLM apps</span>
+                  </div>
+                  <p>{currentAlgorithm.agentUse}</p>
+                </article>
               </div>
-              <p>{currentStep.note}</p>
-            </article>
-            <article className="panel">
-              <div className="panel-title">
-                <span>Why it helps LLM apps</span>
-              </div>
-              <p>{currentAlgorithm.agentUse}</p>
-            </article>
-          </div>
+            </>
+          ) : (
+            <ContextView context={currentAlgorithm.context} />
+          )}
         </section>
       </section>
 
