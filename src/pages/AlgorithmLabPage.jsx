@@ -277,17 +277,17 @@ export function AlgorithmLabPage() {
           <article className="manual-row">
             <span className="manual-index">02</span>
             <div className="manual-body">
-              <h3>MCP tools</h3>
+              <h3>Tools and MCP</h3>
               <p>
-                Binary search, heaps, Rabin-Karp, and deduplication gates make structured
-                tool responses fast and auditable.
+                Binary search, heaps, Rabin-Karp, and routing algorithms make
+                structured tool responses fast, auditable, and safe to inspect.
               </p>
             </div>
           </article>
           <article className="manual-row">
             <span className="manual-index">03</span>
             <div className="manual-body">
-              <h3>Plugins</h3>
+              <h3>Plugins and Memory</h3>
               <p>
                 Plugin packages rely on memory windows, indexes, dependency graphs,
                 and portable execution rules.
@@ -299,8 +299,19 @@ export function AlgorithmLabPage() {
             <div className="manual-body">
               <h3>Orchestration</h3>
               <p>
-                Topological sort, Dijkstra, and Union-Find turn multi-agent work into
-                schedulable paths and explainable clusters.
+                Topological sort, Dijkstra, Union-Find, and lease-locked queues turn
+                multi-agent work into schedulable, recoverable paths.
+              </p>
+            </div>
+          </article>
+          <article className="manual-row">
+            <span className="manual-index">05</span>
+            <div className="manual-body">
+              <h3>Control Plane</h3>
+              <p>
+                Approval state machines, token buckets, permission graphs, and audit
+                hash chains enforce identity, policy, rate limits, and
+                tamper-evident logs.
               </p>
             </div>
           </article>
