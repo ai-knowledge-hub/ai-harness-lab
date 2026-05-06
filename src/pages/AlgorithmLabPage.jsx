@@ -7,6 +7,8 @@ const ARTICLE_URL =
   "https://ai-news-hub.performics-labs.com/analysis/deterministic-core-algorithms-data-structures-marketing-agents";
 const CONTROL_ARTICLE_URL =
   "https://ai-news-hub.performics-labs.com/news/google-cloud-next-2026-marketing-commerce-adtech-impact";
+const AD_PLATFORM_SECURITY_URL =
+  "https://ai-news-hub.performics-labs.com/analysis/building-secure-marketing-agents-ad-platform-authentication-architecture";
 
 function CodeView({ lines, activeLine }) {
   return (
@@ -135,6 +137,24 @@ export function AlgorithmLabPage() {
                   rel="noreferrer"
                 >
                   Read control-plane article
+                </a>
+              </article>
+              <article className="source-row">
+                <div>
+                  <h2>Secure Marketing Agents</h2>
+                  <p>
+                    The ad-platform source for scoped campaign-change grants,
+                    policy-gated execution, approval records, and rollback
+                    evidence in DV360 and Google Ads workflows.
+                  </p>
+                </div>
+                <a
+                  className="inline-link muted-link"
+                  href={AD_PLATFORM_SECURITY_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Read security architecture
                 </a>
               </article>
             </div>
@@ -369,6 +389,91 @@ export function AlgorithmLabPage() {
           </article>
         </div>
       </section>
+
+      <section
+        className="ad-control-plane"
+        id="ad-platform-control-plane"
+        aria-labelledby="ad-control-plane-title"
+      >
+        <div className="section-head">
+          <p className="eyebrow">Ad platform control plane</p>
+          <h2 id="ad-control-plane-title">Plan, validate, approve, execute, record</h2>
+        </div>
+        <div className="control-flow" aria-label="Ad platform control-plane walkthrough">
+          {[
+            {
+              step: "01",
+              label: "Plan",
+              title: "Agent drafts a change",
+              detail:
+                "The read-only agent proposes a structured DV360 or Google Ads diff: entity, current state, proposed state, rationale, expected impact, and risk tier.",
+              artifact: "change_plan.json",
+            },
+            {
+              step: "02",
+              label: "Validate",
+              title: "Policy checks scope and risk",
+              detail:
+                "The policy engine checks advertiser scope, max bid or budget delta, targeting breadth, workspace ownership, and same-entity write conflicts.",
+              artifact: "policy_decision",
+            },
+            {
+              step: "03",
+              label: "Approve",
+              title: "Human signs high-risk action",
+              detail:
+                "Budget increases, targeting broadening, audience expansion, and tracking changes create an approval record before execution can continue.",
+              artifact: "approval_id",
+            },
+            {
+              step: "04",
+              label: "Execute",
+              title: "Narrow service writes to API",
+              detail:
+                "The executor retrieves scoped credentials, validates current platform state, applies the approved change, and queues same-line-item DV360 writes.",
+              artifact: "execution_grant",
+            },
+            {
+              step: "05",
+              label: "Record",
+              title: "Audit captures rollback evidence",
+              detail:
+                "The system stores pre-image, post-image, API payload, policy result, approver, execution token, and rollback patch for review or recovery.",
+              artifact: "audit_event",
+            },
+          ].map((item, index, items) => (
+            <article className="control-step" key={item.step}>
+              <span className="manual-index">{item.step}</span>
+              <div className="control-step-body">
+                <span className="control-step-label">{item.label}</span>
+                <h3>{item.title}</h3>
+                <p>{item.detail}</p>
+                <code>{item.artifact}</code>
+              </div>
+              {index < items.length - 1 && <span className="flow-arrow" aria-hidden="true">→</span>}
+            </article>
+          ))}
+        </div>
+        <div className="token-card" aria-label="Example scoped campaign change grant">
+          <div>
+            <p className="eyebrow">Scoped campaign-change grant</p>
+            <h3>One action, one advertiser, one expiry window</h3>
+            <p>
+              The campaign equivalent of a scoped payment token: enough authority
+              to apply one approved change, not broad access to the whole ad account.
+            </p>
+          </div>
+          <pre>{`{
+  "platform": "dv360",
+  "advertiser_id": "987654",
+  "entity_type": "line_item",
+  "allowed_action": "apply_bid_delta",
+  "max_delta_percent": 10,
+  "approval_id": "approval_abc"
+}`}</pre>
+        </div>
+      </section>
+
 
       <section className="build-notes" id="build-notes" aria-labelledby="build-notes-title">
         <div className="section-head">
