@@ -1669,35 +1669,50 @@ svg {
 
 .ad-control-plane {
   margin: 0 5vw 8vh;
-  padding: clamp(24px, 4vw, 52px);
+  padding: clamp(28px, 4vw, 56px);
+}
+
+.ad-control-plane .section-head {
+  margin-bottom: clamp(28px, 4vw, 44px);
+}
+
+.ad-control-plane .section-head h2 {
+  max-width: 620px;
+  justify-self: end;
+  text-wrap: balance;
 }
 
 .control-flow {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
 }
 
 .control-step {
   position: relative;
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: 14px;
-  min-height: 280px;
-  padding: 22px 18px 22px 0;
+  gap: 18px;
+  min-height: 318px;
+  padding: 26px 26px 28px 22px;
   border-right: 1px solid var(--line);
 }
 
+.control-step:first-child {
+  padding-left: 0;
+}
+
 .control-step:last-child {
+  padding-right: 0;
   border-right: 0;
 }
 
 .control-step-body {
   display: grid;
   align-content: start;
-  gap: 8px;
+  gap: 10px;
 }
 
 .control-step-label {
@@ -1705,38 +1720,45 @@ svg {
   font-size: 0.72rem;
   font-weight: 780;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
 }
 
 .control-step h3 {
+  max-width: 300px;
   margin-bottom: 0;
-  font-size: 1.18rem;
+  font-size: clamp(1.08rem, 1.35vw, 1.34rem);
   line-height: 1.02;
+  text-wrap: balance;
 }
 
 .control-step p {
+  max-width: 330px;
   margin-bottom: 0;
-  font-size: 0.88rem;
-  line-height: 1.52;
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 .control-step code {
   width: fit-content;
-  margin-top: 6px;
-  padding: 5px 7px;
-  border: 1px solid var(--line);
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 6px 8px;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line-strong);
   border-radius: 4px;
   color: var(--text);
-  background: rgba(62, 229, 143, 0.05);
+  background: rgba(62, 229, 143, 0.045);
   font-size: 0.78rem;
 }
 
 .flow-arrow {
   position: absolute;
-  top: 24px;
-  right: 12px;
+  top: 26px;
+  right: 18px;
   color: var(--accent);
   font-size: 1rem;
+  line-height: 1;
+  opacity: 0.9;
 }
 
 .token-card {
@@ -2079,8 +2101,29 @@ svg {
     grid-template-columns: 1fr;
   }
 
-  .section-head h2 {
+  .section-head h2,
+  .ad-control-plane .section-head h2 {
+    justify-self: start;
     text-align: left;
+  }
+
+  .control-step,
+  .control-step:first-child,
+  .control-step:last-child {
+    min-height: auto;
+    padding: 22px 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .control-step:last-child {
+    border-bottom: 0;
+  }
+
+  .flow-arrow {
+    top: 24px;
+    right: 0;
+    transform: rotate(90deg);
   }
 
   .harness-stage {
