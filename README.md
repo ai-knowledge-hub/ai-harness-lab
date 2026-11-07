@@ -1,72 +1,51 @@
-# AI Harness Lab
+# Harness · AI Knowledge Hub
 
-AI Harness Lab is the interactive systems manual in the wider AI Knowledge Hub
-ecosystem, focused on how reliable AI is engineered inside marketing systems.
-It is designed for builders, experimenters, and learners who want to understand
-deterministic algorithms, data structures, orchestration patterns, memory
-strategies, permissions, and practical harness design for campaigns, content,
-analytics, reporting, and martech operations.
+Harness is the practical engineering companion to [AI Knowledge Hub](https://ai-knowledge-hub.org/). It connects system design, algorithms, software production, measurement, and agent engineering to marketing, growth, and go-to-market work.
 
-The site is marketing-first by design, but the underlying engineering patterns
-remain portable to adjacent AI products and operational systems.
+The homepage and five track pages link to the existing interactive visualizers, agent control-plane reference pattern, and selected publication reading. Curriculum outlines distinguish future lessons and builds from available resources. YouTube tutorials and production project walkthroughs are in development.
 
-It complements:
+It complements the [publication](https://ai-knowledge-hub.org/) for research and explanations and [Skills](https://skills.ai-knowledge-hub.org/) for reusable capabilities, tools, agents, and plugins.
 
-- [AI News Hub](https://ai-news-hub.performics-labs.com/) for editorial analysis on AI, marketing technology, and applied systems change
-- [AI Skills Guide](https://skills.ai-knowledge-hub.org/) for the implementation catalogue of skills, tools, MCP, and plugins
-
-This app currently includes the `Algorithms` module, based on the Performics
-Labs article "The Deterministic Core: Algorithms and Data Structures That Make
-Marketing Agents Fast, Safe, and Scalable."
-
-## Local development
-
-Install dependencies:
+## Develop and verify
 
 ```sh
 pnpm install
-```
-
-Run the Vite dev server:
-
-```sh
-pnpm dev 
-```
-
-Build for production:
-
-```sh
-pnpm build
-```
-
-## Tests
-
-Run the unit and component test suite:
-
-```sh
-pnpm test:run
-```
-
-Run browser smoke tests:
-
-```sh
+pnpm dev
+pnpm check
 pnpm test:e2e
 ```
 
-Run the standard verification stack:
+`pnpm check` runs the unit/component suite and production build. Browser tests use the production output, so run it before `pnpm test:e2e`. Playwright starts its own preview on port 4173; install its Chromium browser when needed with `pnpm exec playwright install chromium`.
 
-```sh
-pnpm check
-```
+## Routes
 
-## Structure
+| Route | Content |
+| --- | --- |
+| `/` | Homepage and five-track orientation |
+| `/learn/system-design` | Platforms & System Design |
+| `/learn/algorithms` | Algorithms & Data, including the full visualizer index |
+| `/learn/software-production` | Software Design & Production |
+| `/learn/measurement-ml` | Measurement & ML |
+| `/learn/ai-engineering` | AI Engineering & Harnesses |
+| `/learn/algorithms/visualizers` | All 15 interactive visualizers |
+| `/learn/ai-engineering/control-plane` | Agent control-plane reference pattern |
+| `/algorithms`, `/patterns` | Compatibility redirects preserving query strings and anchors |
+| `/examples` | Retained planned case-study page |
 
-- `/` — AI Harness Lab homepage and positioning
-- `/algorithms` — interactive deterministic core visualizer built around marketing AI workloads
-- `/patterns` — planned module for memory, permissions, orchestration, and control in marketing AI systems
-- `/examples` — planned case-study library for reporting, content, campaign, and analytics systems
+A direct visualizer link uses `?algorithm=<id>#visualizer`, for example `/learn/algorithms/visualizers?algorithm=tokenBucket#visualizer`. Browser history restores the selected algorithm. The anchor targets the working area, including on phones.
+
+## Brand and content
+
+- `src/content/site.js` owns the working identity, family URLs, five tracks, and curated resources.
+- `src/pages/TrackPage.jsx` renders each track from that catalogue.
+- `styles.css` owns the shared tokens, site shell, homepage, and track layouts. `src/styles/labs.css` retains the existing learning-surface rules.
+- `src/visualizers/algorithms-data.js` retains the existing algorithms, code examples, steps, and practical context.
+- `public/brand/provenance.json` records the exact copied optical artwork and its source hashes. No sibling checkout is imported at build or runtime.
+- `docs/brand-tokens.reference.json` captures the selected shared brand foundation, version 0.1.0.
+- [Rebrand implementation and verification](docs/rebrand-2026-11-07.md) records the first slice.
+
+The reading theme defaults to dark. An explicit choice is stored under `harness-theme` and applied before rendering; unavailable browser storage falls back to the default. Artwork is static, text remains semantic HTML, and reduced motion is respected.
 
 ## Deployment
 
-The project is set up as a Vite single-page app and can be deployed to Vercel.
-`vercel.json` keeps direct route access working.
+This is an existing Vite/React single-page app. `vercel.json` preserves direct access to routes. Build with `pnpm build`; this rebrand does not change hosting or deploy the site.

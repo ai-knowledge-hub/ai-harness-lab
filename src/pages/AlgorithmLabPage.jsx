@@ -1,14 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import { algorithms, operations } from "../visualizers/algorithms-data";
 import { renderVisualization } from "../visualizers/renderers";
-import { HeroAlgorithm } from "../sections/HeroAlgorithm";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
+import { articleUrl, trackPath, tracks } from "../content/site";
 
-const ARTICLE_URL =
-  "https://ai-news-hub.performics-labs.com/analysis/deterministic-core-algorithms-data-structures-marketing-agents";
-const CONTROL_ARTICLE_URL =
-  "https://ai-news-hub.performics-labs.com/news/google-cloud-next-2026-marketing-commerce-adtech-impact";
-const AD_PLATFORM_SECURITY_URL =
-  "https://ai-news-hub.performics-labs.com/analysis/building-secure-marketing-agents-ad-platform-authentication-architecture";
+const ARTICLE_URL = articleUrl(
+  "deterministic-core-algorithms-data-structures-marketing-agents",
+);
+const CONTROL_ARTICLE_URL = articleUrl(
+  "anatomy-marketing-agent-skills-tools-mcp",
+);
+const AD_PLATFORM_SECURITY_URL = articleUrl(
+  "building-secure-marketing-agents-ad-platform-authentication-architecture",
+);
 
 function CodeView({ lines, activeLine }) {
   return (
@@ -58,7 +67,13 @@ function ContextView({ context }) {
 
 export function AlgorithmLabPage() {
   const [filter, setFilter] = useState("All");
-  const [currentId, setCurrentId] = useState("binary");
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const requestedId = searchParams.get("algorithm");
+  const currentId = algorithms.some((item) => item.id === requestedId)
+    ? requestedId
+    : "binary";
   const [stepIndex, setStepIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1050);
@@ -69,7 +84,13 @@ export function AlgorithmLabPage() {
     [currentId],
   );
 
-  const currentStep = currentAlgorithm.steps[stepIndex];
+  const currentStep =
+    currentAlgorithm.steps[stepIndex] ?? currentAlgorithm.steps[0];
+
+  useEffect(() => {
+    setStepIndex(0);
+    setPlaying(false);
+  }, [currentId]);
 
   useEffect(() => {
     if (!playing) return undefined;
@@ -85,86 +106,65 @@ export function AlgorithmLabPage() {
     return () => window.clearInterval(timer);
   }, [playing, speed, currentAlgorithm.steps.length]);
 
+  const activeFilter =
+    filter === "All" || filter === currentAlgorithm.operation ? filter : "All";
   const visibleAlgorithms = algorithms.filter(
-    (item) => filter === "All" || item.operation === filter,
+    (item) => activeFilter === "All" || item.operation === activeFilter,
   );
 
   function setAlgorithm(id) {
-    setCurrentId(id);
+    // Reselecting the active entry resets playback without creating a new
+    // navigation key, which would be treated as an intentional anchor revisit.
+    if (requestedId !== id) {
+      const next = new URLSearchParams(searchParams);
+      next.set("algorithm", id);
+      navigate(
+        {
+          pathname: location.pathname,
+          search: next.toString(),
+          hash: location.hash,
+        },
+        { preventScrollReset: true },
+      );
+    }
     setStepIndex(0);
     setPlaying(false);
   }
 
   return (
-    <main id="top">
-      <section className="module-hero algorithm-hero" aria-labelledby="page-title">
+    <main id="main-content" className="lab-page" tabIndex={-1}>
+      <nav className="breadcrumbs editorial-wrap" aria-label="Breadcrumb">
+        <Link to="/">Harness</Link>
+        <span aria-hidden="true">/</span>
+        <Link to={trackPath(tracks[1])}>Algorithms & Data</Link>
+        <span aria-hidden="true">/</span>
+        <span>Visualizers</span>
+      </nav>
+      <section
+        className="module-hero algorithm-hero"
+        aria-labelledby="page-title"
+      >
         <div className="intro-copy">
           <h1 id="page-title">Algorithms inside marketing agents</h1>
           <p>
-            Step through the deterministic core behind skills, MCP tools, plugins,
-            CLIs, agent orchestration, and governed control planes. Each animation
-            uses marketing system shapes: campaigns, crawls, reports, tool paths,
-            incident clusters, approvals, permission graphs, and audit logs.
+            Step through the deterministic core behind skills, MCP tools,
+            plugins, CLIs, agent orchestration, and governed control planes.
+            Each animation uses marketing system shapes: campaigns, crawls,
+            reports, tool paths, incident clusters, approvals, permission
+            graphs, and audit logs.
           </p>
-          <div className="article-bridge" aria-label="Source analysis">
-            <span className="manual-index">Sources</span>
-            <div className="source-list">
-              <article className="source-row">
-                <div>
-                  <h2>The Deterministic Core</h2>
-                  <p>
-                    The systems argument for why marketing agents need explicit
-                    algorithms for finding, exploring, ordering, routing,
-                    deduplicating, and compressing work.
-                  </p>
-                </div>
-                <a className="inline-link" href={ARTICLE_URL} target="_blank" rel="noreferrer">
-                  Read algorithms essay
-                </a>
-              </article>
-              <article className="source-row">
-                <div>
-                  <h2>Google Cloud Next 2026</h2>
-                  <p>
-                    The control-plane source for the identity, gateway, policy,
-                    approval, and audit visualizers added to the Control group.
-                  </p>
-                </div>
-                <a
-                  className="inline-link muted-link"
-                  href={CONTROL_ARTICLE_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Read control-plane article
-                </a>
-              </article>
-              <article className="source-row">
-                <div>
-                  <h2>Secure Marketing Agents</h2>
-                  <p>
-                    The ad-platform source for scoped campaign-change grants,
-                    policy-gated execution, approval records, and rollback
-                    evidence in DV360 and Google Ads workflows.
-                  </p>
-                </div>
-                <a
-                  className="inline-link muted-link"
-                  href={AD_PLATFORM_SECURITY_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Read security architecture
-                </a>
-              </article>
-            </div>
-          </div>
+          <a className="action-link" href="#catalogue">
+            Choose a visualizer
+          </a>
         </div>
-        <HeroAlgorithm />
       </section>
 
-      <section className="workspace" id="visualizer" aria-label="Algorithm visualizer">
-        <aside className="catalogue" aria-label="Algorithm catalogue">
+      <section className="workspace" aria-label="Algorithm visualizer">
+        <aside
+          className="catalogue"
+          id="catalogue"
+          aria-label="Algorithm catalogue"
+        >
           <div className="catalogue-head">
             <p className="eyebrow">Operations</p>
             <h2>Choose a pattern</h2>
@@ -173,7 +173,8 @@ export function AlgorithmLabPage() {
             {operations.map((operation) => (
               <button
                 key={operation}
-                className={`filter ${filter === operation ? "active" : ""}`}
+                className={`filter ${activeFilter === operation ? "active" : ""}`}
+                aria-pressed={activeFilter === operation}
                 type="button"
                 onClick={() => {
                   setFilter(operation);
@@ -199,6 +200,7 @@ export function AlgorithmLabPage() {
               <button
                 key={item.id}
                 className={`algorithm-button ${item.id === currentId ? "active" : ""}`}
+                aria-pressed={item.id === currentId}
                 type="button"
                 onClick={() => setAlgorithm(item.id)}
               >
@@ -209,7 +211,7 @@ export function AlgorithmLabPage() {
           </div>
         </aside>
 
-        <section className="stage" aria-live="polite">
+        <section className="stage" id="visualizer" aria-live="polite">
           <div className="stage-head">
             <div>
               <p className="eyebrow">{currentAlgorithm.operation}</p>
@@ -252,7 +254,9 @@ export function AlgorithmLabPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setStepIndex((previous) => Math.max(0, previous - 1))}
+                    onClick={() =>
+                      setStepIndex((previous) => Math.max(0, previous - 1))
+                    }
                   >
                     Back
                   </button>
@@ -267,7 +271,10 @@ export function AlgorithmLabPage() {
                     type="button"
                     onClick={() =>
                       setStepIndex((previous) =>
-                        Math.min(currentAlgorithm.steps.length - 1, previous + 1),
+                        Math.min(
+                          currentAlgorithm.steps.length - 1,
+                          previous + 1,
+                        ),
                       )
                     }
                   >
@@ -295,7 +302,10 @@ export function AlgorithmLabPage() {
                   <div
                     className="visualization"
                     dangerouslySetInnerHTML={{
-                      __html: renderVisualization(currentAlgorithm.id, currentStep),
+                      __html: renderVisualization(
+                        currentAlgorithm.id,
+                        currentStep,
+                      ),
                     }}
                   />
                 </article>
@@ -305,7 +315,10 @@ export function AlgorithmLabPage() {
                     <span>Reference code</span>
                     <strong>{currentAlgorithm.complexity}</strong>
                   </div>
-                  <CodeView lines={currentAlgorithm.code} activeLine={currentStep.line} />
+                  <CodeView
+                    lines={currentAlgorithm.code}
+                    activeLine={currentStep.line}
+                  />
                 </article>
               </div>
 
@@ -330,10 +343,80 @@ export function AlgorithmLabPage() {
         </section>
       </section>
 
-      <section className="stack-map" id="stack-map" aria-labelledby="stack-map-title">
+      <section
+        className="lab-sources editorial-wrap"
+        aria-label="Related publication reading"
+      >
+        <div className="article-bridge" aria-label="Source analysis">
+          <span className="manual-index">Sources</span>
+          <div className="source-list">
+            <article className="source-row">
+              <div>
+                <h2>The Deterministic Core</h2>
+                <p>
+                  The systems argument for why marketing agents need explicit
+                  algorithms for finding, exploring, ordering, routing,
+                  deduplicating, and compressing work.
+                </p>
+              </div>
+              <a
+                className="inline-link"
+                href={ARTICLE_URL}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Read algorithms essay
+              </a>
+            </article>
+            <article className="source-row">
+              <div>
+                <h2>The Anatomy of a Marketing Agent</h2>
+                <p>
+                  How runtime, harness, tools, and permissions interact in a
+                  marketing workflow.
+                </p>
+              </div>
+              <a
+                className="inline-link muted-link"
+                href={CONTROL_ARTICLE_URL}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Read control-plane article
+              </a>
+            </article>
+            <article className="source-row">
+              <div>
+                <h2>Secure Marketing Agents</h2>
+                <p>
+                  The ad-platform source for scoped campaign-change grants,
+                  policy-gated execution, approval records, and rollback
+                  evidence in DV360 and Google Ads workflows.
+                </p>
+              </div>
+              <a
+                className="inline-link muted-link"
+                href={AD_PLATFORM_SECURITY_URL}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Read security architecture
+              </a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="stack-map"
+        id="stack-map"
+        aria-labelledby="stack-map-title"
+      >
         <div className="section-head">
           <p className="eyebrow">From the source analysis</p>
-          <h2 id="stack-map-title">Where each structure sits in the agent stack</h2>
+          <h2 id="stack-map-title">
+            Where each structure sits in the agent stack
+          </h2>
         </div>
         <div className="manual-list stack-manual">
           <article className="manual-row">
@@ -341,8 +424,8 @@ export function AlgorithmLabPage() {
             <div className="manual-body">
               <h3>Skills</h3>
               <p>
-                BFS, DFS, topological sort, Bloom filters, and circular buffers keep
-                workflow steps explicit and bounded.
+                BFS, DFS, topological sort, Bloom filters, and circular buffers
+                keep workflow steps explicit and bounded.
               </p>
             </div>
           </article>
@@ -361,8 +444,8 @@ export function AlgorithmLabPage() {
             <div className="manual-body">
               <h3>Plugins and Memory</h3>
               <p>
-                Plugin packages rely on memory windows, indexes, dependency graphs,
-                and portable execution rules.
+                Plugin packages rely on memory windows, indexes, dependency
+                graphs, and portable execution rules.
               </p>
             </div>
           </article>
@@ -371,8 +454,8 @@ export function AlgorithmLabPage() {
             <div className="manual-body">
               <h3>Orchestration</h3>
               <p>
-                Topological sort, Dijkstra, Union-Find, and lease-locked queues turn
-                multi-agent work into schedulable, recoverable paths.
+                Topological sort, Dijkstra, Union-Find, and lease-locked queues
+                turn multi-agent work into schedulable, recoverable paths.
               </p>
             </div>
           </article>
@@ -381,8 +464,8 @@ export function AlgorithmLabPage() {
             <div className="manual-body">
               <h3>Control Plane</h3>
               <p>
-                Approval state machines, token buckets, permission graphs, and audit
-                hash chains enforce identity, policy, rate limits, and
+                Approval state machines, token buckets, permission graphs, and
+                audit hash chains enforce identity, policy, rate limits, and
                 tamper-evident logs.
               </p>
             </div>
@@ -397,9 +480,14 @@ export function AlgorithmLabPage() {
       >
         <div className="section-head">
           <p className="eyebrow">Ad platform control plane</p>
-          <h2 id="ad-control-plane-title">Plan, validate, approve, execute, record</h2>
+          <h2 id="ad-control-plane-title">
+            Plan, validate, approve, execute, record
+          </h2>
         </div>
-        <div className="control-flow" aria-label="Ad platform control-plane walkthrough">
+        <div
+          className="control-flow"
+          aria-label="Ad platform control-plane walkthrough"
+        >
           {[
             {
               step: "01",
@@ -450,17 +538,25 @@ export function AlgorithmLabPage() {
                 <p>{item.detail}</p>
                 <code>{item.artifact}</code>
               </div>
-              {index < items.length - 1 && <span className="flow-arrow" aria-hidden="true">→</span>}
+              {index < items.length - 1 && (
+                <span className="flow-arrow" aria-hidden="true">
+                  →
+                </span>
+              )}
             </article>
           ))}
         </div>
-        <div className="token-card" aria-label="Example scoped campaign change grant">
+        <div
+          className="token-card"
+          aria-label="Example scoped campaign change grant"
+        >
           <div>
             <p className="eyebrow">Scoped campaign-change grant</p>
             <h3>One action, one advertiser, one expiry window</h3>
             <p>
-              The campaign equivalent of a scoped payment token: enough authority
-              to apply one approved change, not broad access to the whole ad account.
+              The campaign equivalent of a scoped payment token: enough
+              authority to apply one approved change, not broad access to the
+              whole ad account.
             </p>
           </div>
           <pre>{`{
@@ -474,8 +570,11 @@ export function AlgorithmLabPage() {
         </div>
       </section>
 
-
-      <section className="build-notes" id="build-notes" aria-labelledby="build-notes-title">
+      <section
+        className="build-notes"
+        id="build-notes"
+        aria-labelledby="build-notes-title"
+      >
         <div className="section-head">
           <p className="eyebrow">Implementation notes</p>
           <h2 id="build-notes-title">How this mirrors the reference pattern</h2>
@@ -486,8 +585,8 @@ export function AlgorithmLabPage() {
             The published analysis provides the systems argument and the six
             operation model: find, explore, order, deduplicate, route, and
             compress. This lab turns those categories into visual states, code
-            traces, and marketing-specific data examples that can be studied step
-            by step.
+            traces, and marketing-specific data examples that can be studied
+            step by step.
           </p>
         </div>
       </section>
