@@ -18,7 +18,7 @@ const examples = [
 
 export function ExamplesPage() {
   return (
-    <main>
+    <main id="main-content" tabIndex={-1}>
       <section className="module-hero module-coming-soon" aria-labelledby="examples-title">
         <p className="eyebrow">Practical Examples</p>
         <h1 id="examples-title">Real marketing systems, real harness decisions</h1>

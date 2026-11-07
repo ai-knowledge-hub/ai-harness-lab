@@ -1,17 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="AI Harness Lab is an interactive pattern lab for harness engineering, deterministic algorithms, and AI agent system design."
+      content="Practical engineering for AI-powered growth. Explore system design, algorithms, software production, measurement, and agent harnesses."
     />
-    <title>AI Harness Lab</title>
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2307110f'/%3E%3Cpath d='M8 8h8v8H8zM16 8h8v8h-8zM8 16h8v8H8zM16 16h8v8h-8z' fill='%233ee58f'/%3E%3C/svg%3E"
-    />
+    <meta name="theme-color" content="#000000" />
+    <title>Harness · AI Knowledge Hub</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      try {
+        var harnessTheme = localStorage.getItem("harness-theme");
+        if (harnessTheme === "light" || harnessTheme === "dark")
+          document.documentElement.dataset.theme = harnessTheme;
+      } catch (error) {
+        /* Use the default reading theme when storage is unavailable. */
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

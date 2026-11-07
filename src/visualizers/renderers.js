@@ -16,7 +16,7 @@ function renderNodeGraph(nodes, edges, step) {
         step.visited?.includes(to) ||
         step.found?.some((item) => item.includes(to)) ||
         step.done?.includes(to);
-      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${active ? "rgba(62,229,143,.68)" : "rgba(215,255,235,.18)"}" stroke-width="2"></line>`;
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${active ? "color-mix(in srgb, var(--accent) 68.0%, transparent)" : "color-mix(in srgb, var(--text) 18.0%, transparent)"}" stroke-width="2"></line>`;
     })
     .join("");
 
@@ -24,15 +24,16 @@ function renderNodeGraph(nodes, edges, step) {
     .map(([name, [x, y]]) => {
       const active = name === step.active;
       const visited =
-        step.visited?.includes(name) || step.found?.some((item) => item.includes(name));
+        step.visited?.includes(name) ||
+        step.found?.some((item) => item.includes(name));
       const fill = active
         ? "var(--accent)"
         : visited
-          ? "rgba(123, 227, 255, 0.7)"
-          : "rgba(255,255,255,.07)";
-      const color = active ? "#04100b" : "#edf8f2";
+          ? "var(--viz-info)"
+          : "color-mix(in srgb, var(--text) 7.0%, transparent)";
+      const color = active || visited ? "var(--viz-on-fill)" : "var(--text)";
       return `<g>
-        <circle cx="${x}" cy="${y}" r="30" fill="${fill}" stroke="rgba(215,255,235,.28)"></circle>
+        <circle cx="${x}" cy="${y}" r="30" fill="${fill}" stroke="color-mix(in srgb, var(--text) 28.0%, transparent)"></circle>
         <text x="${x}" y="${y + 4}" text-anchor="middle" fill="${color}" font-size="10">${name.length > 12 ? name.slice(0, 11) + ".." : name}</text>
       </g>`;
     })
@@ -65,20 +66,20 @@ function renderBinary(step) {
         : isMid
           ? "var(--warn)"
           : inWindow
-            ? "rgba(123, 227, 255, 0.72)"
-            : "rgba(255,255,255,0.15)";
+            ? "var(--viz-info)"
+            : "color-mix(in srgb, var(--text) 15.0%, transparent)";
       return `<g>
         <rect x="${x}" y="${y}" width="46" height="${height}" rx="6" fill="${fill}"></rect>
-        <text x="${x + 23}" y="296" text-anchor="middle" fill="#9fb7ad" font-size="12">${label}</text>
-        <text x="${x + 23}" y="${y - 10}" text-anchor="middle" fill="#edf8f2" font-size="13">${value.toFixed(2)}</text>
-        <text x="${x + 23}" y="320" text-anchor="middle" fill="#7be3ff" font-size="12">${index}</text>
+        <text x="${x + 23}" y="296" text-anchor="middle" fill="var(--muted)" font-size="12">${label}</text>
+        <text x="${x + 23}" y="${y - 10}" text-anchor="middle" fill="var(--text)" font-size="13">${value.toFixed(2)}</text>
+        <text x="${x + 23}" y="320" text-anchor="middle" fill="var(--viz-info)" font-size="12">${index}</text>
       </g>`;
     })
     .join("");
   return `
     <svg viewBox="0 0 620 360" role="img">
-      <line x1="24" y1="215" x2="590" y2="215" stroke="#ffc857" stroke-dasharray="5 5"></line>
-      <text x="590" y="207" text-anchor="end" fill="#ffc857" font-size="13">target CPA 6.00</text>
+      <line x1="24" y1="215" x2="590" y2="215" stroke="var(--warn)" stroke-dasharray="5 5"></line>
+      <text x="590" y="207" text-anchor="end" fill="var(--warn)" font-size="13">target CPA 6.00</text>
       ${bars}
     </svg>
     <div class="legend">
@@ -154,8 +155,11 @@ function renderRabin(step) {
   const marked = [...text]
     .map((char, index) => {
       const inWindow = index >= step.window[0] && index <= step.window[1];
-      const inHit = step.hits.some(([start, end]) => index >= start && index <= end);
-      if (inHit || inWindow) return `<mark>${char === " " ? "&nbsp;" : escapeHtml(char)}</mark>`;
+      const inHit = step.hits.some(
+        ([start, end]) => index >= start && index <= end,
+      );
+      if (inHit || inWindow)
+        return `<mark>${char === " " ? "&nbsp;" : escapeHtml(char)}</mark>`;
       return char === " " ? " " : escapeHtml(char);
     })
     .join("");
@@ -177,10 +181,10 @@ function renderHeap(step) {
     .map(([name, score], index) => {
       const [x, y] = positions[index];
       return `<g>
-        ${index > 0 ? `<line x1="300" y1="95" x2="${x}" y2="${y - 25}" stroke="rgba(215,255,235,.22)" stroke-width="2"></line>` : ""}
-        <circle cx="${x}" cy="${y}" r="52" fill="${index === 0 ? "var(--warn)" : "rgba(123,227,255,.7)"}"></circle>
-        <text x="${x}" y="${y - 5}" text-anchor="middle" fill="#04100b" font-size="13" font-weight="700">${score}</text>
-        <text x="${x}" y="${y + 16}" text-anchor="middle" fill="#04100b" font-size="11">${name}</text>
+        ${index > 0 ? `<line x1="300" y1="95" x2="${x}" y2="${y - 25}" stroke="color-mix(in srgb, var(--text) 22.0%, transparent)" stroke-width="2"></line>` : ""}
+        <circle cx="${x}" cy="${y}" r="52" fill="${index === 0 ? "var(--warn)" : "var(--viz-info)"}"></circle>
+        <text x="${x}" y="${y - 5}" text-anchor="middle" fill="var(--viz-on-fill)" font-size="13" font-weight="700">${score}</text>
+        <text x="${x}" y="${y + 16}" text-anchor="middle" fill="var(--viz-on-fill)" font-size="11">${name}</text>
       </g>`;
     })
     .join("");
@@ -206,7 +210,10 @@ function renderTopo(step) {
     <div class="cards">
       ${waves
         .map(
-          (wave, index) => `<div class="campaign-card ${index + 1 === step.wave ? "active" : ""}">
+          (
+            wave,
+            index,
+          ) => `<div class="campaign-card ${index + 1 === step.wave ? "active" : ""}">
             <strong>Wave ${index + 1}</strong><br />
             ${wave.map((task) => `<span>${task}</span>`).join("<br />")}
           </div>`,
@@ -274,8 +281,8 @@ function renderDijkstra(step) {
       const [x2, y2] = nodes[to];
       const active = pathEdges.includes(`${from}->${to}`);
       return `
-        <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${active ? "var(--accent)" : "rgba(215,255,235,.2)"}" stroke-width="${active ? 4 : 2}"></line>
-        <text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 - 8}" text-anchor="middle" fill="#ffc857" font-size="12">${cost}</text>
+        <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${active ? "var(--accent)" : "color-mix(in srgb, var(--text) 20.0%, transparent)"}" stroke-width="${active ? 4 : 2}"></line>
+        <text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 - 8}" text-anchor="middle" fill="var(--warn)" font-size="12">${cost}</text>
       `;
     })
     .join("");
@@ -284,8 +291,8 @@ function renderDijkstra(step) {
       const active = name === step.active;
       const settled = step.settled.includes(name);
       return `<g>
-        <circle cx="${x}" cy="${y}" r="36" fill="${active ? "var(--accent)" : settled ? "rgba(123,227,255,.7)" : "rgba(255,255,255,.07)"}" stroke="rgba(215,255,235,.28)"></circle>
-        <text x="${x}" y="${y + 4}" text-anchor="middle" fill="${active ? "#04100b" : "#edf8f2"}" font-size="10">${name.replace("_", " ")}</text>
+        <circle cx="${x}" cy="${y}" r="36" fill="${active ? "var(--accent)" : settled ? "var(--viz-info)" : "color-mix(in srgb, var(--text) 7.0%, transparent)"}" stroke="color-mix(in srgb, var(--text) 28.0%, transparent)"></circle>
+        <text x="${x}" y="${y + 4}" text-anchor="middle" fill="${active || settled ? "var(--viz-on-fill)" : "var(--text)"}" font-size="10">${name.replace("_", " ")}</text>
       </g>`;
     })
     .join("");
@@ -301,7 +308,10 @@ function renderUnion(step) {
     <div class="cards">
       ${step.groups
         .map(
-          (group, index) => `<div class="campaign-card ${group.length > 1 ? "active" : ""}">
+          (
+            group,
+            index,
+          ) => `<div class="campaign-card ${group.length > 1 ? "active" : ""}">
             <strong>Root cause ${index + 1}</strong><br />
             ${group.join("<br />")}
           </div>`,
@@ -314,7 +324,13 @@ function renderUnion(step) {
 }
 
 function renderApproval(step) {
-  const states = ["proposed", "awaiting_approval", "approved", "executing", "executed"];
+  const states = [
+    "proposed",
+    "awaiting_approval",
+    "approved",
+    "executing",
+    "executed",
+  ];
   const rejected = step.active === "rejected";
   const stateMarkup = states
     .map((state, index) => {
@@ -322,19 +338,19 @@ function renderApproval(step) {
       const complete = step.approved?.includes(state);
       const x = 64 + index * 122;
       return `<g>
-        ${index > 0 ? `<line x1="${x - 82}" y1="90" x2="${x - 36}" y2="90" stroke="${complete ? "var(--accent)" : "rgba(215,255,235,.2)"}" stroke-width="2"></line>` : ""}
-        <rect x="${x - 36}" y="54" width="72" height="72" rx="4" fill="${active ? "var(--accent)" : complete ? "rgba(62,229,143,.16)" : "rgba(255,255,255,.04)"}" stroke="rgba(215,255,235,.28)"></rect>
-        <text x="${x}" y="84" text-anchor="middle" fill="${active ? "#04100b" : "#edf8f2"}" font-size="10" font-weight="700">${state.split("_")[0]}</text>
-        <text x="${x}" y="101" text-anchor="middle" fill="${active ? "#04100b" : "#edf8f2"}" font-size="10">${state.split("_")[1] ?? ""}</text>
+        ${index > 0 ? `<line x1="${x - 82}" y1="90" x2="${x - 36}" y2="90" stroke="${complete ? "var(--accent)" : "color-mix(in srgb, var(--text) 20.0%, transparent)"}" stroke-width="2"></line>` : ""}
+        <rect x="${x - 36}" y="54" width="72" height="72" rx="4" fill="${active ? "var(--accent)" : complete ? "color-mix(in srgb, var(--accent) 16.0%, transparent)" : "color-mix(in srgb, var(--text) 4.0%, transparent)"}" stroke="color-mix(in srgb, var(--text) 28.0%, transparent)"></rect>
+        <text x="${x}" y="84" text-anchor="middle" fill="${active ? "var(--viz-on-fill)" : "var(--text)"}" font-size="10" font-weight="700">${state.split("_")[0]}</text>
+        <text x="${x}" y="101" text-anchor="middle" fill="${active ? "var(--viz-on-fill)" : "var(--text)"}" font-size="10">${state.split("_")[1] ?? ""}</text>
       </g>`;
     })
     .join("");
   return `
     <svg viewBox="0 0 680 210" role="img">
       ${stateMarkup}
-      <line x1="64" y1="130" x2="64" y2="168" stroke="${rejected ? "var(--bad)" : "rgba(215,255,235,.16)"}" stroke-width="2"></line>
-      <rect x="18" y="168" width="92" height="32" rx="4" fill="${rejected ? "rgba(255,107,107,.18)" : "rgba(255,255,255,.04)"}" stroke="${rejected ? "var(--bad)" : "rgba(215,255,235,.2)"}"></rect>
-      <text x="64" y="189" text-anchor="middle" fill="${rejected ? "var(--bad)" : "#9fb7ad"}" font-size="11" font-weight="700">rejected</text>
+      <line x1="64" y1="130" x2="64" y2="168" stroke="${rejected ? "var(--bad)" : "color-mix(in srgb, var(--text) 16.0%, transparent)"}" stroke-width="2"></line>
+      <rect x="18" y="168" width="92" height="32" rx="4" fill="${rejected ? "color-mix(in srgb, var(--bad) 18.0%, transparent)" : "color-mix(in srgb, var(--text) 4.0%, transparent)"}" stroke="${rejected ? "var(--bad)" : "color-mix(in srgb, var(--text) 20.0%, transparent)"}"></rect>
+      <text x="64" y="189" text-anchor="middle" fill="${rejected ? "var(--bad)" : "var(--muted)"}" font-size="11" font-weight="700">rejected</text>
     </svg>
     <p class="viz-label">Action</p>
     <div class="metric-list"><span class="pill ${rejected ? "warn" : "active"}">${step.action}</span><span class="pill">${step.active}</span></div>
@@ -397,9 +413,10 @@ function renderPermissionGraph(step) {
     .map(([from, to]) => {
       const [x1, y1] = nodes[from];
       const [x2, y2] = nodes[to];
-      const blocked = step.blocked?.includes(from) || step.blocked?.includes(to);
+      const blocked =
+        step.blocked?.includes(from) || step.blocked?.includes(to);
       const active = step.allowed?.includes(from) && step.allowed?.includes(to);
-      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${blocked ? "var(--bad)" : active ? "var(--accent)" : "rgba(215,255,235,.18)"}" stroke-width="${active || blocked ? 3 : 2}"></line>`;
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${blocked ? "var(--bad)" : active ? "var(--accent)" : "color-mix(in srgb, var(--text) 18.0%, transparent)"}" stroke-width="${active || blocked ? 3 : 2}"></line>`;
     })
     .join("");
   const nodeMarkup = Object.entries(nodes)
@@ -408,14 +425,18 @@ function renderPermissionGraph(step) {
       const allowed = step.allowed?.includes(id);
       const blocked = step.blocked?.includes(id);
       const fill = blocked
-        ? "rgba(255,107,107,.18)"
+        ? "color-mix(in srgb, var(--bad) 18.0%, transparent)"
         : active
           ? "var(--accent)"
           : allowed
-            ? "rgba(62,229,143,.13)"
-            : "rgba(255,255,255,.05)";
-      const stroke = blocked ? "var(--bad)" : allowed ? "rgba(62,229,143,.5)" : "rgba(215,255,235,.24)";
-      const text = active ? "#04100b" : "#edf8f2";
+            ? "color-mix(in srgb, var(--accent) 13.0%, transparent)"
+            : "color-mix(in srgb, var(--text) 5.0%, transparent)";
+      const stroke = blocked
+        ? "var(--bad)"
+        : allowed
+          ? "color-mix(in srgb, var(--accent) 50.0%, transparent)"
+          : "color-mix(in srgb, var(--text) 24.0%, transparent)";
+      const text = active && !blocked ? "var(--viz-on-fill)" : "var(--text)";
       return `<g>
         <rect x="${x - 46}" y="${y - 28}" width="92" height="56" rx="4" fill="${fill}" stroke="${stroke}"></rect>
         <text x="${x}" y="${y + 4}" text-anchor="middle" fill="${text}" font-size="11" font-weight="700">${label}</text>
@@ -468,5 +489,8 @@ const renderers = {
 };
 
 export function renderVisualization(id, step) {
-  return renderers[id](step);
+  return renderers[id](step).replace(
+    "<svg ",
+    `<svg aria-label="${escapeHtml(step.label)}" `,
+  );
 }

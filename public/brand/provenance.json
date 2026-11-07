@@ -1,0 +1,25 @@
+{
+  "brandVersion": "0.1.0",
+  "capturedAt": "2026-11-07",
+  "asset": "sphere",
+  "usage": "Static Harness entrance, adapting the existing publication Lab artwork. Source artwork remains unchanged.",
+  "originalSource": "remotion/public/brand/artwork/sphere.jpg",
+  "originalSha256": "6e058aae6e1f57d3747022759f2bd5a5b63ed0008483069afaad343e2efd6afb",
+  "rights": "Owner-requested integration in an owned product. This record makes no additional asset-pack redistribution or generation-provenance claims.",
+  "deliveryAssets": [
+    {
+      "path": "public/brand/sphere-800.webp",
+      "sourceRepository": "independent-ai-publication",
+      "sourcePath": "public/images/op-art/delivery/sphere-web-800-c1ace3029888.webp",
+      "sha256": "c1ace3029888f0cf66d44d76dfdd3ba8ffd5a6036b9320d16ac45874cc9a238a",
+      "bytes": 87466
+    },
+    {
+      "path": "public/brand/sphere-1600.webp",
+      "sourceRepository": "independent-ai-publication",
+      "sourcePath": "public/images/op-art/delivery/sphere-web-1600-48b593ba15cb.webp",
+      "sha256": "48b593ba15cbe390ec1d525432b76ef61841eeca8d4220fb7bd3532b4312fad4",
+      "bytes": 189146
+    }
+  ]
+}

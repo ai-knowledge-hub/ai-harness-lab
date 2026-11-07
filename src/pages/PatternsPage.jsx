@@ -1,5 +1,5 @@
-const ARTICLE_URL =
-  "https://ai-news-hub.performics-labs.com/news/google-cloud-next-2026-marketing-commerce-adtech-impact";
+import { Link } from "react-router-dom";
+import { articleUrl } from "../content/site";
 
 const controlLayers = [
   {
@@ -61,7 +61,8 @@ const approvalRules = [
   {
     action: "Publish creative",
     risk: "Medium",
-    control: "Require brand and compliance review before the tool call executes.",
+    control:
+      "Require brand and compliance review before the tool call executes.",
   },
 ];
 
@@ -75,26 +76,43 @@ const mondayQuestions = [
 
 export function PatternsPage() {
   return (
-    <main>
-      <section className="module-hero control-hero" aria-labelledby="patterns-title">
+    <main id="main-content" className="pattern-page" tabIndex={-1}>
+      <nav className="breadcrumbs editorial-wrap" aria-label="Breadcrumb">
+        <Link to="/">Harness</Link>
+        <span aria-hidden="true">/</span>
+        <Link to="/learn/ai-engineering">AI Engineering</Link>
+        <span aria-hidden="true">/</span>
+        <span>Control plane</span>
+      </nav>
+      <section
+        className="module-hero control-hero"
+        aria-labelledby="patterns-title"
+      >
         <p className="eyebrow">Structural Patterns</p>
         <h1 id="patterns-title">Agent Control Plane</h1>
         <p>
-          Identity, gateway, policy, inspection, and audit are the structures that
-          let marketing agents touch real systems without becoming unmanaged
-          automations. This page turns the Google Cloud Next security argument
-          into a practical harness pattern.
+          Identity, gateway, policy, inspection, and audit are the structures
+          that let marketing agents touch real systems without becoming
+          unmanaged automations. This reference pattern turns the security
+          architecture into a practical harness pattern.
         </p>
         <div className="article-bridge" aria-label="Source article">
           <span className="manual-index">Source</span>
           <p>
-            Companion pattern for the AI News Hub article
-            <strong> Google Cloud Next 2026: What Changes for Marketing, Commerce, and Ad Tech</strong>.
-            The article explains the platform shift; this module shows the control
-            plane that marketing teams need before agents touch campaign data,
-            commerce feeds, or publishing workflows.
+            Related reading from AI Knowledge Hub:
+            <strong> Secure Marketing Agents</strong>. The article develops an
+            execution architecture; this pattern explores the control plane that
+            marketing teams need before agents touch campaign data, commerce
+            feeds, or publishing workflows.
           </p>
-          <a className="inline-link" href={ARTICLE_URL} target="_blank" rel="noreferrer">
+          <a
+            className="inline-link"
+            href={articleUrl(
+              "building-secure-marketing-agents-ad-platform-authentication-architecture",
+            )}
+            target="_blank"
+            rel="noreferrer"
+          >
             Read article
           </a>
         </div>
@@ -103,33 +121,51 @@ export function PatternsPage() {
       <section className="control-plane" aria-labelledby="control-plane-title">
         <div className="section-head">
           <p className="eyebrow">Reference pattern</p>
-          <h2 id="control-plane-title">A governed route from agent intent to system action</h2>
+          <h2 id="control-plane-title">
+            A governed route from agent intent to system action
+          </h2>
         </div>
 
         <div className="control-grid">
-          <article className="control-diagram" aria-label="Agent control plane diagram">
+          <article
+            className="control-diagram"
+            aria-label="Agent control plane diagram"
+          >
             <div className="control-node agent-node">
               <span>Agent</span>
               <strong>Campaign optimization agent</strong>
               <p>Plans the work, but does not hold platform credentials.</p>
             </div>
-            <div className="control-arrow" aria-hidden="true">↓</div>
+            <div className="control-arrow" aria-hidden="true">
+              ↓
+            </div>
             <div className="control-node gateway-node">
               <span>Gateway</span>
               <strong>Identity + policy boundary</strong>
-              <p>Checks scope, account access, protocol rules, and approval gates.</p>
+              <p>
+                Checks scope, account access, protocol rules, and approval
+                gates.
+              </p>
             </div>
-            <div className="control-arrow" aria-hidden="true">↓</div>
+            <div className="control-arrow" aria-hidden="true">
+              ↓
+            </div>
             <div className="control-node tools-node">
               <span>Tools</span>
               <strong>Google Ads · DV360 · BigQuery · CMS</strong>
-              <p>Run with scoped credentials owned by the gateway, not the agent.</p>
+              <p>
+                Run with scoped credentials owned by the gateway, not the agent.
+              </p>
             </div>
-            <div className="control-arrow" aria-hidden="true">↓</div>
+            <div className="control-arrow" aria-hidden="true">
+              ↓
+            </div>
             <div className="control-node audit-node">
               <span>Audit</span>
               <strong>Action trail</strong>
-              <p>Records actor, account, tool, decision, approver, and result.</p>
+              <p>
+                Records actor, account, tool, decision, approver, and result.
+              </p>
             </div>
           </article>
 
@@ -139,8 +175,8 @@ export function PatternsPage() {
             <p>
               The agent inherits a human account, sees whatever the person sees,
               and breaks when the person leaves, rotates credentials, or changes
-              roles. Audit also becomes ambiguous because human and agent actions
-              collapse into one identity.
+              roles. Audit also becomes ambiguous because human and agent
+              actions collapse into one identity.
             </p>
             <div className="case-divider"></div>
             <p className="eyebrow">Safer pattern</p>
@@ -180,7 +216,9 @@ export function PatternsPage() {
         <ol className="flow-steps">
           {accessFlow.map((step, index) => (
             <li key={step}>
-              <span className="manual-index">{String(index + 1).padStart(2, "0")}</span>
+              <span className="manual-index">
+                {String(index + 1).padStart(2, "0")}
+              </span>
               <p>{step}</p>
             </li>
           ))}
@@ -192,7 +230,11 @@ export function PatternsPage() {
           <p className="eyebrow">Approval gates</p>
           <h2 id="approval-title">Risk decides whether the agent can act</h2>
         </div>
-        <div className="approval-table" role="table" aria-label="Agent action approval rules">
+        <div
+          className="approval-table"
+          role="table"
+          aria-label="Agent action approval rules"
+        >
           <div className="approval-row approval-head" role="row">
             <span role="columnheader">Action</span>
             <span role="columnheader">Risk</span>
@@ -201,7 +243,10 @@ export function PatternsPage() {
           {approvalRules.map((rule) => (
             <div key={rule.action} className="approval-row" role="row">
               <span role="cell">{rule.action}</span>
-              <span role="cell" className={`risk risk-${rule.risk.toLowerCase()}`}>
+              <span
+                role="cell"
+                className={`risk risk-${rule.risk.toLowerCase()}`}
+              >
                 {rule.risk}
               </span>
               <span role="cell">{rule.control}</span>
@@ -213,12 +258,16 @@ export function PatternsPage() {
       <section className="build-notes" aria-labelledby="questions-title">
         <div className="section-head">
           <p className="eyebrow">Monday morning checklist</p>
-          <h2 id="questions-title">Questions to ask before deploying an agent</h2>
+          <h2 id="questions-title">
+            Questions to ask before deploying an agent
+          </h2>
         </div>
         <div className="question-list">
           {mondayQuestions.map((question, index) => (
             <article key={question} className="question-row">
-              <span className="manual-index">{String(index + 1).padStart(2, "0")}</span>
+              <span className="manual-index">
+                {String(index + 1).padStart(2, "0")}
+              </span>
               <p>{question}</p>
             </article>
           ))}
