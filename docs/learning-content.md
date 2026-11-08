@@ -1,0 +1,65 @@
+# Practitioner guides and content authoring
+
+This is the first implementation for [#11](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/11) and [#12](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/12), under [epic #10](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/10).
+
+Harness is a how-to reference for practitioners building and operating AI products. Use guides, implementation steps, design decisions and working examples in public copy. Avoid framing the site as a course, curriculum or study programme. Keep the underlying explanations and explicit limits of each example.
+
+The existing `/learn/` routes and internal `lesson`/`learning` identifiers remain compatibility details; public labels use guide terminology.
+
+## Ownership and relationships
+
+`src/content/learning.js` is the repo-owned registry. Each collection has stable, unique kebab-case IDs. `src/content/lessons/` contains authored practitioner guides, not a scrape of external articles.
+
+| Object | Role |
+| --- | --- |
+| Concept | A principle or prerequisite; an ID does not imply a separate published page |
+| Track | Existing engineering discipline in `site.js`; one primary track owns a guide |
+| Guide | One canonical path, reading metadata, intended outcomes, working context and ordered sections |
+| Project | A runnable build; planned builds have no destination |
+| Platform | Source-reviewed capabilities and separately recorded account-access state |
+| Publication | A curated article and an explanation of its relationship to the guide |
+| Capability | A relevant Skills resource and its actual relationship/readiness |
+| Video | A real walkthrough destination or an explicit planned record |
+
+Cross-track relevance creates relationships, not copies of the guide. A reusable implementation belongs in Skills once that ownership is established; Harness owns the implementation guidance, fixtures and reference build. No runtime or build imports refer to sibling repositories.
+
+## Guide fields
+
+A guide defines `id`, `path`, `title`, optional `shortTitle`, `description`, `trackId`, `publicationStatus`, `format`, `readingMinutes`, `updatedAt`, `introduction`, `objectives`, `prerequisiteConceptIds`, `conceptIds`, `projectIds`, `platformIds`, `publicationIds`, `capabilityIds`, `videoIds`, `relatedGuideIds`, and ordered `sections`.
+
+Canonical paths use `/learn/<trackId>/<lessonId>`. A section has a stable `id`, `title`, and blocks. Current block types are paragraph, list, callout, code, flow and table. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
+
+Supported lifecycle rules:
+
+- Guides are `draft` or `published`. A draft has a visible Guide preview label, a canonical URL, `noindex, follow`, and is excluded from the sitemap. Drafts still require coherent reading content.
+- Projects and videos are `planned` with `href: null`, or `available` with a destination. A planned item never creates a working-looking build/watch link.
+- Platforms distinguish `research-planned`, `documented`, and `account-verified`, plus `unverified`, `verified`, or `unavailable` account access. Source review alone does not establish account access.
+- Publication and capability links are curated reference relationships, not claims that an article's example and a package are identical or that an integration has been deployed.
+
+To add a guide, add its authored data and registry relationships, then run `pnpm check`. The track index and route catalogue derive guide discovery from the registry. Do not add a navigation entry pointing to a future guide.
+
+## Validation
+
+`validateLearningContent` checks IDs, paths, track membership, relationship targets, metadata, objectives, sections, anchors, block shapes and lifecycle consistency. The production build invokes it and fails on invalid content. Failure cases have unit coverage.
+
+Current validation is structural. It does not establish the accuracy of an external article, API compatibility, permissions, causal conclusions, or actual account availability. Those require source and implementation review.
+
+## Rendering and metadata
+
+`src/pages/LessonPage.jsx` supplies the shared reader: breadcrumbs, desktop contents, native mobile contents, intended outcomes, working context, typed content blocks, related resources, source dates and planned-next-step information. Data drives labels and update dates.
+
+`pnpm build` builds the client, creates a temporary server renderer using the existing React/Vite dependencies, validates content, and writes complete HTML for each canonical route. The renderer is removed from `dist` afterwards; no server runtime or listening build server is required. `sitemap.xml` includes indexable canonical routes, and `robots.txt` points to it.
+
+The client hydrates a matching canonical page. Query-selected algorithms and legacy fallback URLs render fresh, because static default-state markup cannot represent their selected state. The existing browser navigation and visualizer state contracts remain supported. Metadata is shared between build rendering and client navigation.
+
+The site remains a static deployment with the existing Vercel filesystem-first rewrite fallback. `cleanUrls: true` serves extensionless HTML paths. The build emits flat HTML and directory-index copies so the canonical path and its trailing-slash form work in static previews. Vercel routing has been checked against its configuration documentation, not a deployment; deployment itself is outside this slice.
+
+## Platform references and supporting cases
+
+The overview and ChatGPT Ads introduction precede the draft API-design guide. Registry order defines discovery order. `relatedGuideIds` resolve to canonical guide records and are validated with other relationships. Paragraph blocks may include a `source` with an HTTPS `href` and descriptive `title`; the reader renders it beside the claim.
+
+A publication relationship with `kind: "case-study"` renders as a labelled supporting aside after the main guide body. Keep the core explanation useful without opening that article. Only render related-reading, source and planned-build sections when they have content. Selected source review does not establish a full platform dossier or verified account access.
+
+## Staged ChatGPT Ads architecture
+
+The closed `ads-architecture` block renders the dedicated HTML/SVG walkthrough, backed by `src/content/chatgpt-ad-architecture.js`. The guide/section/block position supplies deterministic DOM and SVG IDs across static rendering and client navigation. The server renders the complete map and all explanations; client enhancement adds stage controls and illustrative delivery outcomes. SVG edges and HTML nodes share fixed layout coordinates inside a keyboard-scrollable region. Documented responsibilities use solid borders; the planned Harness worker and evidence store use dashed borders. No internal logs-to-reporting pipeline is asserted.

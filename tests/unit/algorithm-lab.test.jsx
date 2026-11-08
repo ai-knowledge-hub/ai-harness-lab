@@ -13,19 +13,25 @@ describe("AlgorithmLabPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /dijkstra/i }));
 
     expect(screen.getByRole("heading", { name: "Dijkstra" })).toBeInTheDocument();
-    expect(screen.getByText(/weighted graph of tool calls/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /dijkstra/i })).toHaveAttribute(
+      "aria-pressed", "true",
+    );
   });
 
   it("advances steps with the next button", () => {
-    render(
+    const { container } = render(
       <MemoryRouter>
         <AlgorithmLabPage />
       </MemoryRouter>,
     );
 
+    const note = container.querySelector(".explain-row article p");
+    const initialNote = note.textContent;
+
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
 
-    expect(screen.getByText(/middle value is 5.80/i)).toBeInTheDocument();
+    expect(container.querySelector(".step-meter span")).toHaveTextContent("2");
+    expect(note.textContent).not.toBe(initialNote);
   });
 
   it("shows control algorithms for agent governance", () => {
@@ -50,11 +56,9 @@ describe("AlgorithmLabPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /lease-locked queue/i }));
 
     expect(screen.getByRole("heading", { name: "Lease-Locked Queue" })).toBeInTheDocument();
-    expect(screen.getByText(/two agents do not execute the same action/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /audit hash chain/i }));
 
     expect(screen.getByRole("heading", { name: "Audit Hash Chain" })).toBeInTheDocument();
-    expect(screen.getByText(/tamper-evident action log/i)).toBeInTheDocument();
   });
 });

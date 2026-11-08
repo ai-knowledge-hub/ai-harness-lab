@@ -5,12 +5,15 @@ import { ExamplesPage } from "./pages/ExamplesPage";
 import { HomePage } from "./pages/HomePage";
 import { PatternsPage } from "./pages/PatternsPage";
 import { TrackPage } from "./pages/TrackPage";
+import { LessonPage } from "./pages/LessonPage";
+import { lessons } from "./content/learning";
+import { getPageMetadata } from "./content/page-metadata";
 import { site, tracks, trackPath, labPath, controlPath } from "./content/site";
 
 function TrackNavigation({ onNavigate }) {
   const { pathname } = useLocation();
   return (
-    <nav className="track-navigation" aria-label="Learning tracks">
+    <nav className="track-navigation" aria-label="Engineering tracks">
       {tracks.map((track) => (
         <Link
           key={track.slug}
@@ -28,9 +31,12 @@ function TrackNavigation({ onNavigate }) {
 }
 
 function Header() {
-  const [theme, setTheme] = useState(() =>
-    document.documentElement.dataset.theme === "light" ? "light" : "dark",
-  );
+  const [theme, setTheme] = useState("dark");
+  useEffect(() => {
+    setTheme(
+      document.documentElement.dataset.theme === "light" ? "light" : "dark",
+    );
+  }, []);
   const mobileMenu = useRef(null);
   function closeMenu() {
     if (mobileMenu.current?.open) {
@@ -106,19 +112,37 @@ function PageEffects() {
   const previousLocation = useRef({ pathname, search, hash });
   useEffect(() => {
     const previous = previousLocation.current;
-    const track = tracks.find((item) => pathname.startsWith(trackPath(item)));
-    const title =
-      pathname === labPath
-        ? "Algorithm visualizers"
-        : pathname === controlPath
-          ? "Agent control plane"
-          : track?.title;
-    document.title = title
-      ? `${title} · Harness · AI Knowledge Hub`
-      : "Harness · AI Knowledge Hub";
+    const metadata = getPageMetadata(pathname);
+    document.title = metadata.title;
     const description = document.querySelector('meta[name="description"]');
-    if (description)
-      description.content = track?.description ?? site.description;
+    if (description) description.content = metadata.description;
+    for (const [selector, tag, attributes] of [
+      [
+        'link[rel="canonical"]',
+        "link",
+        { rel: "canonical", href: metadata.canonical },
+      ],
+      [
+        'meta[name="robots"]',
+        "meta",
+        { name: "robots", content: metadata.robots },
+      ],
+      ...Object.entries({
+        "og:title": metadata.title,
+        "og:description": metadata.description,
+        "og:url": metadata.canonical,
+      }).map(([property, content]) => [
+        `meta[property="${property}"]`,
+        "meta",
+        { property, content },
+      ]),
+    ]) {
+      const element =
+        document.querySelector(selector) ??
+        document.head.appendChild(document.createElement(tag));
+      for (const [name, value] of Object.entries(attributes))
+        element.setAttribute(name, value);
+    }
     if (previous.pathname !== pathname) {
       document.getElementById("main-content")?.focus({ preventScroll: true });
     }
@@ -155,7 +179,7 @@ function Footer() {
       <nav aria-label="Footer">
         <a href={site.publication}>Publication</a>
         <a href={site.skills}>Skills</a>
-        <Link to="/#tracks">Learning tracks</Link>
+        <Link to="/#tracks">Engineering tracks</Link>
       </nav>
     </footer>
   );
@@ -168,6 +192,13 @@ export default function App() {
       <PageEffects />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        {lessons.map((lesson) => (
+          <Route
+            key={lesson.id}
+            path={lesson.path}
+            element={<LessonPage lesson={lesson} />}
+          />
+        ))}
         {tracks.map((track) => (
           <Route
             key={track.slug}

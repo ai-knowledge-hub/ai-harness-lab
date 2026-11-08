@@ -4,8 +4,6 @@ import {
   site,
   tracks,
   trackPath,
-  labPath,
-  controlPath,
   articleUrl,
 } from "../content/site";
 
@@ -38,8 +36,8 @@ export function HomePage() {
             <a className="action-link" href="#tracks">
               Explore the tracks
             </a>
-            <Link className="text-link" to={labPath}>
-              Open the visualizers
+            <Link className="text-link" to="/learn/system-design/advertising-platforms">
+              Explore advertising systems
             </Link>
           </div>
         </div>
@@ -100,43 +98,43 @@ export function HomePage() {
               <p className="eyebrow">Start here</p>
               <h2 id="available-title">Get inside the system.</h2>
             </div>
-            <p>Interactive labs and a reference pattern to explore now.</p>
+            <p>Platform maps and practical design references.</p>
           </div>
           <div className="available-grid">
             <article className="featured-resource">
               <p className="resource-kind">
-                Interactive labs · Algorithms & Data
+                Overview · Platforms & System Design
               </p>
               <h3>
-                <Link to={labPath}>Make the logic visible.</Link>
+                <Link to="/learn/system-design/advertising-platforms">How advertising platforms work.</Link>
               </h3>
               <p>
-                Follow search, ranking, scheduling, memory, and control one step
-                at a time. Inspect the code alongside the changing state.
+                Follow ad delivery, measurement and reporting. Locate the
+                interfaces and data systems you can build around them.
               </p>
-              <Link className="text-link" to={labPath}>
-                Explore {algorithms.length} visualizers
+              <Link className="text-link" to="/learn/system-design/advertising-platforms">
+                Read the platform overview
               </Link>
             </article>
             <article className="featured-resource">
               <p className="resource-kind">
-                Reference pattern · AI Engineering
+                First platform · ChatGPT Ads
               </p>
               <h3>
-                <Link to={controlPath}>From agent intent to action.</Link>
+                <Link to="/learn/system-design/chatgpt-ads">From the ad experience to the integration.</Link>
               </h3>
               <p>
-                Trace a campaign request through identity, permissions, tools,
-                and audit. See where the harness makes each decision explicit.
+                Map advertiser controls, measurement and reporting, then follow
+                the workflow across the five engineering tracks.
               </p>
-              <Link className="text-link" to={controlPath}>
-                Study the control plane
+              <Link className="text-link" to="/learn/system-design/chatgpt-ads">
+                Explore ChatGPT Ads
               </Link>
             </article>
           </div>
           <p className="tutorial-note">
-            YouTube tutorials are in development. Each will connect a concept to
-            its walkthrough, code, and practical exercise here.
+            YouTube walkthroughs are in development. Each will connect a concrete
+            task to its implementation guide, code, and working example here.
           </p>
         </section>
         <section className="reading-section" aria-labelledby="reading-title">

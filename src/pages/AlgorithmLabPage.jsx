@@ -585,8 +585,8 @@ export function AlgorithmLabPage() {
             The published analysis provides the systems argument and the six
             operation model: find, explore, order, deduplicate, route, and
             compress. This lab turns those categories into visual states, code
-            traces, and marketing-specific data examples that can be studied
-            step by step.
+            traces, and marketing-specific data examples you can inspect
+            step by step and adapt to your own systems.
           </p>
         </div>
       </section>
