@@ -1,4 +1,6 @@
 @import "./src/styles/labs.css";
+@import "./src/styles/lessons.css";
+@import "./src/styles/ads-architecture.css";
 
 /* Shared brand 0.1.0. Exact foundation recorded in docs/brand-tokens.reference.json. */
 :root {
@@ -577,7 +579,7 @@ pre {
   max-width: 900px;
   text-wrap: balance;
 }
-.track-intro > p:last-child {
+.track-intro > p:not(.eyebrow):not(.track-question) {
   max-width: 740px;
   margin-top: 22px;
 }
@@ -1383,7 +1385,7 @@ pre {
     font-size: 21px;
     margin-top: 24px;
   }
-  .track-intro > p:last-child {
+  .track-intro > p:not(.eyebrow):not(.track-question) {
     font-size: 16px;
   }
   .resource-row {
@@ -1570,4 +1572,16 @@ pre {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Track introductions lead; supporting material follows the practical scope. */
+.track-intro > .text-link {
+  margin-top: 24px;
+}
+.track-resources {
+  margin-top: 70px;
+}
+
+.track-intro + .track-outline {
+  margin-top: 0;
 }

@@ -1,4 +1,5 @@
 export const site = {
+  origin: "https://harness.ai-knowledge-hub.org",
   name: "Harness",
   family: "AI Knowledge Hub",
   description:
@@ -20,41 +21,24 @@ export const tracks = [
     title: "Platforms & System Design",
     question: "Understand the systems that distribute products.",
     description:
-      "Study the architecture behind advertising, search, and distribution. Connect APIs, event pipelines, auctions, retrieval, and serving to the systems you can build.",
+      "Understand how advertising platforms connect advertiser intent to the user experience. Follow ad delivery, measurement and reporting into the APIs and data systems you can build around them.",
     short: "Platforms, APIs, auctions, and the architecture of distribution.",
-    availability: "Foundations & reading",
+    availability: "Platform overviews & guides",
     topics: [
       [
-        "Platform architecture",
-        "Follow an impression, click, and conversion through a system. Separate documented platform behaviour from educational models.",
+        "Understand ad delivery",
+        "Map the user experience, advertiser controls, ad selection and serving at a useful level. Separate documented interfaces from explanatory architecture models.",
       ],
       [
-        "APIs & integrations",
-        "Model accounts, resources, permissions, pagination, quotas, and failures before connecting an advertising platform.",
+        "Design reporting integrations",
+        "Define accounts, reporting grain, permissions, metric meaning, freshness and result completeness before implementing a connector.",
       ],
       [
-        "Data & serving",
-        "Explore event collection, queues, aggregation, caching, and the trade-offs between freshness, latency, and cost.",
+        "Build the ingestion system",
+        "Work through report jobs, pagination, request partitioning, large files and late data. Detailed connector and production builds are planned.",
       ],
     ],
-    resources: [
-      {
-        title: "Rate limiting with a token bucket",
-        description:
-          "Step through a gateway controlling the rate of tool calls.",
-        href: visualizerUrl("tokenBucket"),
-        kind: "Interactive lab",
-      },
-      {
-        title: "Designing the marketing agent’s tool layer",
-        description:
-          "Read the publication guide to bounded tools, APIs, MCP, and CLI interfaces.",
-        href: articleUrl(
-          "muscles-of-the-machine-tools-mcp-cli-first-principles-marketing",
-        ),
-        kind: "Publication guide",
-      },
-    ],
+    resources: [],
   },
   {
     slug: "algorithms",
@@ -63,21 +47,23 @@ export const tracks = [
     title: "Algorithms & Data",
     question: "Make the underlying logic visible.",
     description:
-      "Step through the data structures and algorithms used in marketing systems. Follow the state, inspect the code, and understand the conditions that make each pattern useful.",
+      "Implement the operations behind a useful integration: traverse pages, deduplicate records, aggregate metrics, rank results and coordinate work. Use reference code and visible state to inspect how a pattern behaves before adapting it.",
+    application:
+      "For ChatGPT Ads, this means retrieving the requested population and producing defensible totals. Reporting-specific code is planned; the existing visualizers provide references for the underlying operations.",
     short: "Search, ranking, scheduling, memory, and deterministic control.",
     availability: "Interactive visualizers",
     topics: [
       [
-        "Find, explore & rank",
-        "Search collections, traverse websites and repositories, and maintain a ranked set of campaign results.",
+        "Retrieve the complete population",
+        "Follow continuations, detect repeated cursors and retain the reason a read stopped. Provider-specific reporting examples are planned.",
       ],
       [
-        "Schedule & coordinate",
-        "Order dependent tasks, find routes, group related incidents, and coordinate workers.",
+        "Transform without losing meaning",
+        "Deduplicate observations, aggregate additive metrics and derive ratios at the right grain. Inspect missing values and incomplete inputs.",
       ],
       [
-        "Memory & control",
-        "Explore bounded buffers, probabilistic filters, approvals, rate limits, permissions, and audit chains.",
+        "Bound and coordinate work",
+        "Apply queues, buffers, rate limits and dependency ordering. Use the visualizers below to inspect the relevant state transitions.",
       ],
     ],
     resources: [
@@ -106,17 +92,19 @@ export const tracks = [
     title: "Software Design & Production",
     question: "Take a working feature into reliable operation.",
     description:
-      "Design components, contracts, and state transitions, then work through deployment, infrastructure, networking, reliability, observability, and operating cost.",
+      "Turn an integration into software you can run repeatedly and recover when it fails. Work through component boundaries, storage, deployment, networking, concurrency, observability and operating cost.",
+    application:
+      "For ChatGPT Ads, the production problem is an ingestion service that can resume interrupted work, reconcile late data and expose coverage gaps. That reference build is planned; this track establishes the operating decisions it must make.",
     short: "Component design, concurrency, deployment, and reliable operation.",
-    availability: "Foundations & reading",
+    availability: "Scope & working references",
     topics: [
       [
-        "Design the software",
-        "Define interfaces, provider adapters, data models, state, and failure contracts that can evolve with the product.",
+        "Design the ingestion boundary",
+        "Separate provider adapters, raw evidence, transformed data and the API your product exposes. Make account isolation and failure contracts explicit.",
       ],
       [
-        "Coordinate work",
-        "Reason about concurrency, duplicate jobs, leases, retries, interrupted execution, and recovery.",
+        "Resume and reconcile",
+        "Use checkpoints, bounded retries, deduplication and backfills to recover from interrupted jobs and late or revised reports.",
       ],
       [
         "Operate the software",
@@ -134,7 +122,7 @@ export const tracks = [
       {
         title: "Secure marketing agents",
         description:
-          "Study scoped access and execution boundaries for advertising integrations.",
+          "Design scoped access and execution boundaries for advertising integrations.",
         href: articleUrl(
           "building-secure-marketing-agents-ad-platform-authentication-architecture",
         ),
@@ -150,12 +138,14 @@ export const tracks = [
     question: "Make better decisions, then test their effect.",
     description:
       "Connect measurement, causal inference, prediction, and optimisation to growth decisions. Start with the objective and evidence needed to know whether an intervention helped.",
+    application:
+      "For ChatGPT Ads, begin with what the reporting metrics mean, which signals inform delivery and which comparison could establish additional business value. Platform-specific measurement and ML implementations are planned.",
     short: "Experiments, incrementality, prediction, and optimisation.",
-    availability: "Foundations & reading",
+    availability: "Scope & related analysis",
     topics: [
       [
         "Measure & explain",
-        "Define outcomes and baselines. Study experiments, incrementality, attribution, and the assumptions behind causal conclusions.",
+        "Define outcomes and baselines. Use experiments, incrementality, and attribution with explicit assumptions behind causal conclusions.",
       ],
       [
         "Predict & decide",
@@ -163,14 +153,14 @@ export const tracks = [
       ],
       [
         "Optimise & learn",
-        "Study budget allocation, bandits, and reinforcement learning through explicit feedback and evaluation. Runnable ML labs are planned.",
+        "Apply budget allocation, bandits, and reinforcement learning with explicit feedback and evaluation. Runnable ML labs are planned.",
       ],
     ],
     resources: [
       {
         title: "Building to learn",
         description:
-          "Read the lessons from prototyping agentic marketing optimisation.",
+          "Explore the design decisions and trade-offs in an agentic marketing optimisation prototype.",
         href: articleUrl("building-to-learn-agentic-marketing-optimization"),
         kind: "Publication essay",
       },
@@ -192,7 +182,9 @@ export const tracks = [
     title: "AI Engineering & Harnesses",
     question: "Build with agents. Build the systems around them.",
     description:
-      "Learn the engineering behind agent-assisted development and agent-powered products: context, tools, memory, orchestration, evaluation, and the harness that connects them.",
+      "Use coding agents to build and verify integrations, then design the harness that lets agents operate them. Connect context, tools, memory, permissions and evaluation to a concrete workflow.",
+    application:
+      "For ChatGPT Ads, the first operational target is a reporting capability with explicit scope, completeness and failure semantics. Coding-agent walkthroughs and reporting CLI/MCP adapters are planned; the control-plane reference is available now.",
     short: "Coding agents, tools, memory, orchestration, and evaluation.",
     availability: "Reference pattern & labs",
     topics: [

@@ -2,7 +2,7 @@ const examples = [
   {
     title: "Reporting Harnesses",
     summary:
-      "Practical studies of automated reporting systems, data refresh loops, approval checkpoints, and narrative generation pipelines.",
+      "Implementation walkthroughs of automated reporting systems, data refresh loops, approval checkpoints, and narrative generation pipelines.",
   },
   {
     title: "Content and Creative Workflows",

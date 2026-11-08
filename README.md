@@ -2,7 +2,7 @@
 
 Harness is the practical engineering companion to [AI Knowledge Hub](https://ai-knowledge-hub.org/). It connects system design, algorithms, software production, measurement, and agent engineering to marketing, growth, and go-to-market work.
 
-The homepage and five track pages link to the existing interactive visualizers, agent control-plane reference pattern, and selected publication reading. Curriculum outlines distinguish future lessons and builds from available resources. YouTube tutorials and production project walkthroughs are in development.
+The homepage and five track pages link to the existing interactive visualizers, agent control-plane reference pattern, and selected publication reading. Track outlines distinguish planned implementation guides and builds from available resources. YouTube walkthroughs and production project examples are in development.
 
 It complements the [publication](https://ai-knowledge-hub.org/) for research and explanations and [Skills](https://skills.ai-knowledge-hub.org/) for reusable capabilities, tools, agents, and plugins.
 
@@ -23,6 +23,9 @@ pnpm test:e2e
 | --- | --- |
 | `/` | Homepage and five-track orientation |
 | `/learn/system-design` | Platforms & System Design |
+| `/learn/system-design/advertising-platforms` | Advertising-platform overview |
+| `/learn/system-design/chatgpt-ads` | ChatGPT Ads system introduction |
+| `/learn/system-design/api-design` | Draft API-design practitioner guide |
 | `/learn/algorithms` | Algorithms & Data, including the full visualizer index |
 | `/learn/software-production` | Software Design & Production |
 | `/learn/measurement-ml` | Measurement & ML |
@@ -38,7 +41,7 @@ A direct visualizer link uses `?algorithm=<id>#visualizer`, for example `/learn/
 
 - `src/content/site.js` owns the working identity, family URLs, five tracks, and curated resources.
 - `src/pages/TrackPage.jsx` renders each track from that catalogue.
-- `styles.css` owns the shared tokens, site shell, homepage, and track layouts. `src/styles/labs.css` retains the existing learning-surface rules.
+- `styles.css` owns the shared tokens, site shell, homepage, and track layouts. `src/styles/labs.css` retains the existing visualizer and reference-surface rules.
 - `src/visualizers/algorithms-data.js` retains the existing algorithms, code examples, steps, and practical context.
 - `public/brand/provenance.json` records the exact copied optical artwork and its source hashes. No sibling checkout is imported at build or runtime.
 - `docs/brand-tokens.reference.json` captures the selected shared brand foundation, version 0.1.0.
@@ -46,6 +49,12 @@ A direct visualizer link uses `?algorithm=<id>#visualizer`, for example `/learn/
 
 The reading theme defaults to dark. An explicit choice is stored under `harness-theme` and applied before rendering; unavailable browser storage falls back to the default. Artwork is static, text remains semantic HTML, and reduced motion is respected.
 
+## Guide authoring and rendering
+
+See [the content model and authoring guide](docs/learning-content.md) and [the foundation implementation record](docs/learning-foundation-2026-11-07.md). The platform overview and ChatGPT Ads introduction establish the system context before the draft API-design guide. The Christmas article is a supporting case study; the main reference is evergreen. ChatGPT Ads includes a five-stage HTML/SVG architecture walkthrough with documented/reference-design labels, illustrative delivery outcomes, and a complete no-JavaScript fallback. The interactive reporting walkthrough and live integration are separate planned issues.
+
+`pnpm build` validates content and generates route-specific HTML, metadata, a sitemap and robots file. Guides can be read without JavaScript. Draft guides remain noindex and are excluded from the sitemap. The existing React application hydrates matching pages and retains interactive visualizers.
+
 ## Deployment
 
-This is an existing Vite/React single-page app. `vercel.json` preserves direct access to routes. Build with `pnpm build`; this rebrand does not change hosting or deploy the site.
+This is a Vite/React static site with a client navigation fallback. `vercel.json` preserves direct route access; generated static files take precedence. Build with `pnpm build`. No deployment is performed by the local build.
