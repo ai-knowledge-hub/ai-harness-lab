@@ -8,6 +8,8 @@ const metricDefinitions = {
 };
 
 const maxAttempts = 3;
+export const defaultReportPages = 10;
+export const maxReportPages = 20;
 const isCount = (value) => Number.isSafeInteger(value) && value >= 0;
 
 function pageKeys(page, scope, receivedKeys) {
@@ -46,9 +48,9 @@ function reportStatus(reason, rowCount, pagesCollected) {
 
 // readPage supplies a prepared page or a named failure. The synthetic reader
 // settles promptly and observes the same cancellation signal as the collector.
-export async function collectSyntheticReport({ scope, retrievedAt, readPage, signal, maxPages }) {
-  if (!Number.isInteger(maxPages) || maxPages < 1 || maxPages > 20) {
-    throw new RangeError("maxPages must be an integer from 1 to 20");
+export async function collectSyntheticReport({ scope, retrievedAt, readPage, signal, maxPages = defaultReportPages }) {
+  if (!Number.isInteger(maxPages) || maxPages < 1 || maxPages > maxReportPages) {
+    throw new RangeError(`maxPages must be an integer from 1 to ${maxReportPages}`);
   }
 
   const rows = [];
