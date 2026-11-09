@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { campaignDayKey, summarizeRows } from "./reporting/rows.mjs";
 
 const fixture = JSON.parse(await readFile(
   new URL("./fixtures/chatgpt-ads-reporting.json", import.meta.url),
@@ -11,21 +12,6 @@ const scenarios = new Map([
   ["complete", fixture.initial],
   ["refreshed", fixture.refreshed],
 ]);
-
-function summarize(rows) {
-  if (!rows.length) return null;
-
-  const sum = (field) => rows.reduce((total, row) => total + row[field], 0);
-  const spendInPence = rows.reduce((total, row) => total + Math.round(row.spend * 100), 0);
-  return {
-    impressions: sum("impressions"),
-    clicks: sum("clicks"),
-    spend: spendInPence / 100,
-    conversions: rows.every((row) => typeof row.conversions === "number")
-      ? sum("conversions")
-      : null,
-  };
-}
 
 function collectReport(scenario, { pages, retrieved_at }) {
   const pagesByCursor = new Map(pages.map(({ after, response }) => [after, response]));
@@ -47,7 +33,7 @@ function collectReport(scenario, { pages, retrieved_at }) {
     }
 
     for (const row of page.data) {
-      const key = JSON.stringify([row.campaign_id, row.readable_time]);
+      const key = campaignDayKey(row);
       if (rowsByCampaignDay.has(key)) {
         throw new Error(`Duplicate campaign-day in the ${scenario} report: ${key}`);
       }
@@ -73,7 +59,7 @@ function collectReport(scenario, { pages, retrieved_at }) {
     retrieved_at,
     status,
     coverage: { pages_collected: pagesCollected, next_cursor: cursor, stop_reason: stopReason },
-    received_totals: summarize(rows),
+    received_totals: summarizeRows(rows),
     rows,
   };
 }

@@ -19,6 +19,8 @@ pnpm test:e2e
 
 Run the synthetic ChatGPT Ads reporting experiment locally with `node scripts/chatgpt-ads-reporting-experiment.mjs`. The script, sample data and [experiment notes](docs/chatgpt-ads-reporting-experiment.md) live in the repository, outside the website build.
 
+Run the local collector with `node scripts/collect-chatgpt-ads-report.mjs`. The [collector guide](docs/chatgpt-ads-reporting-collector.md) describes the synthetic scenarios, page limits and report output.
+
 ## Routes
 
 | Route | Content |
