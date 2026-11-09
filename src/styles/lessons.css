@@ -301,6 +301,9 @@ html:has(.lesson-page) {
 .lesson-next p {
   font-size: 16px;
 }
+.lesson-project + .lesson-project {
+  margin-top: 26px;
+}
 .lesson-next .lesson-video-note {
   margin-top: 18px;
   font-size: 14px;

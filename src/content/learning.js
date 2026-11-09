@@ -4,8 +4,10 @@ import { apiDesignLesson } from "./lessons/api-design";
 import { chatgptAdsApisGuide } from "./lessons/chatgpt-ads-apis";
 import { chatgptAdsReportingGuide } from "./lessons/chatgpt-ads-reporting";
 import { articleUrl } from "./site";
+import { discovery } from "./discovery";
 
 export const learningContent = {
+  discovery,
   concepts: [
     {
       id: "http-basics",
@@ -122,11 +124,21 @@ export const learningContent = {
   projects: [
     {
       id: "advertising-reporting",
-      title: "A report collector that can pick up where it left off",
+      title: "Local report collector",
+      status: "available",
+      mode: "sample",
+      href: "https://github.com/ai-knowledge-hub/ai-harness-lab/blob/fbddf8b079578848adc943b85b34d925c870ca34/docs/chatgpt-ads-reporting-collector.md",
+      description:
+        "Run the collector from a checkout with Node.js 20 or later. Compare a complete report with a partial run using fictional data. No account is needed.",
+      lessonIds: ["chatgpt-ads-reporting"],
+    },
+    {
+      id: "live-advertising-reporting",
+      title: "Connect to a live account",
       status: "planned",
       href: null,
       description:
-        "A report collector you can try with sample data. A setup with a verified live account is planned separately.",
+        "A deployment walkthrough and verified account setup are in development.",
       lessonIds: ["chatgpt-ads-reporting"],
     },
   ],
@@ -147,6 +159,12 @@ export const learningContent = {
       ),
       relationship:
         "How software and AI agents use tools, and why each tool needs a clear job, rules and limits.",
+    },
+    {
+      id: "secure-marketing-agents",
+      title: "Secure marketing agents",
+      href: articleUrl("building-secure-marketing-agents-ad-platform-authentication-architecture"),
+      relationship: "See how account permissions shape the boundary between a worker and the platform it calls.",
     },
   ],
   capabilities: [

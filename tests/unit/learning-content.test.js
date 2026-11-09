@@ -9,6 +9,31 @@ function changed(mutator) {
 }
 
 describe("Learning content integrity", () => {
+  it("rejects a cross-track case link to a missing section", () => {
+    const content = changed((draft) => {
+      const link = draft.discovery.tracks["software-production"].examples.find(
+        (example) => example.kind === "guide",
+      );
+      link.anchor = "missing-section";
+    });
+    expect(() => validateLearningContent(content)).toThrow(
+      "invalid destination guide/chatgpt-ads-reporting#missing-section",
+    );
+  });
+
+  it("keeps a planned live project out of the available examples", () => {
+    const content = changed((draft) => {
+      draft.discovery.tracks["software-production"].examples.unshift({
+        kind: "project",
+        id: "live-advertising-reporting",
+        action: "Run the live collector",
+      });
+    });
+    expect(() => validateLearningContent(content)).toThrow(
+      "invalid destination project/live-advertising-reporting",
+    );
+  });
+
   it("rejects a prerequisite that has no source record", () => {
     expect(() =>
       validateLearningContent(

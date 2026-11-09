@@ -3,7 +3,7 @@ export const site = {
   name: "Harness",
   family: "AI Knowledge Hub",
   description:
-    "Practical engineering for AI-powered growth. Explore system design, algorithms, software production, measurement, and agent harnesses.",
+    "Practical engineering for building, operating, and evaluating AI products. Explore five tracks, reusable guides, and worked examples.",
   publication: "https://ai-knowledge-hub.org",
   skills: "https://skills.ai-knowledge-hub.org",
 };
@@ -18,27 +18,11 @@ export const tracks = [
     slug: "system-design",
     number: "01",
     nav: "System design",
-    title: "Platforms & System Design",
-    question: "Understand the systems that distribute products.",
+    title: "System design",
     description:
-      "See how advertising platforms choose which ads to show, what advertisers can control and how to collect the results in your own tools.",
-    short: "How platforms choose ads and report results.",
-    availability: "Platform overviews & guides",
-    topics: [
-      [
-        "Understand ad delivery",
-        "See where ads appear, what makes an ad qualify and which campaign settings you can change.",
-      ],
-      [
-        "Plan what your reports need",
-        "Choose the accounts, dates and metrics, then check access and decide how to spot missing or out-of-date results.",
-      ],
-      [
-        "Collect and save reports",
-        "Handle reports that arrive in batches, large files and figures that change later. A working report collector is planned.",
-      ],
-    ],
-    resources: [],
+      "Map who does what, where data moves, and what each part promises.",
+    short: "Map boundaries, data flows, and API contracts.",
+    availability: "Guide & references",
   },
   {
     slug: "algorithms",
@@ -89,46 +73,11 @@ export const tracks = [
     slug: "software-production",
     number: "03",
     nav: "Software & production",
-    title: "Software Design & Production",
-    question: "Take a working feature into reliable operation.",
+    title: "Software & production",
     description:
-      "Turn an integration into software you can run repeatedly and recover when it fails. Work through component boundaries, storage, deployment, networking, concurrency, observability and operating cost.",
-    application:
-      "For ChatGPT Ads, the production problem is an ingestion service that can resume interrupted work, reconcile late data and expose coverage gaps. That reference build is planned; this track establishes the operating decisions it must make.",
-    short: "Component design, concurrency, deployment, and reliable operation.",
-    availability: "Scope & working references",
-    topics: [
-      [
-        "Design the ingestion boundary",
-        "Separate provider adapters, raw evidence, transformed data and the API your product exposes. Make account isolation and failure contracts explicit.",
-      ],
-      [
-        "Resume and reconcile",
-        "Use checkpoints, bounded retries, deduplication and backfills to recover from interrupted jobs and late or revised reports.",
-      ],
-      [
-        "Operate the software",
-        "Plan deployment, networking, secrets, account isolation, monitoring, capacity, and cost. Full deployment walkthroughs are planned.",
-      ],
-    ],
-    resources: [
-      {
-        title: "Coordinating workers with a lease",
-        description:
-          "Inspect the states of a lease-locked queue and its workers.",
-        href: visualizerUrl("leaseQueue"),
-        kind: "Interactive lab",
-      },
-      {
-        title: "Secure marketing agents",
-        description:
-          "Design scoped access and execution boundaries for advertising integrations.",
-        href: articleUrl(
-          "building-secure-marketing-agents-ad-platform-authentication-architecture",
-        ),
-        kind: "Publication guide",
-      },
-    ],
+      "Design work you can retry, inspect, and recover after a failure.",
+    short: "Design for deployment, retries, and recovery.",
+    availability: "Lab & local sample",
   },
   {
     slug: "measurement-ml",
