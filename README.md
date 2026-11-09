@@ -21,6 +21,8 @@ Run the synthetic ChatGPT Ads reporting experiment locally with `node scripts/ch
 
 Run the local collector with `node scripts/collect-chatgpt-ads-report.mjs`. The [collector guide](docs/chatgpt-ads-reporting-collector.md) describes the synthetic scenarios, page limits and report output.
 
+The [local adapter guide](docs/chatgpt-ads-reporting-adapters.md) shows how to read the same synthetic report from the CLI or a local MCP host.
+
 ## Routes
 
 | Route | Content |
