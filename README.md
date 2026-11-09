@@ -25,7 +25,9 @@ pnpm test:e2e
 | `/learn/system-design` | Platforms & System Design |
 | `/learn/system-design/advertising-platforms` | Advertising-platform overview |
 | `/learn/system-design/chatgpt-ads` | ChatGPT Ads system introduction |
-| `/learn/system-design/api-design` | Draft API-design practitioner guide |
+| `/learn/system-design/api-design` | Reusable API-design principles |
+| `/learn/system-design/chatgpt-ads-apis` | Source-linked public capability map |
+| `/learn/system-design/chatgpt-ads-reporting` | Reporting implementation case (preview) |
 | `/learn/algorithms` | Algorithms & Data, including the full visualizer index |
 | `/learn/software-production` | Software Design & Production |
 | `/learn/measurement-ml` | Measurement & ML |
@@ -51,9 +53,9 @@ The reading theme defaults to dark. An explicit choice is stored under `harness-
 
 ## Guide authoring and rendering
 
-See [the content model and authoring guide](docs/learning-content.md) and [the foundation implementation record](docs/learning-foundation-2026-11-07.md). The platform overview and ChatGPT Ads introduction establish the system context before the draft API-design guide. The Christmas article is a supporting case study; the main reference is evergreen. ChatGPT Ads includes a five-stage HTML/SVG architecture walkthrough with documented/reference-design labels, illustrative delivery outcomes, and a complete no-JavaScript fallback. The interactive reporting walkthrough and live integration are separate planned issues.
+See [the content model and authoring guide](docs/learning-content.md) and [the foundation implementation record](docs/learning-foundation-2026-11-07.md). The system-design track separates platform references, reusable API-design principles and implementation cases. A shared context navigation connects the ChatGPT Ads system, public capability map, principles and reporting case. The Christmas article is a supporting case study; the main reference is evergreen. ChatGPT Ads includes a five-stage HTML/SVG architecture walkthrough with documented/reference-design labels, illustrative delivery outcomes, and a complete no-JavaScript fallback. Six native disclosures explain orchestrator responsibilities and distinguish source-backed behaviour from our interpretations. Clearly labelled downloads separate OpenAI’s external OpenAPI specification from Harness mock contracts and synthetic fixtures. The reporting case is a preview; a runnable connector and live integration remain planned.
 
-`pnpm build` validates content and generates route-specific HTML, metadata, a sitemap and robots file. Guides can be read without JavaScript. Draft guides remain noindex and are excluded from the sitemap. The existing React application hydrates matching pages and retains interactive visualizers.
+`pnpm build` validates content and synthetic architecture fixtures, then generates route-specific HTML, metadata, a sitemap and robots file. Guides can be read without JavaScript. Draft guides remain noindex and are excluded from the sitemap. The existing React application hydrates matching pages and retains interactive visualizers.
 
 ## Deployment
 

@@ -1,0 +1,47 @@
+{
+  "reference_kind": "curated-public-capability-map",
+  "schema_version": "1.0.0",
+  "publisher": "Harness · AI Knowledge Hub",
+  "reviewed_at": "2026-11-08",
+  "notice": "Harness’s guide to the APIs OpenAI describes for advertisers. Check OpenAI’s documentation for exact API requirements and the features your account can use.",
+  "capabilities": [
+    {
+      "id": "configure",
+      "title": "Set up campaigns and ads",
+      "direction": "Your software → Campaign settings",
+      "system_connection": "Change the settings the ad system uses to choose and show ads.",
+      "operations": ["Create, read, update or delete campaigns, ad groups and ads through api.ads.openai.com/v1"],
+      "data": "IDs, status, budgets and bids. Context hints (context_hints) describe situations where an ad may be relevant. Creative fields include the title, ad text and destination link (creative.title, creative.body and creative.target_url).",
+      "boundary": "You can change advertiser settings. Conversation details, ranking scores and individual auction results stay inside the platform.",
+      "access": "Keep the Advertiser API key on your server. The key gives your software access to a specific ad account. Some features require separate access.",
+      "source_title": "Campaign setup and management",
+      "source_url": "https://developers.openai.com/ads/api-overview",
+      "detail_url": "https://developers.openai.com/ads/api-reference/ads"
+    },
+    {
+      "id": "measure",
+      "title": "Send records of conversions",
+      "direction": "Your server → OpenAI’s measurement system",
+      "system_connection": "Send a record when someone takes an action you track, such as placing an order.",
+      "operations": ["POST https://bzr.openai.com/v1/events?pid=<PIXEL-ID>"],
+      "data": "Send an event ID, the type of action, the time in milliseconds (timestamp_ms), permitted details for matching and other information about the action. The API responds with information about the submission.",
+      "boundary": "Accepting a record, giving an ad credit for the action and finding out whether the ad caused an extra sale are three separate things. To avoid counting an action twice when you send it from both your website and server, use the same event ID and Pixel ID.",
+      "access": "You need a Pixel ID, which identifies the measurement setup, and a Conversions API key. Get them through Ads Manager or an approved partner setup.",
+      "source_title": "Conversions API",
+      "source_url": "https://developers.openai.com/ads/conversions-api"
+    },
+    {
+      "id": "report",
+      "title": "Get performance reports",
+      "direction": "OpenAI’s reporting API → Your software",
+      "system_connection": "Request totals such as impressions, clicks and spend for the account, campaigns or ads you choose.",
+      "operations": ["GET /ad_account/insights", "GET /campaigns/{campaign_id}/insights", "GET /ad_groups/{ad_group_id}/insights", "GET /ads/{ad_id}/insights", "POST /conversions/insights"],
+      "data": "Results grouped by account, campaign, ad group or ad and by time period. Conversion reports have their own definitions and limits.",
+      "boundary": "General Insights can send a report in batches. A conversion report that is too large needs smaller requests. The reporting example shows how to handle each.",
+      "access": "Keep the Advertiser API key on your server and check your account has the reporting features you need. Add the paths above to https://api.ads.openai.com/v1.",
+      "source_title": "Insights reference",
+      "source_url": "https://developers.openai.com/ads/api-reference/insights",
+      "detail_url": "https://developers.openai.com/ads/reporting"
+    }
+  ]
+}

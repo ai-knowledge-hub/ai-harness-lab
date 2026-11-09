@@ -1,6 +1,8 @@
 import { advertisingPlatformsGuide } from "./lessons/advertising-platforms";
 import { chatgptAdsGuide } from "./lessons/chatgpt-ads";
 import { apiDesignLesson } from "./lessons/api-design";
+import { chatgptAdsApisGuide } from "./lessons/chatgpt-ads-apis";
+import { chatgptAdsReportingGuide } from "./lessons/chatgpt-ads-reporting";
 import { articleUrl } from "./site";
 
 export const learningContent = {
@@ -9,7 +11,7 @@ export const learningContent = {
       id: "http-basics",
       title: "HTTP requests and responses",
       description:
-        "Working knowledge of HTTP methods, status codes, JSON, and request/response boundaries.",
+        "The examples use HTTP, the rules software follows to send a request over the web and receive a reply.",
     },
     {
       id: "api-contracts",
@@ -28,7 +30,7 @@ export const learningContent = {
     {
       id: "chatgpt-ads",
       title: "ChatGPT Ads",
-      status: "research-planned",
+      status: "documented",
       accountAccess: "unverified",
       checkedAt: "2026-11-08",
       sources: [
@@ -120,12 +122,12 @@ export const learningContent = {
   projects: [
     {
       id: "advertising-reporting",
-      title: "A reliable advertising reporting pipeline",
+      title: "A report collector that can pick up where it left off",
       status: "planned",
       href: null,
       description:
-        "A reproducible reporting example with synthetic fixtures, followed by a separately verified live-account setup.",
-      lessonIds: ["api-design"],
+        "A report collector you can try with sample data. A setup with a verified live account is planned separately.",
+      lessonIds: ["chatgpt-ads-reporting"],
     },
   ],
   publications: [
@@ -135,7 +137,7 @@ export const learningContent = {
       href: articleUrl("chatgpt-ads-christmas-pilot"),
       kind: "case-study",
       relationship:
-        "A seasonal application of the reporting principles: a bounded Christmas pilot, its commercial decision and the distinction between attributed orders and additional sales. The core reference works independently of this case.",
+        "A small Christmas test that asks whether ChatGPT Ads are worth running. It explains the difference between orders the platform credits to an ad and extra sales the campaign caused.",
     },
     {
       id: "tool-layer",
@@ -144,7 +146,7 @@ export const learningContent = {
         "muscles-of-the-machine-tools-mcp-cli-first-principles-marketing",
       ),
       relationship:
-        "The engineering context: bounded capabilities, explicit operation contracts, and MCP/CLI interfaces.",
+        "How software and AI agents use tools, and why each tool needs a clear job, rules and limits.",
     },
   ],
   capabilities: [
@@ -153,18 +155,18 @@ export const learningContent = {
       title: "Ad-platform authentication review",
       href: "https://skills.ai-knowledge-hub.org/skills/security/ad-platform-agent-auth-review",
       relationship:
-        "Related review guidance in Skills. This is not a ChatGPT Ads connector or a verified account integration.",
+        "A guide in Skills for reviewing how an agent gets permission to use an ad account.",
     },
   ],
   videos: [
     {
       id: "api-design-walkthrough",
-      title: "API design: from principle to reporting contract",
+      title: "How to design a request for a campaign report",
       status: "planned",
       href: null,
     },
   ],
-  lessons: [advertisingPlatformsGuide, chatgptAdsGuide, apiDesignLesson],
+  lessons: [advertisingPlatformsGuide, chatgptAdsGuide, chatgptAdsApisGuide, apiDesignLesson, chatgptAdsReportingGuide],
 };
 
 export const lessons = learningContent.lessons;

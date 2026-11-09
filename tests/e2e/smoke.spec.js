@@ -327,11 +327,11 @@ test("the guide is readable as static HTML without JavaScript", async ({
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "API design for advertising systems",
+        name: "API design principles",
       }),
     ).toBeVisible();
     await expect(page).toHaveTitle(
-      "API design for advertising systems · Harness · AI Knowledge Hub",
+      "API design principles · Harness · AI Knowledge Hub",
     );
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",
@@ -339,11 +339,9 @@ test("the guide is readable as static HTML without JavaScript", async ({
     );
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
       "content",
-      "noindex, follow",
+      "index, follow",
     );
-    await expect(page.locator(".lesson-code code")).toContainText(
-      '"sample-account"',
-    );
+    await expect(page.getByRole("navigation", { name: "Reference context" })).toBeVisible();
     await page
       .getByRole("navigation", { name: "Guide contents" })
       .getByRole("link", { name: /Define the contract/ })
@@ -366,12 +364,12 @@ test("the guide is readable as static HTML without JavaScript", async ({
     expect(sitemapText).toContain(
       "https://harness.ai-knowledge-hub.org/learn/system-design",
     );
-    expect(sitemapText).not.toContain(
-      "/learn/system-design/api-design",
-    );
+    expect(sitemapText).toContain("/learn/system-design/api-design");
+    expect(sitemapText).not.toContain("/learn/system-design/chatgpt-ads-reporting");
     for (const [slug, title] of [
       ["advertising-platforms", "How advertising platforms work"],
-      ["chatgpt-ads", "ChatGPT Ads: a system introduction"],
+      ["chatgpt-ads", "How ChatGPT Ads works"],
+      ["chatgpt-ads-apis", "ChatGPT Ads APIs for advertisers"],
     ]) {
       await page.goto(`http://127.0.0.1:4173/learn/system-design/${slug}`);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
@@ -383,6 +381,8 @@ test("the guide is readable as static HTML without JavaScript", async ({
         await expect(page.getByRole("region", { name: "Architecture diagram" })).toBeVisible();
         await expect(page.locator('.ads-node[data-node="worker"]')).toContainText("Harness · proposed");
         await expect(page.locator(".ads-stage-copy")).toHaveCount(5);
+        await page.locator(".orchestrator-views summary").first().click();
+        await expect(page.locator(".orchestrator-flow").first()).toBeVisible();
         await expect(page.getByRole("button", { name: "Show complete diagram" })).toHaveCount(0);
       }
     }
@@ -405,14 +405,14 @@ test("the architecture walkthrough preserves stages, evidence labels and deliver
       const edge = (from, to) => walkthrough.locator(`path[data-from="${from}"][data-to="${to}"]`);
       await expect(edge("display", "client")).toHaveCSS("opacity", "1");
       await expect(edge("display", "late")).toHaveCSS("opacity", "0.18");
-      await walkthrough.getByLabel("Illustrative delivery outcome").selectOption("late");
+      await walkthrough.getByLabel("Example ad outcome").selectOption("late");
       await expect(walkthrough.locator(".ads-delivery-example [role=status]")).toContainText("No ad is shown");
       await expect(edge("checks", "bundle")).toHaveCSS("opacity", "1");
       await expect(edge("bundle", "display")).toHaveCSS("opacity", "1");
       await expect(edge("display", "late")).toHaveCSS("opacity", "1");
       await expect(edge("checks", "no-ad")).toHaveCSS("opacity", "0.18");
       await expect(edge("display", "client")).toHaveCSS("opacity", "0.18");
-      await walkthrough.getByLabel("Illustrative delivery outcome").selectOption("ineligible");
+      await walkthrough.getByLabel("Example ad outcome").selectOption("ineligible");
       await expect(walkthrough.locator(".ads-delivery-example [role=status]")).toContainText("final check rejects");
       await expect(edge("checks", "no-ad")).toHaveCSS("opacity", "1");
       await expect(edge("checks", "bundle")).toHaveCSS("opacity", "0.18");
@@ -473,16 +473,16 @@ test("guide navigation, hydration, saved theme and metadata stay coherent", asyn
     })
     .click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("How advertising platforms work");
-  await page.getByRole("link", { name: "ChatGPT Ads: a system introduction", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("ChatGPT Ads: a system introduction");
-  await page.getByRole("link", { name: "API design for advertising systems", exact: true }).click();
+  await page.getByRole("link", { name: "How ChatGPT Ads works", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("How ChatGPT Ads works");
+  await page.getByRole("link", { name: "API design principles", exact: true }).click();
   await expect(page).toHaveURL(/\/learn\/system-design\/api-design$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "API design for advertising systems",
+    "API design principles",
   );
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     "content",
-    /bounded reporting contract/,
+    /how to tell whether the task is finished/,
   );
   await page.getByRole("button", { name: "Switch to light mode" }).click();
   await page.reload();
@@ -490,6 +490,8 @@ test("guide navigation, hydration, saved theme and metadata stay coherent", asyn
     page.getByRole("button", { name: "Switch to dark mode" }),
   ).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.getByRole("navigation", { name: "Reference context" }).getByRole("link", { name: /Reporting example/ }).click();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
   await expect(page.getByText("Planned build", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Open the build", exact: true }),
@@ -507,14 +509,30 @@ test("guide navigation, hydration, saved theme and metadata stay coherent", asyn
     .not.toMatch(/Christmas|holiday/i);
   await page
     .getByRole("navigation", { name: "Guide contents" })
-    .getByRole("link", { name: /Connect it to ChatGPT Ads/ })
+    .getByRole("link", { name: /Show what your report is missing/ })
     .click();
   await expect(
     page.getByRole("heading", {
-      name: "Connect it to ChatGPT Ads",
+      name: "Show what your report is missing",
       exact: true,
     }),
   ).toBeInViewport();
+  await page.getByRole("navigation", { name: "Reference context" }).getByRole("link", { name: /Advertiser APIs/ }).click();
+  await expect(page.locator(".capability-entry")).toHaveCount(3);
+  await expect(page.locator(".capability-entry").last()).toContainText("GET /ad_account/insights");
+  await expect(page.getByRole("link", { name: /OpenAI Ads OpenAPI specification/ })).toHaveAttribute("href", "https://developers.openai.com/ads/openapi.json");
+  // Follow every local download from the real rendered pages; inspect the deployed artifact.
+  for (const slug of ["chatgpt-ads-apis", "chatgpt-ads", "chatgpt-ads-reporting"]) {
+    await page.goto(`/learn/system-design/${slug}`);
+    for (const anchor of await page.locator(".reference-downloads a[download]").all()) {
+      const response = await page.request.get(await anchor.getAttribute("href"));
+      expect(response.status()).toBe(200);
+      expect(await response.text()).not.toMatch(/<!doctype html/i);
+      expect(await response.text()).toMatch(/Harness/);
+    }
+  }
+  await page.getByRole("navigation", { name: "Reference context" }).getByRole("link", { name: /API principles/ }).click();
+  await expect(page.getByRole("navigation", { name: "Reference context" }).getByRole("link", { name: /API principles/ })).toHaveAttribute("aria-current", "page");
   expect(errors).toEqual([]);
 });
 
@@ -523,7 +541,7 @@ test("guide content reflows in both themes with usable mobile contents", async (
 }) => {
   const routes = ["system-design", "algorithms", "software-production", "measurement-ml", "ai-engineering"]
     .map((track) => `/learn/${track}`)
-    .concat(["advertising-platforms", "chatgpt-ads", "api-design"].map((slug) => `/learn/system-design/${slug}`));
+    .concat(["advertising-platforms", "chatgpt-ads", "chatgpt-ads-apis", "chatgpt-ads-reporting", "api-design"].map((slug) => `/learn/system-design/${slug}`));
   await page.goto(routes[0]);
   for (const theme of ["dark", "light"]) {
     if (theme === "light")

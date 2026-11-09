@@ -1,3 +1,5 @@
+import { referenceContext } from "./reference-context";
+import { referenceDownloads } from "./reference-downloads";
 import { learningContent } from "./learning";
 import { tracks, labPath, controlPath } from "./site";
 
@@ -38,6 +40,8 @@ export function validateLearningContent(content = learningContent) {
         fail(`${name}/${item.id}: HTTPS destination required`);
     }
   }
+  for (const link of referenceContext)
+    if (!indexes.lessons?.has(link.guideId)) fail(`context: unknown guide ${link.guideId}`);
   const paths = new Set([labPath, controlPath]);
   const references = {
     prerequisiteConceptIds: "concepts",
@@ -60,6 +64,8 @@ export function validateLearningContent(content = learningContent) {
       fail(`${label}: invalid canonical path`);
     if (paths.has(lesson.path)) fail(`${label}: duplicate path ${lesson.path}`);
     paths.add(lesson.path);
+    if (!["overview", "platform", "capabilities", "principle", "case"].includes(lesson.kind))
+      fail(`${label}: invalid reference kind`);
     if (!["draft", "published"].includes(lesson.publicationStatus))
       fail(`${label}: invalid publication status`);
     if (![lesson.description, lesson.introduction, lesson.format].every(text))
@@ -104,7 +110,8 @@ export function validateLearningContent(content = learningContent) {
         fail(`${label}/${section.id}: incomplete section`);
       for (const block of section.blocks ?? []) {
         const valid =
-          block.type === "ads-architecture" ? true :
+          ["ads-architecture", "ads-orchestrator", "ads-capabilities"].includes(block.type) ? true :
+          block.type === "reference-downloads" ? Object.hasOwn(referenceDownloads, block.collection ?? "") :
           block.type === "paragraph"
             ? text(block.text)
             : block.type === "callout"

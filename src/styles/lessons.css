@@ -468,3 +468,47 @@ html:has(.lesson-page) {
     font-size: 12px;
   }
 }
+
+/* Reference roles and evidence use rules and typography rather than card grids. */
+.reference-context { margin-top: 32px; padding-block: 22px; border-block: 1px solid var(--line); }
+.reference-context ol { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); list-style: none; padding: 0; margin: 16px 0 0; gap: 20px; }
+.reference-context a { display: block; min-height: 44px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.reference-context strong, .reference-context span { display: block; }
+.reference-context strong { color: var(--text); font-weight: 400; margin-bottom: 6px; }
+.reference-context a[aria-current="page"] strong { text-decoration: underline; text-underline-offset: 5px; font-weight: 700; }
+.reference-context a:hover strong { text-decoration: underline; text-underline-offset: 5px; }
+.reference-small, .lesson-section .reference-small { font-size: 14px; line-height: 1.7; color: var(--muted); }
+.reference-provenance { display: block; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.reference-definitions { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 3fr); gap: 14px 24px; font-size: 15px; line-height: 1.7; margin-block: 24px; }
+.reference-definitions dt { color: var(--text); }
+.reference-definitions dd { margin: 0; color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+.reference-definitions ul { padding: 0; margin: 0; list-style: none; }
+.reference-definitions li + li { margin-top: 8px; }
+.reference-definitions code { font-size: 12px; }
+.capability-entry { border-top: 1px solid var(--line); margin-top: 28px; padding-top: 26px; }
+.capability-entry h3 { font-size: clamp(25px, 3vw, 32px); margin-block: 12px; }
+.capability-entry > p { font-size: 16px; line-height: 1.7; }
+.capability-entry .capability-direction { color: var(--text); font-size: 18px; margin-block: 16px; }
+.reference-downloads > ul { padding: 0; margin: 24px 0 0; list-style: none; }
+.reference-downloads li { border-top: 1px solid var(--line); padding-block: 22px; }
+.reference-downloads li > a { display: inline-block; padding-block: 10px; font-size: 19px; line-height: 1.5; text-decoration: underline; text-underline-offset: 5px; }
+.reference-downloads li > p { font-size: 15px; line-height: 1.7; max-width: 70ch; }
+.orchestrator-detail > p { font-size: 16px; line-height: 1.7; margin-block: 16px; }
+.orchestrator-views { list-style: none; padding: 0; margin: 28px 0; border-top: 1px solid var(--line); }
+.orchestrator-views li { border-bottom: 1px solid var(--line); }
+.orchestrator-views summary { cursor: pointer; padding-block: 22px; font-size: 20px; line-height: 1.5; }
+.orchestrator-views summary > span { font-size: 12px; color: var(--muted); margin-inline: 8px 18px; }
+.orchestrator-body { padding: 0 0 20px; }
+.orchestrator-body > p { font-size: 16px; line-height: 1.7; }
+.orchestrator-flow { display: grid; grid-template-columns: minmax(0, 1fr) 50px minmax(0, 1fr); align-items: center; gap: 16px; margin-block: 22px; }
+.orchestrator-flow > span { border-block: 1px solid var(--line-strong); padding: 18px 0; font-size: 17px; line-height: 1.5; }
+.orchestrator-flow svg { width: 100%; }
+.track-lessons + .track-lessons { margin-top: 52px; }
+@media (max-width: 640px) {
+  .reference-context ol { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 14px; }
+  .reference-definitions { grid-template-columns: 1fr; gap: 6px; }
+  .reference-definitions dd + dt { margin-top: 14px; }
+  .orchestrator-flow { grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr); gap: 10px; }
+  .orchestrator-flow > span { font-size: 15px; }
+  .orchestrator-views summary { font-size: 18px; }
+}

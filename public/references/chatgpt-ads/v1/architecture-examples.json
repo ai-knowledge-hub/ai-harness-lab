@@ -1,0 +1,173 @@
+[
+  {
+    "event_type": "orchestrator.tool_call",
+    "trace_id": "3f6f8c90-2a21-4b3e-9d77-8f2c1a5b6d01",
+    "conversation_id": "conv_yosemite_trip",
+    "payload": {
+      "session_id": "ads_sess_88ab12",
+      "iteration": 2,
+      "tool_name": "auction",
+      "arguments": {
+        "nominations": [
+          "cand_shoe01",
+          "cand_shoe02"
+        ]
+      },
+      "result": {
+        "admission": {
+          "min_relevance_met": true,
+          "min_value_met": true
+        },
+        "ranking": [
+          {
+            "candidate_id": "cand_shoe01",
+            "quality_adjusted_score": 0.91,
+            "rank": 1
+          },
+          {
+            "candidate_id": "cand_shoe02",
+            "quality_adjusted_score": 0.74,
+            "rank": 2
+          }
+        ],
+        "pricing": {
+          "price": 1.35,
+          "currency": "USD"
+        },
+        "pacing_applied": true,
+        "winner": {
+          "candidate_id": "cand_shoe01",
+          "advertiser_id": "adv_trailgear",
+          "campaign_id": "cmp_spring25",
+          "creative": {
+            "title": "TrailGrip X — built for Yosemite-grade terrain",
+            "description": "Waterproof, 4mm lug grip, 30-day trial.",
+            "destination_link": "https://example.com/trailgrip",
+            "cta": "See fit options"
+          },
+          "bid": 1.2,
+          "locale_eligibility": [
+            "US",
+            "CA"
+          ],
+          "product_reviews": {
+            "avg_rating": 4.6,
+            "review_count": 12841
+          }
+        }
+      }
+    },
+    "reference_kind": "illustrative-internal-model",
+    "schema_version": "1.0.0",
+    "publisher": "Harness · AI Knowledge Hub"
+  },
+  {
+    "reference_kind": "illustrative-internal-model",
+    "schema_version": "1.0.0",
+    "event_type": "orchestrator.tool_call",
+    "payload": {
+      "session_id": "synthetic-session",
+      "iteration": 1,
+      "tool_name": "embed",
+      "arguments": {
+        "texts": [
+          "packable travel footwear"
+        ]
+      },
+      "result": {
+        "vectors": [
+          [
+            0.1,
+            0.2,
+            -0.1
+          ]
+        ]
+      }
+    },
+    "publisher": "Harness · AI Knowledge Hub"
+  },
+  {
+    "reference_kind": "illustrative-internal-model",
+    "schema_version": "1.0.0",
+    "event_type": "orchestrator.tool_call",
+    "payload": {
+      "session_id": "synthetic-session",
+      "iteration": 2,
+      "tool_name": "final_gate",
+      "arguments": {
+        "winner": "synthetic-ad"
+      },
+      "result": {
+        "deliver": false,
+        "block_reason": "feels_inappropriate_in_chat"
+      }
+    },
+    "publisher": "Harness · AI Knowledge Hub"
+  },
+  {
+    "reference_kind": "illustrative-internal-model",
+    "schema_version": "1.0.0",
+    "event_type": "orchestrator.tool_call",
+    "payload": {
+      "session_id": "synthetic-session",
+      "iteration": 2,
+      "tool_name": "final_gate",
+      "arguments": {
+        "winner": "synthetic-ad"
+      },
+      "result": {
+        "deliver": true,
+        "block_reason": null
+      }
+    },
+    "publisher": "Harness · AI Knowledge Hub"
+  },
+  {
+    "reference_kind": "illustrative-internal-model",
+    "schema_version": "1.0.0",
+    "event_type": "frontend.ad_event",
+    "payload": {
+      "session_id": "synthetic-session",
+      "event": "dropped_arrived_late",
+      "arrival_delta_ms": 24
+    },
+    "publisher": "Harness · AI Knowledge Hub"
+  },
+  {
+    "reference_kind": "illustrative-internal-model",
+    "schema_version": "1.0.0",
+    "event_type": "frontend.ad_event",
+    "payload": {
+      "session_id": "synthetic-session",
+      "event": "impression_shown",
+      "arrival_delta_ms": -20
+    },
+    "publisher": "Harness · AI Knowledge Hub"
+  },
+  {
+    "reference_kind": "illustrative-internal-model",
+    "schema_version": "1.0.0",
+    "event_type": "orchestrator.tool_call",
+    "payload": {
+      "session_id": "synthetic-session",
+      "iteration": 1,
+      "tool_name": "auction",
+      "arguments": {
+        "nominations": [
+          "cand_shoe01",
+          "cand_shoe02"
+        ]
+      },
+      "result": {
+        "admission": {
+          "min_relevance_met": false,
+          "min_value_met": false
+        },
+        "ranking": [],
+        "winner": null,
+        "pricing": null
+      }
+    },
+    "publisher": "Harness · AI Knowledge Hub"
+  }
+]

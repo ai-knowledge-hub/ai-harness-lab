@@ -26,32 +26,20 @@ export function TrackPage({ track }) {
           </>
         )}
       </header>
-      {lessonsForTrack(track.slug).length > 0 && (
-        <section
-          className="track-lessons"
-          aria-labelledby="track-lessons-title"
-        >
-          <div className="editorial-section-head">
-            <h2 id="track-lessons-title">Start with the platform</h2>
-            <p>Get the system map, inspect the first platform, then design the integration.</p>
-          </div>
-          <div className="resource-list">
-            {lessonsForTrack(track.slug).map((lesson) => (
-              <Link key={lesson.id} className="resource-row" to={lesson.path}>
-                <span className="resource-kind">
-                  {lesson.format}
-                  {lesson.publicationStatus === "draft" ? " · Preview" : ""}
-                </span>
-                <div>
-                  <h3>{lesson.title}</h3>
-                  <p>{lesson.description}</p>
-                </div>
-                <span className="resource-action">Read</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+      {[
+        { id: "platform", title: "How ad platforms work", description: "See how platforms choose ads and what advertisers can do with their APIs.", kinds: ["overview", "platform", "capabilities"] },
+        { id: "principles", title: "Design a clear API", description: "Define what you can ask for and what the result should tell you.", kinds: ["principle"] },
+        { id: "cases", title: "Worked examples", description: "Follow a task from the first request to a usable report.", kinds: ["case"] },
+      ].map((group) => {
+        const guides = lessonsForTrack(track.slug).filter((guide) => group.kinds.includes(guide.kind));
+        return guides.length > 0 && <section className="track-lessons" aria-labelledby={`track-${group.id}-title`} key={group.id}>
+          <div className="editorial-section-head"><h2 id={`track-${group.id}-title`}>{group.title}</h2><p>{group.description}</p></div>
+          <div className="resource-list">{guides.map((guide) => <Link key={guide.id} className="resource-row" to={guide.path}>
+            <span className="resource-kind">{guide.format}{guide.publicationStatus === "draft" ? " · Preview" : ""}</span>
+            <div><h3>{guide.title}</h3><p>{guide.description}</p></div><span className="resource-action">Read</span>
+          </Link>)}</div>
+        </section>;
+      })}
       <section className="track-outline" aria-labelledby="outline-title">
         <div className="editorial-section-head">
           <h2 id="outline-title">Where this track goes deeper</h2>

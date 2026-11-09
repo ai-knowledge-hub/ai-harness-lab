@@ -2,6 +2,9 @@ import { Link } from "react-router-dom";
 import { tracks, trackPath } from "../content/site";
 import { getLesson, relatedContent } from "../content/learning";
 import { ChatGPTAdsArchitecture } from "../components/ChatGPTAdsArchitecture";
+import { AdsCapabilities, ReferenceDownloads } from "../components/AdsReference";
+import { AdsOrchestrator } from "../components/AdsOrchestrator";
+import { referenceContext } from "../content/reference-context";
 import { SiteLink } from "../components/SiteLink";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
@@ -31,6 +34,9 @@ function Contents({ sections }) {
 }
 
 function LessonBlock({ block, blockId }) {
+  if (block.type === "ads-capabilities") return <AdsCapabilities />;
+  if (block.type === "ads-orchestrator") return <AdsOrchestrator />;
+  if (block.type === "reference-downloads") return <ReferenceDownloads collection={block.collection} />;
   if (block.type === "ads-architecture") return <ChatGPTAdsArchitecture id={blockId} />;
   if (block.type === "paragraph")
     return (
@@ -178,6 +184,16 @@ export function LessonPage({ lesson }) {
             </div>
             <p className="lesson-lede">{lesson.introduction}</p>
           </header>
+          {referenceContext.some((item) => item.guideId === lesson.id) && (
+            <nav className="reference-context" aria-label="Reference context">
+              <p className="eyebrow">Read these guides in any order</p>
+              <ol>{referenceContext.map((item) => <li key={item.guideId}>
+                <Link to={getLesson(item.guideId).path} aria-current={item.guideId === lesson.id ? "page" : undefined}>
+                  <strong>{item.label}</strong><span>{item.purpose}</span>
+                </Link>
+              </li>)}</ol>
+            </nav>
+          )}
           <details className="lesson-mobile-contents">
             <summary>On this page</summary>
             <Contents sections={lesson.sections} />
@@ -226,7 +242,7 @@ export function LessonPage({ lesson }) {
           ))}
           {relatedGuides.length > 0 && (
             <section className="lesson-related" aria-labelledby="related-guides-title">
-              <p className="eyebrow">Continue the workflow</p>
+              <p className="eyebrow">Where to go next</p>
               <h2 id="related-guides-title">Related guides</h2>
               {relatedGuides.map((guide) => (
                 <article key={guide.id}>
@@ -256,7 +272,7 @@ export function LessonPage({ lesson }) {
               {capabilities.map((capability) => (
                 <article key={capability.id}>
                   <span className="resource-kind">
-                    Related capability · Skills
+                    Related guide · Skills
                   </span>
                   <h3>
                     <a href={capability.href}>{capability.title}</a>
@@ -273,7 +289,7 @@ export function LessonPage({ lesson }) {
               aria-labelledby="sources-title"
             >
               <h2 id="sources-title">Platform sources</h2>
-              <p>Selected official sources reviewed for this reference. A full capability review and live account verification remain separate work.</p>
+              <p>Official sources used in this guide. Check your own ad account for the features you can access.</p>
               {platforms.map((platform) => (
                 <details className="guide-source-group" key={platform.id}>
                   <summary>
@@ -297,7 +313,7 @@ export function LessonPage({ lesson }) {
             <section className="lesson-next" aria-labelledby="lesson-next-title">
               <p className="eyebrow">Build on this</p>
               <h2 id="lesson-next-title">
-                Turn the contract into a working report.
+                Build a report collector
               </h2>
               {projects.map((project) => (
                 <div key={project.id}>

@@ -25,9 +25,9 @@ Cross-track relevance creates relationships, not copies of the guide. A reusable
 
 ## Guide fields
 
-A guide defines `id`, `path`, `title`, optional `shortTitle`, `description`, `trackId`, `publicationStatus`, `format`, `readingMinutes`, `updatedAt`, `introduction`, `objectives`, `prerequisiteConceptIds`, `conceptIds`, `projectIds`, `platformIds`, `publicationIds`, `capabilityIds`, `videoIds`, `relatedGuideIds`, and ordered `sections`.
+A guide defines `id`, `path`, `title`, optional `shortTitle`, `description`, `trackId`, `kind`, `publicationStatus`, `format`, `readingMinutes`, `updatedAt`, `introduction`, `objectives`, `prerequisiteConceptIds`, `conceptIds`, `projectIds`, `platformIds`, `publicationIds`, `capabilityIds`, `videoIds`, `relatedGuideIds`, and ordered `sections`.
 
-Canonical paths use `/learn/<trackId>/<lessonId>`. A section has a stable `id`, `title`, and blocks. Current block types are paragraph, list, callout, code, flow and table. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
+Canonical paths use `/learn/<trackId>/<lessonId>`. A section has a stable `id`, `title`, and blocks. Current prose block types are paragraph, list, callout, code, flow and table. Closed visual blocks are `ads-architecture`, `ads-orchestrator` and `ads-capabilities`; `reference-downloads` selects a known collection from `src/content/reference-downloads.js`. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
 
 Supported lifecycle rules:
 
@@ -56,10 +56,16 @@ The site remains a static deployment with the existing Vercel filesystem-first r
 
 ## Platform references and supporting cases
 
-The overview and ChatGPT Ads introduction precede the draft API-design guide. Registry order defines discovery order. `relatedGuideIds` resolve to canonical guide records and are validated with other relationships. Paragraph blocks may include a `source` with an HTTPS `href` and descriptive `title`; the reader renders it beside the claim.
+Each guide declares a `kind`: overview, platform, capabilities, principle or case. The track groups platform references, reusable principles and implementation cases, preserving registry order inside each group. `reference-context.js` defines the small workflow navigation shared by the current principles, platform, public-capability and reporting-case pages. Extend it deliberately when another case is added; do not copy provider details back into the reusable principles. `relatedGuideIds` resolve to canonical guide records and are validated with other relationships. Paragraph blocks may include a `source` with an HTTPS `href` and descriptive `title`; the reader renders it beside the claim.
 
 A publication relationship with `kind: "case-study"` renders as a labelled supporting aside after the main guide body. Keep the core explanation useful without opening that article. Only render related-reading, source and planned-build sections when they have content. Selected source review does not establish a full platform dossier or verified account access.
 
 ## Staged ChatGPT Ads architecture
 
 The closed `ads-architecture` block renders the dedicated HTML/SVG walkthrough, backed by `src/content/chatgpt-ad-architecture.js`. The guide/section/block position supplies deterministic DOM and SVG IDs across static rendering and client navigation. The server renders the complete map and all explanations; client enhancement adds stage controls and illustrative delivery outcomes. SVG edges and HTML nodes share fixed layout coordinates inside a keyboard-scrollable region. Documented responsibilities use solid borders; the planned Harness worker and evidence store use dashed borders. No internal logs-to-reporting pipeline is asserted.
+
+## Reference artifacts
+
+`public/references/chatgpt-ads/v1/` holds versioned Harness files. `capabilities.json` supplies both the rendered public capability map and its JSON download. The official OpenAPI link stays external to OpenAI. Do not relabel the internal reference schema as a provider contract. The README records provenance, synthetic conventions and limitations.
+
+`checkReferenceContracts` runs during the build using development-only Ajv 2020 and format validation; it validates each synthetic architecture event against the reference schema. The event discriminator, embedding-tool shape, contextual gate and frontend timing are distinct boundaries. Negative unit tests cover those boundaries. The browser suite checks deployed download URLs, context navigation, native no-JavaScript disclosures and responsive reflow. No validator is bundled into the site runtime.

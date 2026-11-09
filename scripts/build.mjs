@@ -1,3 +1,4 @@
+import { checkReferenceContracts } from "./reference-contracts.mjs";
 import { build } from "vite";
 import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
@@ -5,6 +6,7 @@ import { pathToFileURL } from "node:url";
 
 // Build both entry points without a listening server. The temporary renderer
 // uses the same components as the client and is removed from deploy output.
+await checkReferenceContracts();
 await build();
 const rendererDirectory = resolve("dist/.prerender");
 try {
