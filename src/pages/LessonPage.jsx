@@ -4,6 +4,7 @@ import { getLesson, relatedContent } from "../content/learning";
 import { ChatGPTAdsArchitecture } from "../components/ChatGPTAdsArchitecture";
 import { AdsCapabilities, ReferenceDownloads } from "../components/AdsReference";
 import { AdsOrchestrator } from "../components/AdsOrchestrator";
+import { AdsReportingReference } from "../components/AdsReportingReference";
 import { referenceContext } from "../content/reference-context";
 import { SiteLink } from "../components/SiteLink";
 
@@ -36,6 +37,7 @@ function Contents({ sections }) {
 function LessonBlock({ block, blockId }) {
   if (block.type === "ads-capabilities") return <AdsCapabilities />;
   if (block.type === "ads-orchestrator") return <AdsOrchestrator />;
+  if (block.type === "ads-reporting-reference") return <AdsReportingReference id={blockId} />;
   if (block.type === "reference-downloads") return <ReferenceDownloads collection={block.collection} />;
   if (block.type === "ads-architecture") return <ChatGPTAdsArchitecture id={blockId} />;
   if (block.type === "paragraph")

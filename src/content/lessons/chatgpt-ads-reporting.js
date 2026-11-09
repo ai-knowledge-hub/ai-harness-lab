@@ -6,7 +6,7 @@ export const chatgptAdsReportingGuide = {
   objectives: ["Turn a question about campaign performance into an Insights request.", "Know when to ask for the next batch and when to split a request into smaller ones.", "Show what the report covers and how recently you collected the data."],
   prerequisiteConceptIds: ["http-basics"], conceptIds: ["api-contracts", "reporting-evidence"], projectIds: ["advertising-reporting"], platformIds: ["chatgpt-ads"], publicationIds: ["christmas-pilot"], capabilityIds: ["auth-review"], videoIds: ["api-design-walkthrough"],
   relatedGuideIds: ["api-design", "chatgpt-ads-apis", "chatgpt-ads"],
-  introduction: "Say you want to know what each campaign spent on a given day. This example shows how to ask OpenAI’s reporting API for the figures and check that you have every batch. The sample uses made-up data. Connecting a live account and running the software are planned work.",
+  introduction: "Say you want to know what each campaign spent on a given day. This guide shows what to ask for, how to tell whether every batch arrived, and what to do when the figures are missing or out of date. You can inspect five prepared examples with fictional data.",
   sections: [
     { id: "scope-the-operation", title: "Decide what the report should cover", blocks: [
       { type: "paragraph", text: "Start with results by campaign and day for one ad account you have permission to use. Choose the dates and metrics, then keep the account’s time zone, currency and the time you collected the data with the report. A live request needs separate Advertiser API access.", source: { title: "Reporting definitions and data updates", href: "https://developers.openai.com/ads/reporting" } },
@@ -31,6 +31,11 @@ export const chatgptAdsReportingGuide = {
       { type: "paragraph", text: "In this example, two of three batches are ready and the remaining batch is named. Save the request ID, the dates or IDs covered by each batch, and when you collected it. If you retry, avoid counting the same campaign and day twice. Getting the last page tells you the request is finished. Recent figures can still change, so decide when to refresh them." },
       { type: "callout", title: "What conversions tell you", text: "Attribution means the platform gives an ad credit for an action such as a purchase under its reporting rules. To estimate additional sales caused by the campaign, you need a comparison that helps estimate what would have happened without it. Show missing or late data and explain the metrics before using a report to suggest a budget or ad change." },
     ] },
+    {
+      id: "report-outcomes",
+      title: "Can you use this report?",
+      blocks: [{ type: "ads-reporting-reference" }],
+    },
     { id: "reference-downloads", title: "Reference downloads", blocks: [{ type: "reference-downloads", collection: "reporting" }] },
   ],
 };

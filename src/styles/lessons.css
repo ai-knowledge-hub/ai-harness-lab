@@ -512,3 +512,81 @@ html:has(.lesson-page) {
   .orchestrator-flow > span { font-size: 15px; }
   .orchestrator-views summary { font-size: 18px; }
 }
+
+.report-reference > h3 {
+  margin-block: 12px;
+  font-size: 22px;
+}
+.report-reference p {
+  max-width: 70ch;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.report-example-list {
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.report-example-list details {
+  border-bottom: 1px solid var(--line);
+}
+.report-example-list summary {
+  padding: 16px 12px;
+}
+.report-example-list summary:hover,
+.report-example-list details[open] > summary {
+  background: var(--surface);
+}
+.report-example-list summary strong {
+  font-size: 17px;
+}
+.report-example-list summary span {
+  display: block;
+  margin: 4px 0 0 17px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.report-example-body {
+  padding: 18px 12px 22px;
+}
+.report-example-body h4 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.report-example-body p + h4,
+.report-example-body p + p {
+  margin-top: 16px;
+}
+.report-example-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  margin-block: 18px;
+}
+.report-example-facts dt {
+  color: var(--muted);
+  font-size: 14px;
+}
+.report-example-facts dd {
+  margin: 6px 0 0;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.report-example-comparison {
+  width: 100%;
+  margin-block: 18px;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+}
+.report-example-comparison caption {
+  margin-bottom: 6px;
+  color: var(--muted);
+  text-align: left;
+}
+.report-example-comparison th,
+.report-example-comparison td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
