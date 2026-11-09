@@ -1,150 +1,215 @@
 import { Link } from "react-router-dom";
-import { HomeHeroHarness } from "../sections/HomeHeroHarness";
-
-const modules = [
-  {
-    title: "Algorithms",
-    href: "/algorithms",
-    summary:
-      "Interactive visualizers for the deterministic structures behind campaign reporting, crawl monitoring, routing, clustering, and other marketing AI workloads.",
-  },
-  {
-    title: "Patterns",
-    href: "/patterns",
-    summary:
-      "Harness design patterns for memory, permissions, orchestration, and context compaction in real marketing systems and agent-assisted operations.",
-  },
-  {
-    title: "Examples",
-    href: "/examples",
-    summary:
-      "Builder-oriented walkthroughs of reporting harnesses, campaign-analysis systems, content workflows, and other real marketing AI case studies.",
-  },
-];
-
-const audience = [
-  "Builders turning marketing operations into working AI systems",
-  "Learners studying what sits between a model, a martech stack, and production behavior",
-  "Experimenters comparing harness patterns across campaign, content, reporting, and analytics workflows",
-];
+import { algorithms } from "../visualizers/algorithms-data";
+import {
+  site,
+  tracks,
+  trackPath,
+  articleUrl,
+} from "../content/site";
 
 export function HomePage() {
   return (
-    <main id="top" className="home-shell">
-      <section className="home-hero" aria-labelledby="page-title">
-        <div className="home-hero-grid">
-          <div className="home-kicker">
-            <p className="eyebrow">Interactive Pattern Lab</p>
-            <p className="section-index">Issue 01</p>
+    <main id="main-content" className="landing" tabIndex={-1}>
+      <section className="landing-hero" aria-labelledby="page-title">
+        <picture className="hero-art" aria-hidden="true">
+          <source media="(max-width: 640px)" srcSet="/brand/sphere-800.webp" />
+          <img
+            src="/brand/sphere-1600.webp"
+            alt=""
+            width="1600"
+            height="893"
+            fetchPriority="high"
+          />
+        </picture>
+        <div className="hero-plate">
+          <p className="eyebrow">AI Knowledge Hub · Practical engineering</p>
+          <p className="hero-name">Harness</p>
+          <h1 id="page-title">
+            Build the systems behind{" "}
+            <span className="unbroken">AI-powered</span> growth.
+          </h1>
+          <p className="hero-description">
+            Understand the principles. Explore the code. Build the systems that
+            bring AI products to market.
+          </p>
+          <div className="landing-actions">
+            <a className="action-link" href="#tracks">
+              Explore the tracks
+            </a>
+            <Link className="text-link" to="/learn/system-design/advertising-platforms">
+              Explore advertising systems
+            </Link>
           </div>
-
-          <div className="home-copy">
-            <h1 id="page-title">Harness engineering for marketing AI systems</h1>
-            <p className="home-summary">
-              AI Harness Lab is the interactive companion to the wider AI Knowledge
-              Hub ecosystem: a place to study how deterministic algorithms,
-              structural patterns, orchestration, memory, and control layers make
-              marketing AI systems reliable, scalable, and auditable.
+        </div>
+      </section>
+      <div className="editorial-wrap">
+        <section
+          className="home-orientation"
+          aria-labelledby="orientation-title"
+        >
+          <p className="eyebrow">Theory into practice</p>
+          <div>
+            <h2 id="orientation-title">
+              A practical companion
+              <br />
+              to the changing commercial web.
+            </h2>
+            <p>
+              For builders working across marketing, growth, and go to market.
+              Connect system design, market theory, and machine learning to the
+              decisions behind a working product.
             </p>
-            <div className="hero-actions home-actions">
-              <Link className="hero-link primary-link" to="/algorithms">
-                Open algorithms
+          </div>
+        </section>
+        <section
+          id="tracks"
+          className="tracks-section"
+          aria-labelledby="tracks-title"
+        >
+          <div className="editorial-section-head">
+            <h2 id="tracks-title">Five tracks. One connected practice.</h2>
+            <p>Choose a discipline. Follow it into a real system.</p>
+          </div>
+          <div className="track-list">
+            {tracks.map((track) => (
+              <Link
+                className="track-row"
+                to={trackPath(track)}
+                key={track.slug}
+              >
+                <span className="track-number">{track.number}</span>
+                <h3>{track.title}</h3>
+                <p>{track.short}</p>
+                <span className="track-availability">
+                  {track.slug === "algorithms"
+                    ? `${algorithms.length} visualizers`
+                    : track.availability}
+                </span>
               </Link>
-              <Link className="hero-link" to="/patterns">
-                Browse patterns
+            ))}
+          </div>
+        </section>
+        <section
+          className="available-section"
+          aria-labelledby="available-title"
+        >
+          <div className="editorial-section-head">
+            <div>
+              <p className="eyebrow">Start here</p>
+              <h2 id="available-title">Get inside the system.</h2>
+            </div>
+            <p>Platform maps and practical design references.</p>
+          </div>
+          <div className="available-grid">
+            <article className="featured-resource">
+              <p className="resource-kind">
+                Overview · Platforms & System Design
+              </p>
+              <h3>
+                <Link to="/learn/system-design/advertising-platforms">How advertising platforms work.</Link>
+              </h3>
+              <p>
+                Follow ad delivery, measurement and reporting. Locate the
+                interfaces and data systems you can build around them.
+              </p>
+              <Link className="text-link" to="/learn/system-design/advertising-platforms">
+                Read the platform overview
               </Link>
+            </article>
+            <article className="featured-resource">
+              <p className="resource-kind">
+                First platform · ChatGPT Ads
+              </p>
+              <h3>
+                <Link to="/learn/system-design/chatgpt-ads">From the ad experience to the integration.</Link>
+              </h3>
+              <p>
+                Map advertiser controls, measurement and reporting, then follow
+                the workflow across the five engineering tracks.
+              </p>
+              <Link className="text-link" to="/learn/system-design/chatgpt-ads">
+                Explore ChatGPT Ads
+              </Link>
+            </article>
+          </div>
+          <p className="tutorial-note">
+            YouTube walkthroughs are in development. Each will connect a concrete
+            task to its implementation guide, code, and working example here.
+          </p>
+        </section>
+        <section className="reading-section" aria-labelledby="reading-title">
+          <div className="editorial-section-head">
+            <div>
+              <p className="eyebrow">Read, then explore</p>
+              <h2 id="reading-title">The ideas behind the implementation.</h2>
+            </div>
+            <a className="text-link" href={site.publication}>
+              Read the publication
+            </a>
+          </div>
+          <div className="reading-list">
+            <a
+              href={articleUrl(
+                "deterministic-core-algorithms-data-structures-marketing-agents",
+              )}
+            >
+              <span className="resource-kind">Algorithms & Data</span>
+              <h3>The Deterministic Core</h3>
+              <p>
+                Why explicit algorithms and data structures matter in marketing
+                agents.
+              </p>
+            </a>
+            <a
+              href={articleUrl(
+                "muscles-of-the-machine-tools-mcp-cli-first-principles-marketing",
+              )}
+            >
+              <span className="resource-kind">Platforms & System Design</span>
+              <h3>The Muscles of the Machine</h3>
+              <p>Design the capabilities that connect an agent to real work.</p>
+            </a>
+            <a
+              href={articleUrl(
+                "building-to-learn-agentic-marketing-optimization",
+              )}
+            >
+              <span className="resource-kind">Measurement & ML</span>
+              <h3>Building to Learn</h3>
+              <p>
+                What prototyping reveals about agentic marketing optimisation.
+              </p>
+            </a>
+          </div>
+        </section>
+        <section className="family-section" aria-labelledby="family-title">
+          <h2 id="family-title">Research. Capabilities. Working systems.</h2>
+          <p>Three connected parts of AI Knowledge Hub.</p>
+          <div className="family-grid">
+            <a href={site.publication}>
+              <span className="resource-kind">The publication</span>
+              <h3>Understand the change.</h3>
+              <p>Research, ideas, and evidence on AI and the commercial web.</p>
+            </a>
+            <a href={site.skills}>
+              <span className="resource-kind">Skills</span>
+              <h3>Find the capabilities.</h3>
+              <p>
+                Reusable skills, agents, plugins, and tools to inspect and
+                adapt.
+              </p>
+            </a>
+            <div>
+              <span className="resource-kind">Harness · You are here</span>
+              <h3>Build the system.</h3>
+              <p>
+                Architecture, code, and practical engineering for AI-powered
+                growth.
+              </p>
             </div>
           </div>
-        </div>
-
-        <HomeHeroHarness />
-
-        <aside className="home-meta home-facts" aria-label="Site scope">
-          <div>
-            <span className="meta-label">Format</span>
-            <p>Interactive manual for builders, learners, and operators working inside marketing AI stacks.</p>
-          </div>
-          <div>
-            <span className="meta-label">Focus</span>
-            <p>Deterministic control layers, reference patterns, and real harness behavior for campaign, content, and reporting systems.</p>
-          </div>
-          <div>
-            <span className="meta-label">Current modules</span>
-            <p>Algorithms, patterns, and examples for marketing-first applied AI engineering.</p>
-          </div>
-        </aside>
-      </section>
-
-      <section className="home-section home-section-lines" aria-labelledby="home-modules-title">
-        <div className="section-head">
-          <p className="eyebrow">Modules</p>
-          <h2 id="home-modules-title">Three ways into the system</h2>
-        </div>
-        <div className="manual-list">
-          {modules.map((module, index) => (
-            <article key={module.title} className="manual-row">
-              <span className="manual-index">{`0${index + 1}`}</span>
-              <div className="manual-body">
-                <h3>{module.title}</h3>
-                <p>{module.summary}</p>
-              </div>
-              <Link className="inline-link" to={module.href}>
-                Open module
-              </Link>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="home-section" aria-labelledby="audience-title">
-        <div className="section-head">
-          <p className="eyebrow">Audience</p>
-          <h2 id="audience-title">Built for teams working past generic AI demos</h2>
-        </div>
-        <div className="audience-manifest">
-          {audience.map((item, index) => (
-            <article key={item} className="audience-row">
-              <span className="manual-index">{`0${index + 1}`}</span>
-              <p>{item}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="home-section home-ecosystem" aria-labelledby="ecosystem-title">
-        <div className="section-head">
-          <p className="eyebrow">Ecosystem</p>
-          <h2 id="ecosystem-title">How this property fits the wider marketing AI hub</h2>
-        </div>
-        <div className="ecosystem-grid">
-          <article className="ecosystem-block current-block">
-            <span className="meta-label">Current property</span>
-            <h3>AI Harness Lab</h3>
-            <p>
-              Interactive reference space for deterministic algorithms, harness
-              behavior, and structural decisions in marketing AI systems.
-            </p>
-          </article>
-          <article className="ecosystem-block">
-            <span className="meta-label">Editorial stream</span>
-            <h3>
-              <a href="https://ai-news-hub.performics-labs.com/" target="_blank" rel="noreferrer">
-                AI News Hub
-              </a>
-            </h3>
-            <p>Analysis, reporting, and long-form narrative across AI, martech, and applied system change.</p>
-          </article>
-          <article className="ecosystem-block">
-            <span className="meta-label">Implementation catalogue</span>
-            <h3>
-              <a href="https://skills.ai-knowledge-hub.org/" target="_blank" rel="noreferrer">
-                AI Skills Guide
-              </a>
-            </h3>
-            <p>Reference catalogue for skills, tools, MCP servers, plugins, and builder workflows that can be applied across marketing operations.</p>
-          </article>
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }

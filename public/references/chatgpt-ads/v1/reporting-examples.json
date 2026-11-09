@@ -1,0 +1,50 @@
+{
+  "reference_kind": "illustrative-reporting-case",
+  "schema_version": "1.0.0",
+  "publisher": "Harness · AI Knowledge Hub",
+  "reviewed_at": "2026-11-08",
+  "notice": "Synthetic example. provider_request describes documented parameters, not a live request. application_envelope is our own design, not an OpenAI response. No credentials or account verification.",
+  "source_url": "https://developers.openai.com/ads/api-reference/insights",
+  "provider_request": {
+    "method": "GET",
+    "url": "https://api.ads.openai.com/v1/ad_account/insights",
+    "query": {
+      "aggregation_level": "campaign",
+      "time_granularity": "daily",
+      "fields[]": [
+        "metadata.readable_time",
+        "campaign.id",
+        "campaign.impressions",
+        "campaign.clicks",
+        "campaign.spend"
+      ],
+      "time_ranges[]": [
+        "{\"type\":\"unix_range\",\"start\":1793491200,\"end\":1793577600}"
+      ]
+    },
+    "encoding": "URL-encode repeated query parameters; authentication belongs on an authorised server."
+  },
+  "continuation_rule": {
+    "when": "has_more is true",
+    "next_query_parameter": "after",
+    "value_from_previous_response": "last_id",
+    "keep_fixed": "Account scope, fields, grain, time ranges, filters and ordering. Stop on repeated cursor or bounded execution limit; preserve partial coverage."
+  },
+  "application_envelope": {
+    "reference_kind": "illustrative-reporting-envelope",
+    "account_ref": "sample-account",
+    "timezone": "UTC",
+    "currency": "USD",
+    "retrieved_at": "2026-11-08T12:00:00Z",
+    "status": "partial",
+    "coverage": {
+      "completed_partitions": 2,
+      "expected_partitions": 3
+    },
+    "missing_partitions": [
+      "campaign-group-c"
+    ],
+    "stop_reason": "retry_budget_exhausted",
+    "rows": []
+  }
+}
