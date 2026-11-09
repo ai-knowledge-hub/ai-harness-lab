@@ -110,7 +110,7 @@ export function validateLearningContent(content = learningContent) {
         fail(`${label}/${section.id}: incomplete section`);
       for (const block of section.blocks ?? []) {
         const valid =
-          ["ads-architecture", "ads-orchestrator", "ads-capabilities"].includes(block.type) ? true :
+          ["ads-architecture", "ads-orchestrator", "ads-capabilities", "ads-reporting-reference"].includes(block.type) ? true :
           block.type === "reference-downloads" ? Object.hasOwn(referenceDownloads, block.collection ?? "") :
           block.type === "paragraph"
             ? text(block.text)

@@ -37,6 +37,7 @@ export const apiDesignLesson = {
     { id: "preserve-reporting-meaning", title: "Keep the meaning when data moves", blocks: [
       { type: "paragraph", text: "If you reformat a report or calculate a new metric, keep the original IDs and units alongside the result. Mark an unavailable number as missing so readers can distinguish it from a measured zero." },
       { type: "paragraph", text: "For a list or report, explain how results are ordered and how to tell when you have the last batch. For a change such as a budget update, explain how to recognise a repeat request. If the first attempt times out, check whether it took effect before trying again." },
+      { type: "paragraph", text: "Give your report format a version so readers and software know how to interpret it. If you change what a field means, use a new version and explain the change. For example, a report grouped by the date of an ad interaction answers a different question from one grouped by the date of a purchase." },
     ] },
     { id: "make-failures-useful", title: "Make failures useful", blocks: [
       { type: "table", columns: ["Condition", "What the result should tell you"], rows: [

@@ -27,7 +27,7 @@ Cross-track relevance creates relationships, not copies of the guide. A reusable
 
 A guide defines `id`, `path`, `title`, optional `shortTitle`, `description`, `trackId`, `kind`, `publicationStatus`, `format`, `readingMinutes`, `updatedAt`, `introduction`, `objectives`, `prerequisiteConceptIds`, `conceptIds`, `projectIds`, `platformIds`, `publicationIds`, `capabilityIds`, `videoIds`, `relatedGuideIds`, and ordered `sections`.
 
-Canonical paths use `/learn/<trackId>/<lessonId>`. A section has a stable `id`, `title`, and blocks. Current prose block types are paragraph, list, callout, code, flow and table. Closed visual blocks are `ads-architecture`, `ads-orchestrator` and `ads-capabilities`; `reference-downloads` selects a known collection from `src/content/reference-downloads.js`. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
+Canonical paths use `/learn/<trackId>/<lessonId>`. A section has a stable `id`, `title`, and blocks. Current prose block types are paragraph, list, callout, code, flow and table. Closed visual blocks are `ads-architecture`, `ads-orchestrator`, `ads-capabilities` and `ads-reporting-reference`. The `reference-downloads` block selects a known collection from `src/content/reference-downloads.js`. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
 
 Supported lifecycle rules:
 
