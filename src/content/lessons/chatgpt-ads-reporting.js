@@ -4,7 +4,7 @@ export const chatgptAdsReportingGuide = {
   description: "Request campaign results, check which data you received and show readers what is missing.",
   trackId: "system-design", kind: "case", publicationStatus: "draft", format: "Worked example", readingMinutes: 9, updatedAt: "2026-11-08",
   objectives: ["Turn a question about campaign performance into an Insights request.", "Know when to ask for the next batch and when to split a request into smaller ones.", "Show what the report covers and how recently you collected the data."],
-  prerequisiteConceptIds: ["http-basics"], conceptIds: ["api-contracts", "reporting-evidence"], projectIds: ["advertising-reporting"], platformIds: ["chatgpt-ads"], publicationIds: ["christmas-pilot"], capabilityIds: ["auth-review"], videoIds: ["api-design-walkthrough"],
+  prerequisiteConceptIds: ["http-basics"], conceptIds: ["api-contracts", "reporting-evidence"], projectIds: ["advertising-reporting", "live-advertising-reporting"], platformIds: ["chatgpt-ads"], publicationIds: ["christmas-pilot"], capabilityIds: ["auth-review"], videoIds: ["api-design-walkthrough"],
   relatedGuideIds: ["api-design", "chatgpt-ads-apis", "chatgpt-ads"],
   introduction: "Say you want to know what each campaign spent on a given day. This guide shows what to ask for, how to tell whether every batch arrived, and what to do when the figures are missing or out of date. You can inspect five prepared examples with fictional data.",
   sections: [

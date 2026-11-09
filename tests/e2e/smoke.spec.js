@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test("homepage and algorithms route load", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("main")).toContainText(
-    /build the systems behind ai-powered growth/i,
+    /build and operate ai products/i,
   );
 
   await page.goto("/algorithms");
@@ -32,9 +32,9 @@ test("five tracks connect to the existing labs and preserve deep links", async (
   await page.goto("/");
   const navigation = page.locator(".desktop-navigation");
   for (const [label, title] of [
-    ["System design", "Platforms & System Design"],
+    ["System design", "System design"],
     ["Algorithms & data", "Algorithms & Data"],
-    ["Software & production", "Software Design & Production"],
+    ["Software & production", "Software & production"],
     ["Measurement & ML", "Measurement & ML"],
     ["AI engineering", "AI Engineering & Harnesses"],
   ]) {
@@ -45,7 +45,7 @@ test("five tracks connect to the existing labs and preserve deep links", async (
     await expect(
       navigation.getByRole("link", { name: label, exact: true }),
     ).toHaveAttribute("aria-current", "page");
-    if (label !== "System design") {
+    if (["Algorithms & data", "Measurement & ML", "AI engineering"].includes(label)) {
       await page.getByRole("link", { name: "Follow the ChatGPT Ads workflow" }).click();
       await expect(page.getByRole("heading", { name: "One platform across five tracks" })).toBeInViewport();
     }
@@ -240,7 +240,7 @@ test("repeated navigation returns to the same tracks anchor", async ({
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
   const tracksHeading = page.getByRole("heading", {
-    name: "Five tracks. One connected practice.",
+    name: "Engineering tracks",
   });
   await page
     .getByRole("link", { name: "Explore the tracks", exact: true })
@@ -469,7 +469,8 @@ test("guide navigation, hydration, saved theme and metadata stay coherent", asyn
     .click();
   await page
     .getByRole("link", {
-      name: /Platform overview.*How advertising platforms work/,
+      name: "Read the platform overview",
+      exact: true,
     })
     .click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("How advertising platforms work");

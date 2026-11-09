@@ -1,6 +1,7 @@
 import { referenceContext } from "./reference-context";
 import { referenceDownloads } from "./reference-downloads";
 import { learningContent } from "./learning";
+import { discoveryGroups, resolveDiscoveryLink } from "./discovery";
 import { tracks, labPath, controlPath } from "./site";
 
 export function validateLearningContent(content = learningContent) {
@@ -154,6 +155,9 @@ export function validateLearningContent(content = learningContent) {
         fail(
           `${name}/${item.id}: planned resources must not expose a working destination`,
         );
+      if (name === "projects" && item.mode !== undefined &&
+          (item.mode !== "sample" || item.status !== "available"))
+        fail(`projects/${item.id}: invalid sample mode`);
       if (
         item.status === "available" &&
         !(
@@ -193,6 +197,72 @@ export function validateLearningContent(content = learningContent) {
       fail(`platform/${platform.id}: official sources required`);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(platform.checkedAt ?? ""))
       fail(`platform/${platform.id}: source review date required`);
+  }
+  const discovery = content.discovery;
+  if (!discovery) {
+    fail("discovery: expected a page directory");
+  } else {
+    const guideKind = (id) => content.lessons?.find((lesson) => lesson.id === id)?.kind;
+    const groupRoles = {
+      guides: ["principle"],
+      examples: ["case", "project", "lab"],
+      references: ["overview", "platform", "capabilities", "publication", "capability"],
+    };
+    const checkLink = (label, link) => {
+      const resolved = resolveDiscoveryLink(content, link);
+      if (!resolved || !text(resolved.href)) {
+        fail(`${label}: invalid destination ${link?.kind ?? ""}/${link?.id ?? ""}${link?.anchor ? `#${link.anchor}` : ""}`);
+      }
+      if (!text(link?.action) || (link.description !== undefined && !text(link.description)))
+        fail(`${label}: link action and any description must have text`);
+      return resolved;
+    };
+    const featured = discovery.featuredCase;
+    checkLink("discovery/featured-case", featured);
+    if (featured?.kind !== "guide" || guideKind(featured.id) !== "case")
+      fail("discovery/featured-case: expected a worked case");
+    for (const [id, next] of Object.entries(discovery.nextByGuide ?? {})) {
+      const label = `discovery/next/${id}`;
+      if (!indexes.lessons?.has(id) || next?.kind !== "guide" || next.id === id)
+        fail(`${label}: expected a different guide`);
+      checkLink(label, next);
+    }
+    for (const [id, page] of Object.entries(discovery.tracks ?? {})) {
+      const label = `discovery/tracks/${id}`;
+      if (!tracks.some((track) => track.slug === id)) fail(`${label}: unknown track`);
+      if (!text(page.start?.title) || !Array.isArray(page.start?.steps) ||
+          !page.start.steps.length || !page.start.steps.every((step) =>
+            Array.isArray(step) && step.length === 2 && step.every(text)))
+        fail(`${label}: a starting method needs a title and named steps`);
+      const next = page.start?.next;
+      const starter = checkLink(`${label}/start`, next);
+      if (!(next?.kind === "lab" || (next?.kind === "guide" && guideKind(next.id) === "principle" && !starter?.preview)))
+        fail(`${label}/start: expected a published principle or a lab`);
+      const destinations = new Set(starter ? [starter.href] : []);
+      const listedGuides = new Set(next?.kind === "guide" ? [next.id] : []);
+      for (const [group] of discoveryGroups) {
+        if (page[group] === undefined) continue;
+        if (!Array.isArray(page[group])) {
+          fail(`${label}/${group}: expected a list`);
+          continue;
+        }
+        for (const link of page[group]) {
+          const resource = checkLink(`${label}/${group}`, link);
+          if (resource && destinations.has(resource.href))
+            fail(`${label}: repeated destination ${resource.href}`);
+          if (resource) destinations.add(resource.href);
+          if (link?.kind === "guide") listedGuides.add(link.id);
+          const kind = link?.kind;
+          const role = kind === "guide" ? guideKind(link.id) : kind;
+          if (!groupRoles[group].includes(role)) fail(`${label}/${group}: unexpected resource type ${role}`);
+        }
+      }
+      for (const guide of content.lessons ?? [])
+        if (guide.trackId === id && !listedGuides.has(guide.id))
+          fail(`${label}: missing primary guide ${guide.id}`);
+      if (page.future !== undefined && (!Array.isArray(page.future) || !page.future.every(text)))
+        fail(`${label}/future: expected unlinked descriptions`);
+    }
   }
   if (errors.length)
     throw new Error(`Invalid learning content:\n- ${errors.join("\n- ")}`);

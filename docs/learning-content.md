@@ -56,6 +56,8 @@ The site remains a static deployment with the existing Vercel filesystem-first r
 
 ## Platform references and supporting cases
 
+See [Harness discovery prototype](harness-discovery-prototype.md) for the page roles, pilot track placement rules, and local review paths. The pilot uses guide IDs and section anchors for navigation without changing canonical guide routes.
+
 Each guide declares a `kind`: overview, platform, capabilities, principle or case. The track groups platform references, reusable principles and implementation cases, preserving registry order inside each group. `reference-context.js` defines the small workflow navigation shared by the current principles, platform, public-capability and reporting-case pages. Extend it deliberately when another case is added; do not copy provider details back into the reusable principles. `relatedGuideIds` resolve to canonical guide records and are validated with other relationships. Paragraph blocks may include a `source` with an HTTPS `href` and descriptive `title`; the reader renders it beside the claim.
 
 A publication relationship with `kind: "case-study"` renders as a labelled supporting aside after the main guide body. Keep the core explanation useful without opening that article. Only render related-reading, source and planned-build sections when they have content. Selected source review does not establish a full platform dossier or verified account access.

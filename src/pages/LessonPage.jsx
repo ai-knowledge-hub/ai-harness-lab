@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { tracks, trackPath } from "../content/site";
-import { getLesson, relatedContent } from "../content/learning";
+import { getLesson, learningContent, relatedContent } from "../content/learning";
+import { resolveDiscoveryLink } from "../content/discovery";
 import { ChatGPTAdsArchitecture } from "../components/ChatGPTAdsArchitecture";
 import { AdsCapabilities, ReferenceDownloads } from "../components/AdsReference";
 import { AdsOrchestrator } from "../components/AdsOrchestrator";
@@ -143,7 +144,11 @@ export function LessonPage({ lesson }) {
   const publications = relatedContent(lesson, "publications", "publicationIds");
   const caseStudies = publications.filter((item) => item.kind === "case-study");
   const relatedReading = publications.filter((item) => item.kind !== "case-study");
-  const relatedGuides = lesson.relatedGuideIds.map(getLesson);
+  const nextLink = learningContent.discovery.nextByGuide[lesson.id];
+  const next = resolveDiscoveryLink(learningContent, nextLink);
+  const relatedGuides = lesson.relatedGuideIds
+    .filter((id) => id !== nextLink?.id)
+    .map(getLesson);
   const capabilities = relatedContent(lesson, "capabilities", "capabilityIds");
   const platforms = relatedContent(lesson, "platforms", "platformIds");
   const videos = relatedContent(lesson, "videos", "videoIds");
@@ -242,6 +247,14 @@ export function LessonPage({ lesson }) {
               <p>{publication.relationship}</p>
             </aside>
           ))}
+          {next && (
+            <section className="lesson-next" aria-labelledby="next-guide-title">
+              <p className="eyebrow">Next · {next.label}</p>
+              <h2 id="next-guide-title">{next.title}</h2>
+              <p>{next.description}</p>
+              <SiteLink href={next.href} className="text-link">{next.action}</SiteLink>
+            </section>
+          )}
           {relatedGuides.length > 0 && (
             <section className="lesson-related" aria-labelledby="related-guides-title">
               <p className="eyebrow">Where to go next</p>
@@ -314,24 +327,24 @@ export function LessonPage({ lesson }) {
           {(projects.length > 0 || videos.length > 0) && (
             <section className="lesson-next" aria-labelledby="lesson-next-title">
               <p className="eyebrow">Build on this</p>
-              <h2 id="lesson-next-title">
-                Build a report collector
-              </h2>
+              <h2 id="lesson-next-title">Try the report collector</h2>
               {projects.map((project) => (
-                <div key={project.id}>
+                <div className="lesson-project" key={project.id}>
                   <h3>
                     {project.title}{" "}
                     <span className="resource-kind">
                       {project.status === "planned"
                         ? "Planned build"
-                        : "Available build"}
+                        : project.mode === "sample"
+                          ? "Run locally · Sample data"
+                          : "Available build"}
                     </span>
                   </h3>
                   <p>{project.description}</p>
                   {project.status === "available" && (
-                    <a className="text-link" href={project.href}>
-                      Open the build
-                    </a>
+                    <SiteLink className="text-link" href={project.href}>
+                      {project.mode === "sample" ? "Open run instructions" : "Open the build"}
+                    </SiteLink>
                   )}
                 </div>
               ))}

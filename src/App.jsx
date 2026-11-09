@@ -175,7 +175,7 @@ function Footer() {
       <Link className="footer-brand" to="/">
         AI Knowledge Hub <span>Harness</span>
       </Link>
-      <p>Practical engineering for AI-powered growth.</p>
+      <p>Practical engineering for AI products.</p>
       <nav aria-label="Footer">
         <a href={site.publication}>Publication</a>
         <a href={site.skills}>Skills</a>
