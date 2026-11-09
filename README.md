@@ -17,6 +17,8 @@ pnpm test:e2e
 
 `pnpm check` runs the unit/component suite and production build. Browser tests use the production output, so run it before `pnpm test:e2e`. Playwright starts its own preview on port 4173; install its Chromium browser when needed with `pnpm exec playwright install chromium`.
 
+Run the synthetic ChatGPT Ads reporting experiment locally with `node scripts/chatgpt-ads-reporting-experiment.mjs`. The script, sample data and [experiment notes](docs/chatgpt-ads-reporting-experiment.md) live in the repository, outside the website build.
+
 ## Routes
 
 | Route | Content |
