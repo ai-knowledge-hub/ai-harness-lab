@@ -93,11 +93,11 @@ describe("Learning content integrity", () => {
     ).toThrow("account verification is inconsistent");
   });
   it("keeps draft lessons out of indexing while retaining a stable canonical", () => {
-    const metadata = getPageMetadata("/learn/system-design/api-design/");
+    const metadata = getPageMetadata("/learn/system-design/chatgpt-ads-reporting/");
     expect(metadata.robots).toBe("noindex, follow");
     expect(metadata.canonical).toBe(
-      "https://harness.ai-knowledge-hub.org/learn/system-design/api-design",
+      "https://harness.ai-knowledge-hub.org/learn/system-design/chatgpt-ads-reporting",
     );
-    expect(metadata.title).toContain("API design for advertising systems");
+    expect(metadata.title).toContain("How to collect ChatGPT Ads reports");
   });
 });

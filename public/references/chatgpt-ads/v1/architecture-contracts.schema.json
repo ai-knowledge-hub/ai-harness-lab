@@ -1,0 +1,1063 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harness.ai-knowledge-hub.org/references/chatgpt-ads/v1/architecture-contracts.schema.json",
+  "title": "Harness illustrative ad-system contracts v1.0.0",
+  "description": "Harness-owned mock contracts adapted from a user-supplied model inspired by OpenAI’s engineering account. NOT OpenAI private payloads, advertiser endpoints, or a runnable provider integration. All field names, enums, numeric scales, timing conventions and sample values are illustrative.",
+  "type": "object",
+  "required": [
+    "event_type",
+    "payload",
+    "reference_kind",
+    "schema_version",
+    "publisher"
+  ],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "ads.session.start",
+        "orchestrator.tool_call",
+        "ads.delivery",
+        "frontend.ad_event",
+        "ads.outcome_log"
+      ]
+    },
+    "trace_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "conversation_id": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "reference_kind": {
+      "const": "illustrative-internal-model"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "publisher": {
+      "const": "Harness · AI Knowledge Hub"
+    }
+  },
+  "$defs": {
+    "AdsSessionStartRequest": {
+      "description": "Harness illustrative AdsSessionStartRequest; responsibility-level model, not a published OpenAI wire contract.",
+      "type": "object",
+      "required": [
+        "turn_id",
+        "conversation_excerpt",
+        "integrity"
+      ],
+      "properties": {
+        "turn_id": {
+          "type": "string"
+        },
+        "conversation_excerpt": {
+          "type": "object",
+          "required": [
+            "turns"
+          ],
+          "properties": {
+            "turns": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "role",
+                  "content",
+                  "turn_index"
+                ],
+                "properties": {
+                  "role": {
+                    "enum": [
+                      "user",
+                      "assistant"
+                    ]
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "turn_index": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            },
+            "cross_conversation_memory": {
+              "type": "boolean",
+              "default": false
+            },
+            "personalization_enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "nonsensitive_user_signals": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          }
+        },
+        "integrity": {
+          "type": "object",
+          "required": [
+            "conversation_safe_for_ads"
+          ],
+          "properties": {
+            "conversation_safe_for_ads": {
+              "type": "boolean"
+            },
+            "integrity_model_version": {
+              "type": "string"
+            }
+          }
+        },
+        "response_deadline_ms": {
+          "type": "integer",
+          "description": "Ad bundle must arrive before ChatGPT finishes its response; chat never waits."
+        }
+      },
+      "additionalProperties": false
+    },
+    "OrchestratorToolCall": {
+      "description": "Harness illustrative OrchestratorToolCall; responsibility-level model, not a published OpenAI wire contract.",
+      "type": "object",
+      "required": [
+        "session_id",
+        "iteration",
+        "tool_name",
+        "arguments",
+        "result"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "iteration": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tool_name": {
+          "enum": [
+            "prepare_queries",
+            "embed",
+            "retrieve",
+            "filter",
+            "score",
+            "nominate",
+            "auction",
+            "final_gate"
+          ]
+        },
+        "arguments": {},
+        "result": {}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "tool_name": {
+                "const": "prepare_queries"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "arguments": {
+                "$ref": "#/$defs/PrepareQueriesArgs"
+              },
+              "result": {
+                "$ref": "#/$defs/PrepareQueriesResult"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tool_name": {
+                "const": "retrieve"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "arguments": {
+                "$ref": "#/$defs/RetrieveArgs"
+              },
+              "result": {
+                "$ref": "#/$defs/RetrieveResult"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tool_name": {
+                "const": "filter"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "arguments": {
+                "$ref": "#/$defs/FilterArgs"
+              },
+              "result": {
+                "$ref": "#/$defs/FilterResult"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tool_name": {
+                "const": "score"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "arguments": {
+                "$ref": "#/$defs/ScoreArgs"
+              },
+              "result": {
+                "$ref": "#/$defs/ScoreResult"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tool_name": {
+                "const": "nominate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "arguments": {
+                "$ref": "#/$defs/NominateArgs"
+              },
+              "result": {
+                "$ref": "#/$defs/NominateResult"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tool_name": {
+                "const": "auction"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "arguments": {
+                "$ref": "#/$defs/AuctionArgs"
+              },
+              "result": {
+                "$ref": "#/$defs/AuctionResult"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tool_name": {
+                "const": "final_gate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "arguments": {
+                "$ref": "#/$defs/FinalGateArgs"
+              },
+              "result": {
+                "$ref": "#/$defs/FinalGateResult"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "tool_name": {
+                "const": "embed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "arguments": {
+                "$ref": "#/$defs/EmbedArgs"
+              },
+              "result": {
+                "$ref": "#/$defs/EmbedResult"
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "PrepareQueriesArgs": {
+      "type": "object",
+      "required": [
+        "conversation_summary"
+      ],
+      "properties": {
+        "conversation_summary": {
+          "type": "string",
+          "description": "Distilled multiturn summary; distinct intent facets preserved, not flattened."
+        },
+        "query_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "broaden": {
+          "type": "boolean",
+          "description": "Rewrite context to broaden beyond 1:1 search strings."
+        }
+      },
+      "additionalProperties": false
+    },
+    "PrepareQueriesResult": {
+      "type": "object",
+      "required": [
+        "queries"
+      ],
+      "properties": {
+        "queries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "text"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "examples": [
+                  "[shoes appropriate for hiking trip]"
+                ]
+              },
+              "embedding": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "intent_facet": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "RetrieveArgs": {
+      "type": "object",
+      "required": [
+        "queries",
+        "indices"
+      ],
+      "properties": {
+        "queries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "indices": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "product_feed",
+              "brand_awareness",
+              "generic"
+            ]
+          }
+        },
+        "strategy": {
+          "enum": [
+            "ann_approximate",
+            "broad"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "RetrieveResult": {
+      "type": "object",
+      "required": [
+        "candidates"
+      ],
+      "properties": {
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AdCandidate"
+          }
+        },
+        "latency_ms": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    },
+    "FilterArgs": {
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "candidates"
+      ]
+    },
+    "FilterResult": {
+      "type": "object",
+      "required": [
+        "passed",
+        "rejected"
+      ],
+      "properties": {
+        "passed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AdCandidate"
+          }
+        },
+        "rejected": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "candidate_id",
+              "reason"
+            ],
+            "properties": {
+              "candidate_id": {
+                "type": "string"
+              },
+              "reason": {
+                "enum": [
+                  "creative_inactive",
+                  "campaign_inactive",
+                  "locale_mismatch",
+                  "policy_violation",
+                  "budget_exhausted",
+                  "pacing_hold",
+                  "placement_incompatible",
+                  "advertiser_dedup"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ScoreArgs": {
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "candidates"
+      ]
+    },
+    "ScoreResult": {
+      "type": "object",
+      "required": [
+        "scored"
+      ],
+      "properties": {
+        "scored": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "candidate_id",
+              "semantic_relevance",
+              "predicted_engagement",
+              "historical_performance"
+            ],
+            "properties": {
+              "candidate_id": {
+                "type": "string"
+              },
+              "semantic_relevance": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "predicted_engagement": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "historical_performance": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "safety_flag": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "NominateArgs": {
+      "type": "object",
+      "required": [
+        "candidate_ids"
+      ],
+      "properties": {
+        "candidate_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Why these fit the conversation context."
+        }
+      },
+      "additionalProperties": false
+    },
+    "NominateResult": {
+      "type": "object",
+      "required": [
+        "nominated"
+      ],
+      "properties": {
+        "nominated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuctionArgs": {
+      "type": "object",
+      "required": [
+        "nominations"
+      ],
+      "properties": {
+        "nominations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "AuctionResult": {
+      "type": "object",
+      "required": [
+        "admission",
+        "ranking",
+        "winner",
+        "pricing"
+      ],
+      "properties": {
+        "admission": {
+          "type": "object",
+          "required": [
+            "min_relevance_met",
+            "min_value_met"
+          ],
+          "properties": {
+            "min_relevance_met": {
+              "type": "boolean"
+            },
+            "min_value_met": {
+              "type": "boolean"
+            }
+          }
+        },
+        "ranking": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "candidate_id",
+              "quality_adjusted_score",
+              "rank"
+            ],
+            "properties": {
+              "candidate_id": {
+                "type": "string"
+              },
+              "quality_adjusted_score": {
+                "type": "number"
+              },
+              "rank": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "pricing": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "price",
+                "currency"
+              ],
+              "properties": {
+                "price": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "currency": {
+                  "type": "string",
+                  "default": "USD"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pacing_applied": {
+          "type": "boolean"
+        },
+        "winner": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AdCandidate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "winner": {
+              "type": "null"
+            },
+            "pricing": {
+              "type": "null"
+            },
+            "ranking": {
+              "maxItems": 0
+            }
+          }
+        },
+        {
+          "properties": {
+            "winner": {
+              "type": "object"
+            },
+            "pricing": {
+              "type": "object"
+            },
+            "ranking": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "FinalGateArgs": {
+      "type": "object",
+      "required": [
+        "winner"
+      ],
+      "properties": {
+        "winner": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "FinalGateResult": {
+      "type": "object",
+      "required": [
+        "deliver",
+        "block_reason"
+      ],
+      "properties": {
+        "deliver": {
+          "type": "boolean"
+        },
+        "block_reason": {
+          "enum": [
+            "feels_inappropriate_in_chat",
+            null
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "deliver": {
+              "const": true
+            },
+            "block_reason": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "deliver": {
+              "const": false
+            },
+            "block_reason": {
+              "const": "feels_inappropriate_in_chat"
+            }
+          }
+        }
+      ]
+    },
+    "AdCandidate": {
+      "type": "object",
+      "required": [
+        "candidate_id",
+        "advertiser_id",
+        "campaign_id",
+        "creative",
+        "bid"
+      ],
+      "properties": {
+        "candidate_id": {
+          "type": "string"
+        },
+        "advertiser_id": {
+          "type": "string"
+        },
+        "campaign_id": {
+          "type": "string"
+        },
+        "creative": {
+          "type": "object",
+          "required": [
+            "title",
+            "description",
+            "destination_link",
+            "cta"
+          ],
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "destination_link": {
+              "type": "string",
+              "format": "uri"
+            },
+            "cta": {
+              "type": "string"
+            }
+          }
+        },
+        "bid": {
+          "type": "number",
+          "minimum": 0
+        },
+        "locale_eligibility": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "product_reviews": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "avg_rating": {
+              "type": "number"
+            },
+            "review_count": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "AdsDeliveryBundle": {
+      "description": "Contract: Ads system -> ChatGPT frontend. Server-side delivery is NOT a user impression; the frontend renders only if the bundle arrives before the response completes.",
+      "type": "object",
+      "required": [
+        "session_id",
+        "creative",
+        "preamble",
+        "render_deadline_ms"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "creative": {
+          "$ref": "#/$defs/AdCandidate/properties/creative"
+        },
+        "preamble": {
+          "type": "object",
+          "required": [
+            "text",
+            "separate_from_creative"
+          ],
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "Short, neutral, model-generated intro linking ad to conversation."
+            },
+            "separate_from_creative": {
+              "const": true
+            },
+            "keeps_advertiser_message_intact": {
+              "const": true
+            }
+          }
+        },
+        "render_deadline_ms": {
+          "type": "integer",
+          "description": "If the frontend misses this, the ad is dropped for this turn."
+        },
+        "label": {
+          "const": "sponsored"
+        }
+      }
+    },
+    "FrontendAdEvent": {
+      "description": "Harness illustrative FrontendAdEvent; responsibility-level model, not a published OpenAI wire contract.",
+      "type": "object",
+      "required": [
+        "session_id",
+        "event"
+      ],
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "event": {
+          "enum": [
+            "impression_shown",
+            "dropped_arrived_late",
+            "clicked",
+            "hidden"
+          ]
+        },
+        "arrival_delta_ms": {
+          "type": "number",
+          "description": "Illustrative convention: bundle arrival minus response completion, in milliseconds. Not a provider field."
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "event": {
+                "const": "impression_shown"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "arrival_delta_ms"
+            ],
+            "properties": {
+              "arrival_delta_ms": {
+                "maximum": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "event": {
+                "const": "dropped_arrived_late"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "arrival_delta_ms"
+            ],
+            "properties": {
+              "arrival_delta_ms": {
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "OutcomeLogEntry": {
+      "description": "Harness illustrative OutcomeLogEntry; responsibility-level model, not a published OpenAI wire contract.",
+      "type": "object",
+      "required": [
+        "outcome",
+        "privacy_class"
+      ],
+      "properties": {
+        "outcome": {
+          "enum": [
+            "turn_ineligible",
+            "session_started_no_retrieval",
+            "retrieval_no_candidates",
+            "failed_hydration_or_eligibility",
+            "delivered",
+            "delivered_interaction"
+          ]
+        },
+        "privacy_class": {
+          "enum": [
+            "measurement_ok",
+            "model_training_ok",
+            "restricted"
+          ]
+        },
+        "stage_metrics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "EmbedArgs": {
+      "type": "object",
+      "required": [
+        "texts"
+      ],
+      "properties": {
+        "texts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "EmbedResult": {
+      "type": "object",
+      "required": [
+        "vectors"
+      ],
+      "properties": {
+        "vectors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$comment": "Source of responsibilities only: https://openai.com/index/building-chatgpt-ad-stack/ . Version 1.0.0; reviewed 2026-11-08. See README.md for limitations. Synthetic examples only.",
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "properties": {
+        "event_type": {
+          "const": "ads.session.start"
+        },
+        "payload": {
+          "$ref": "#/$defs/AdsSessionStartRequest"
+        }
+      }
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "orchestrator.tool_call"
+        },
+        "payload": {
+          "$ref": "#/$defs/OrchestratorToolCall"
+        }
+      }
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "ads.delivery"
+        },
+        "payload": {
+          "$ref": "#/$defs/AdsDeliveryBundle"
+        }
+      }
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "frontend.ad_event"
+        },
+        "payload": {
+          "$ref": "#/$defs/FrontendAdEvent"
+        }
+      }
+    },
+    {
+      "properties": {
+        "event_type": {
+          "const": "ads.outcome_log"
+        },
+        "payload": {
+          "$ref": "#/$defs/OutcomeLogEntry"
+        }
+      }
+    }
+  ]
+}

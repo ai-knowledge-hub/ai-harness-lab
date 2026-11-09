@@ -21,21 +21,21 @@ export const tracks = [
     title: "Platforms & System Design",
     question: "Understand the systems that distribute products.",
     description:
-      "Understand how advertising platforms connect advertiser intent to the user experience. Follow ad delivery, measurement and reporting into the APIs and data systems you can build around them.",
-    short: "Platforms, APIs, auctions, and the architecture of distribution.",
+      "See how advertising platforms choose which ads to show, what advertisers can control and how to collect the results in your own tools.",
+    short: "How platforms choose ads and report results.",
     availability: "Platform overviews & guides",
     topics: [
       [
         "Understand ad delivery",
-        "Map the user experience, advertiser controls, ad selection and serving at a useful level. Separate documented interfaces from explanatory architecture models.",
+        "See where ads appear, what makes an ad qualify and which campaign settings you can change.",
       ],
       [
-        "Design reporting integrations",
-        "Define accounts, reporting grain, permissions, metric meaning, freshness and result completeness before implementing a connector.",
+        "Plan what your reports need",
+        "Choose the accounts, dates and metrics, then check access and decide how to spot missing or out-of-date results.",
       ],
       [
-        "Build the ingestion system",
-        "Work through report jobs, pagination, request partitioning, large files and late data. Detailed connector and production builds are planned.",
+        "Collect and save reports",
+        "Handle reports that arrive in batches, large files and figures that change later. A working report collector is planned.",
       ],
     ],
     resources: [],

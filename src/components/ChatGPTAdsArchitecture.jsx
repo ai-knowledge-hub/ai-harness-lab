@@ -75,9 +75,9 @@ export function ChatGPTAdsArchitecture({ id: diagramId }) {
   return (
     <div className="ads-deep-dive">
       <p className="ads-scope-note">
-        Simplified logical architecture. OpenAI documents the solid components;
-        dashed components are our proposed integration. Layout and grouping are
-        explanatory, not a deployment blueprint. Sources reviewed 8 November 2026.
+        This diagram shows how ChatGPT answers and how the ad system works alongside it.
+        Solid boxes show steps OpenAI describes. Dashed boxes show how Harness
+        proposes to collect and save reports. Sources reviewed 8 November 2026.
       </p>
       {enhanced && (
         <div className="ads-controls">
@@ -108,10 +108,10 @@ export function ChatGPTAdsArchitecture({ id: diagramId }) {
       )}
       <figure className="ads-figure">
         <figcaption>
-          <span>ChatGPT Ads · logical system map</span>
-          <span className="ads-legend"><span>Solid: OpenAI documented</span><span>Dashed: Harness reference design</span></span>
+          <span>ChatGPT Ads · how the parts fit together</span>
+          <span className="ads-legend"><span>Solid: OpenAI documented</span><span>Dashed: Harness proposal</span></span>
         </figcaption>
-        <p className="ads-scroll-hint">Scroll across the diagram to inspect each component →</p>
+        <p className="ads-scroll-hint">Scroll sideways to see the rest of the diagram →</p>
         <div className="ads-map-scroll" tabIndex={0} role="region" aria-label="Architecture diagram">
           <div className="ads-map" id={`${diagramId}-map`} style={{ height: mapHeight }}>
             <svg width="800" height={mapHeight} viewBox={`0 0 800 ${mapHeight}`} aria-hidden="true" focusable="false">
@@ -149,13 +149,13 @@ export function ChatGPTAdsArchitecture({ id: diagramId }) {
             </ul>
           </div>
         </div>
-        <p className="ads-map-note">Two-headed arrows indicate repeatable tool calls or request/response. A rejected placement stops before the bundle; a late bundle can reach the frontend without being displayed. No internal logs-to-reporting connection is asserted.</p>
+        <p className="ads-map-note">Arrows that point both ways show a request and its reply, or a tool the system can use again. The final check can stop an ad before it is sent. An ad that arrives late has already been sent and misses its chance to appear.</p>
       </figure>
       {showDelivery && (
         <div className="ads-delivery-example">
           {enhanced ? (
             <>
-              <label htmlFor={`${diagramId}-example`}>Illustrative delivery outcome</label>
+              <label htmlFor={`${diagramId}-example`}>Example ad outcome</label>
               <select id={`${diagramId}-example`} value={example} onChange={(event) => setExample(event.target.value)}>
                 {Object.entries(deliveryExamples).map(([value, item]) => (
                   <option key={value} value={value}>{item.label}</option>
@@ -165,34 +165,36 @@ export function ChatGPTAdsArchitecture({ id: diagramId }) {
             </>
           ) : (
             <>
-              <p>Illustrative delivery outcomes</p>
+              <p>Example ad outcomes</p>
               <ul>{Object.values(deliveryExamples).map((item) => (
                 <li key={item.label}><strong>{item.label}.</strong> {item.outcome}</li>
               ))}</ul>
             </>
           )}
-          <p className="ads-example-note">A walkthrough of the delivery boundary, not live traffic or a provider trace.</p>
+          <p className="ads-example-note">These examples use imagined situations to show how an ad can be chosen and still go unseen.</p>
         </div>
       )}
       <div className="ads-explanations" id={`${diagramId}-explanations`}>
         {architectureStages.map((item, index) => (showAll || index === stage) && (
           <section className="ads-stage-copy" key={item.short} aria-labelledby={`${diagramId}-stage-${index}`}>
-            <p className="eyebrow">{item.proposal ? "Harness reference design · Planned" : "OpenAI documented · Simplified"}</p>
+            <p className="eyebrow">{item.proposal ? "Harness proposal · Planned" : "OpenAI documented · Simplified"}</p>
             <h3 id={`${diagramId}-stage-${index}`}>{index + 1}. {item.title}</h3>
             <p>{item.documented ?? item.proposal}</p>
             <dl>
-              <dt>Implementation implication</dt><dd>{item.implication}</dd>
+              <dt>What this means in practice</dt><dd>{item.implication}</dd>
               <dt>What to check</dt><dd>{item.check}</dd>
             </dl>
             <a className="source-citation" href={architectureSources[item.source].href}>{architectureSources[item.source].title}</a>
-            {index === 3 && <> · <a className="source-citation" href={architectureSources.engineering.href}>Logging and feedback account</a></>}
-            {item.proposal && <p><Link className="text-link" to="/learn/system-design/api-design">Open the reporting API-design preview</Link></p>}
+            {index === 1 && <p><a className="text-link" href="#orchestrator-detail">See six steps involved in choosing an ad</a></p>}
+            {index === 3 && <p><Link className="text-link" to="/learn/system-design/chatgpt-ads-apis">See what advertisers can do with the APIs</Link></p>}
+            {index === 3 && <> · <a className="source-citation" href={architectureSources.engineering.href}>How OpenAI records events and feedback</a></>}
+            {item.proposal && <p><Link className="text-link" to="/learn/system-design/chatgpt-ads-reporting">Open the reporting example</Link></p>}
           </section>
         ))}
       </div>
       <details className="ads-evidence-note">
-        <summary>How to read the evidence boundary</summary>
-        <p>The published descriptions establish responsibilities and behaviours. They do not establish the exact service topology, storage products, transport protocols, model weights or deployment choices. The dashed worker and store are our proposed reference build. Their implementation is still planned.</p>
+        <summary>What this diagram is based on</summary>
+        <p>OpenAI describes what each part does. The diagram groups those parts to make the process easier to follow. The report collector and saved report data are part of a planned Harness build.</p>
       </details>
     </div>
   );
