@@ -3,15 +3,37 @@ import { algorithms } from "../visualizers/algorithms-data";
 import { visualizerUrl } from "../content/site";
 import { SiteLink } from "../components/SiteLink";
 import { learningContent, lessonsForTrack } from "../content/learning";
-import { discoveryGroups, resolveDiscoveryLink } from "../content/discovery";
+import { caseLinksForTrack, discoveryGroups, resolveDiscoveryLink } from "../content/discovery";
 
-function PilotTrack({ track, pilot }) {
-  const resolve = (link) => resolveDiscoveryLink(learningContent, link);
+const resolve = (link) => resolveDiscoveryLink(learningContent, link);
+
+function TrackResources({ id, title, resources }) {
+  return (
+    <section id={id} className="pilot-section" aria-labelledby={`${id}-title`}>
+      <h2 id={`${id}-title`}>{title}</h2>
+      <ul className="pilot-resources" role="list">
+        {resources.map((resource) => (
+          <li key={resource.href}>
+            <p className="resource-kind">{resource.label}</p>
+            <h3>{resource.title}</h3>
+            <p>{resource.description}</p>
+            <SiteLink href={resource.href} className="text-link">{resource.action}</SiteLink>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function PilotTrack({ track, pilot, caseResources }) {
   const next = resolve(pilot.start.next);
   const groups = discoveryGroups.map(([id, title]) => ({
     id,
     title,
-    resources: (pilot[id] ?? []).map(resolve).filter(Boolean),
+    resources: [
+      ...(pilot[id] ?? []).map(resolve).filter(Boolean),
+      ...(id === "examples" ? caseResources : []),
+    ],
   })).filter((group) => group.resources.length > 0);
 
   return (
@@ -43,19 +65,7 @@ function PilotTrack({ track, pilot }) {
         {next && <SiteLink href={next.href} className="action-link">{next.action}</SiteLink>}
       </section>
       {groups.map(({ id, title, resources }) => (
-        <section key={id} id={id} className="pilot-section" aria-labelledby={`${id}-title`}>
-          <h2 id={`${id}-title`}>{title}</h2>
-          <ul className="pilot-resources" role="list">
-            {resources.map((resource) => (
-              <li key={resource.href}>
-                <p className="resource-kind">{resource.label}</p>
-                <h3>{resource.title}</h3>
-                <p>{resource.description}</p>
-                <SiteLink href={resource.href} className="text-link">{resource.action}</SiteLink>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <TrackResources key={id} id={id} title={title} resources={resources} />
       ))}
       {pilot.future?.length > 0 && (
         <section className="pilot-section track-future" aria-labelledby="future-title">
@@ -67,7 +77,15 @@ function PilotTrack({ track, pilot }) {
   );
 }
 
-function StandardTrack({ track }) {
+function StandardTrack({ track, caseLinks, caseResources }) {
+  const trackGuides = lessonsForTrack(track.slug);
+  const examples = [
+    ...caseResources,
+    ...trackGuides
+      .filter((guide) => guide.kind === "case" && !caseLinks.some((link) => link.id === guide.id))
+      .map((guide) => resolve({ kind: "guide", id: guide.id, action: "Read the case" })),
+  ];
+
   return (
     <>
       <header className="track-intro">
@@ -75,21 +93,12 @@ function StandardTrack({ track }) {
         <h1>{track.title}</h1>
         <p className="track-question">{track.question}</p>
         <p>{track.description}</p>
-        {track.application && (
-          <>
-            <p className="track-application">{track.application}</p>
-            <Link className="text-link" to="/learn/system-design/chatgpt-ads#across-five-tracks">
-              Follow the ChatGPT Ads workflow
-            </Link>
-          </>
-        )}
       </header>
       {[
         { id: "platform", title: "How ad platforms work", description: "See how platforms choose ads and what advertisers can do with their APIs.", kinds: ["overview", "platform", "capabilities"] },
         { id: "principles", title: "Design a clear API", description: "Define what you can ask for and what the result should tell you.", kinds: ["principle"] },
-        { id: "cases", title: "Worked examples", description: "Follow a task from the first request to a usable report.", kinds: ["case"] },
       ].map((group) => {
-        const guides = lessonsForTrack(track.slug).filter((guide) => group.kinds.includes(guide.kind));
+        const guides = trackGuides.filter((guide) => group.kinds.includes(guide.kind));
         return guides.length > 0 && <section className="track-lessons" aria-labelledby={`track-${group.id}-title`} key={group.id}>
           <div className="editorial-section-head"><h2 id={`track-${group.id}-title`}>{group.title}</h2><p>{group.description}</p></div>
           <div className="resource-list">{guides.map((guide) => <Link key={guide.id} className="resource-row" to={guide.path}>
@@ -98,6 +107,9 @@ function StandardTrack({ track }) {
           </Link>)}</div>
         </section>;
       })}
+      {examples.length > 0 && (
+        <TrackResources id="examples" title="Worked examples" resources={examples} />
+      )}
       <section className="track-outline" aria-labelledby="outline-title">
         <div className="editorial-section-head">
           <h2 id="outline-title">Where this track goes deeper</h2>
@@ -177,6 +189,8 @@ function StandardTrack({ track }) {
 
 export function TrackPage({ track }) {
   const pilot = learningContent.discovery.tracks[track.slug];
+  const caseLinks = caseLinksForTrack(learningContent.discovery, track.slug);
+  const caseResources = caseLinks.map(resolve).filter(Boolean);
   return (
     <main id="main-content" className={`track-page editorial-wrap${pilot ? " pilot-track-page" : ""}`} tabIndex={-1}>
       <nav className="breadcrumbs" aria-label="Breadcrumb">
@@ -184,7 +198,11 @@ export function TrackPage({ track }) {
         <span aria-hidden="true">/</span>
         <span>{track.nav}</span>
       </nav>
-      {pilot ? <PilotTrack track={track} pilot={pilot} /> : <StandardTrack track={track} />}
+      {pilot ? (
+        <PilotTrack track={track} pilot={pilot} caseResources={caseResources} />
+      ) : (
+        <StandardTrack track={track} caseLinks={caseLinks} caseResources={caseResources} />
+      )}
       <Link className="text-link" to="/#tracks">
         Explore all five tracks
       </Link>

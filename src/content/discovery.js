@@ -15,6 +15,41 @@ export const discovery = {
       action: "Read the reporting case",
       description: "Apply the contract to a daily campaign report and see how the response explains missing data.",
     },
+    "chatgpt-ads": {
+      kind: "guide",
+      id: "chatgpt-ads-reporting",
+      action: "Read the reporting case",
+      description: "Start with one reporting request and follow it across the five engineering tracks.",
+    },
+  },
+  caseTracks: {
+    "chatgpt-ads-reporting": {
+      "system-design": {
+        anchor: "scope-the-operation",
+        action: "Define the report contract",
+        description: "Decide who can ask for campaign results and what the response should guarantee.",
+      },
+      algorithms: {
+        anchor: "complete-retrieval",
+        action: "Check that you have every batch",
+        description: "Follow page markers, detect repeats, and check whether you received the full result.",
+      },
+      "software-production": {
+        anchor: "application-result",
+        action: "Handle an interrupted report",
+        description: "Decide what to retry, what progress to keep, and how to reconcile revised results.",
+      },
+      "measurement-ml": {
+        anchor: "interpret-metrics",
+        action: "Interpret credited conversions",
+        description: "Separate what the report credits from the additional sales the campaign may have caused.",
+      },
+      "ai-engineering": {
+        anchor: "bounded-agent-tool",
+        action: "Give an agent a bounded reporting tool",
+        description: "Define what the tool can read and what it returns when a result is partial or stale.",
+      },
+    },
   },
   tracks: {
     "system-design": {
@@ -27,9 +62,6 @@ export const discovery = {
         ],
         next: { kind: "guide", id: "api-design", action: "Read API design principles" },
       },
-      examples: [
-        { kind: "guide", id: "chatgpt-ads-reporting", action: "Read the reporting case" },
-      ],
       references: [
         { kind: "guide", id: "advertising-platforms", action: "Read the platform overview" },
         { kind: "guide", id: "chatgpt-ads", action: "Explore ad delivery" },
@@ -48,13 +80,6 @@ export const discovery = {
       },
       examples: [
         { kind: "project", id: "advertising-reporting", action: "Open run instructions" },
-        {
-          kind: "guide",
-          id: "chatgpt-ads-reporting",
-          anchor: "complete-retrieval",
-          action: "See how report batches are collected",
-          description: "See the design for saving progress and identifying which batches are missing.",
-        },
       ],
       references: [
         { kind: "publication", id: "secure-marketing-agents", action: "Read the authentication guide" },
@@ -71,6 +96,13 @@ export const discoveryGroups = [
   ["examples", "Worked examples"],
   ["references", "References"],
 ];
+
+export function caseLinksForTrack(discovery, trackId) {
+  return Object.entries(discovery.caseTracks ?? {}).flatMap(([id, trackLinks]) => {
+    const link = trackLinks?.[trackId];
+    return link ? [{ ...link, kind: "guide", id }] : [];
+  });
+}
 
 export function resolveDiscoveryLink(content, link) {
   if (!link) return null;

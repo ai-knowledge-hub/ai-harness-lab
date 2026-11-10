@@ -29,7 +29,7 @@ export function getPageMetadata(pathname) {
     description: lesson?.description ?? track?.description ?? site.description,
     canonical: `${site.origin}${path}`,
     robots:
-      lesson?.publicationStatus === "draft"
+      lesson?.publicationStatus === "draft" || path === "/examples"
         ? "noindex, follow"
         : "index, follow",
   };

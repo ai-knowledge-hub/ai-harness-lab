@@ -11,9 +11,7 @@ function changed(mutator) {
 describe("Learning content integrity", () => {
   it("rejects a cross-track case link to a missing section", () => {
     const content = changed((draft) => {
-      const link = draft.discovery.tracks["software-production"].examples.find(
-        (example) => example.kind === "guide",
-      );
+      const link = draft.discovery.caseTracks["chatgpt-ads-reporting"]["software-production"];
       link.anchor = "missing-section";
     });
     expect(() => validateLearningContent(content)).toThrow(

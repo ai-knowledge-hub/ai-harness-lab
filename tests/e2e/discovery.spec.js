@@ -25,6 +25,13 @@ test("a reader can start with a principle or go directly to the featured case", 
   await expect(featured.getByText("Featured case · Preview", { exact: true })).toBeInViewport();
   await featured.getByRole("link", { name: "Read the reporting case" }).click();
   await expect(page).toHaveURL(/\/learn\/system-design\/chatgpt-ads-reporting$/);
+  const tracks = page.getByRole("navigation", { name: "Explore the case by track" });
+  await expect(tracks.getByRole("listitem")).toHaveCount(5);
+  await tracks.getByRole("link", { name: /AI engineering/ }).click();
+  await expect(page.getByRole("heading", { name: "Give an agent a bounded reporting tool" })).toBeInViewport();
+  await tracks.getByRole("link", { name: "Run the samples locally" }).click();
+  await expect(page.getByRole("heading", { name: "Try the report collector" })).toBeInViewport();
+  await expect(page.getByRole("link", { name: "Open run instructions for Local reporting CLI and MCP tool" })).toBeVisible();
 });
 
 test.describe("production discovery on a phone without JavaScript", () => {
@@ -44,8 +51,11 @@ test.describe("production discovery on a phone without JavaScript", () => {
     await expect(examples.getByRole("link", { name: "Open run instructions" }))
       .toHaveAttribute("href", /^https:\/\/github\.com\/ai-knowledge-hub\/ai-harness-lab\/blob\/[a-f0-9]{40}\/docs\/chatgpt-ads-reporting-collector\.md$/);
     await expect(page.getByRole("region", { name: "In development" }).getByRole("link")).toHaveCount(0);
-    await examples.getByRole("link", { name: "See how report batches are collected" }).click();
-    await expect(page).toHaveURL(/\/learn\/system-design\/chatgpt-ads-reporting#complete-retrieval$/);
-    await expect(page.getByRole("heading", { name: "Check that you have every batch" })).toBeInViewport();
+    await examples.getByRole("link", { name: "Handle an interrupted report" }).click();
+    await expect(page).toHaveURL(/\/learn\/system-design\/chatgpt-ads-reporting#application-result$/);
+    const section = page.getByRole("region", { name: "Show what your report is missing" });
+    await expect(section.getByRole("heading", { level: 2 })).toBeInViewport();
+    await section.getByRole("link", { name: "Explore Software & production" }).click();
+    await expect(page).toHaveURL(/\/learn\/software-production$/);
   });
 });

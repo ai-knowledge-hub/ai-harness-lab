@@ -35,6 +35,27 @@ function Contents({ sections }) {
   );
 }
 
+function ReferenceContext({ lessonId, label }) {
+  return (
+    <nav className="reference-context" aria-label="Reference context">
+      <p className="eyebrow">{label}</p>
+      <ol>
+        {referenceContext.map((item) => (
+          <li key={item.guideId}>
+            <Link
+              to={getLesson(item.guideId).path}
+              aria-current={item.guideId === lessonId ? "page" : undefined}
+            >
+              <strong>{item.label}</strong>
+              <span>{item.purpose}</span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
 function LessonBlock({ block, blockId }) {
   if (block.type === "ads-capabilities") return <AdsCapabilities />;
   if (block.type === "ads-orchestrator") return <AdsOrchestrator />;
@@ -146,8 +167,15 @@ export function LessonPage({ lesson }) {
   const relatedReading = publications.filter((item) => item.kind !== "case-study");
   const nextLink = learningContent.discovery.nextByGuide[lesson.id];
   const next = resolveDiscoveryLink(learningContent, nextLink);
+  const trackLinks = learningContent.discovery.caseTracks[lesson.id];
+  const caseTracks = tracks.filter((item) => trackLinks?.[item.slug]);
+  const caseTracksByAnchor = new Map(
+    caseTracks.map((item) => [trackLinks[item.slug].anchor, item]),
+  );
+  const hasReferenceContext = referenceContext.some((item) => item.guideId === lesson.id);
   const relatedGuides = lesson.relatedGuideIds
     .filter((id) => id !== nextLink?.id)
+    .filter((id) => !trackLinks || !hasReferenceContext || !referenceContext.some((item) => item.guideId === id))
     .map(getLesson);
   const capabilities = relatedContent(lesson, "capabilities", "capabilityIds");
   const platforms = relatedContent(lesson, "platforms", "platformIds");
@@ -191,15 +219,8 @@ export function LessonPage({ lesson }) {
             </div>
             <p className="lesson-lede">{lesson.introduction}</p>
           </header>
-          {referenceContext.some((item) => item.guideId === lesson.id) && (
-            <nav className="reference-context" aria-label="Reference context">
-              <p className="eyebrow">Read these guides in any order</p>
-              <ol>{referenceContext.map((item) => <li key={item.guideId}>
-                <Link to={getLesson(item.guideId).path} aria-current={item.guideId === lesson.id ? "page" : undefined}>
-                  <strong>{item.label}</strong><span>{item.purpose}</span>
-                </Link>
-              </li>)}</ol>
-            </nav>
+          {hasReferenceContext && !trackLinks && (
+            <ReferenceContext lessonId={lesson.id} label="Read these guides in any order" />
           )}
           <details className="lesson-mobile-contents">
             <summary>On this page</summary>
@@ -227,6 +248,24 @@ export function LessonPage({ lesson }) {
               </p>
             </div>
           </section>
+          {caseTracks.length > 0 && (
+            <nav className="reference-context case-track-nav" aria-labelledby="case-tracks-title">
+              <h2 id="case-tracks-title">Explore the case by track</h2>
+              <ol role="list">
+                {caseTracks.map((item) => (
+                  <li key={item.slug}>
+                    <a href={`#${trackLinks[item.slug].anchor}`}>
+                      <strong>{item.nav}</strong>
+                      <span>{trackLinks[item.slug].action}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+              {projects.some((project) => project.mode === "sample") && (
+                <a className="text-link" href="#try-the-collector">Run the samples locally</a>
+              )}
+            </nav>
+          )}
           {lesson.sections.map((section) => (
             <section
               className="lesson-section"
@@ -238,14 +277,12 @@ export function LessonPage({ lesson }) {
               {section.blocks.map((block, index) => (
                 <LessonBlock block={block} blockId={`${lesson.id}-${section.id}-${index}`} key={index} />
               ))}
+              {caseTracksByAnchor.has(section.id) && (
+                <Link className="text-link case-track-return" to={trackPath(caseTracksByAnchor.get(section.id))}>
+                  Explore {caseTracksByAnchor.get(section.id).nav}
+                </Link>
+              )}
             </section>
-          ))}
-          {caseStudies.map((publication) => (
-            <aside className="guide-case-study" aria-label="Supporting case study" key={publication.id}>
-              <p className="eyebrow">Supporting case study · Publication</p>
-              <h2><a href={publication.href}>{publication.title}</a></h2>
-              <p>{publication.relationship}</p>
-            </aside>
           ))}
           {next && (
             <section className="lesson-next" aria-labelledby="next-guide-title">
@@ -255,6 +292,16 @@ export function LessonPage({ lesson }) {
               <SiteLink href={next.href} className="text-link">{next.action}</SiteLink>
             </section>
           )}
+          {hasReferenceContext && trackLinks && (
+            <ReferenceContext lessonId={lesson.id} label="Guides and platform references" />
+          )}
+          {caseStudies.map((publication) => (
+            <aside className="guide-case-study" aria-label="Supporting case study" key={publication.id}>
+              <p className="eyebrow">Supporting case study · Publication</p>
+              <h2><a href={publication.href}>{publication.title}</a></h2>
+              <p>{publication.relationship}</p>
+            </aside>
+          ))}
           {relatedGuides.length > 0 && (
             <section className="lesson-related" aria-labelledby="related-guides-title">
               <p className="eyebrow">Where to go next</p>
@@ -325,7 +372,7 @@ export function LessonPage({ lesson }) {
             </section>
           )}
           {(projects.length > 0 || videos.length > 0) && (
-            <section className="lesson-next" aria-labelledby="lesson-next-title">
+            <section id="try-the-collector" className="lesson-next" aria-labelledby="lesson-next-title">
               <p className="eyebrow">Build on this</p>
               <h2 id="lesson-next-title">Try the report collector</h2>
               {projects.map((project) => (
@@ -342,7 +389,11 @@ export function LessonPage({ lesson }) {
                   </h3>
                   <p>{project.description}</p>
                   {project.status === "available" && (
-                    <SiteLink className="text-link" href={project.href}>
+                    <SiteLink
+                      className="text-link"
+                      href={project.href}
+                      aria-label={project.mode === "sample" ? `Open run instructions for ${project.title}` : undefined}
+                    >
                       {project.mode === "sample" ? "Open run instructions" : "Open the build"}
                     </SiteLink>
                   )}
