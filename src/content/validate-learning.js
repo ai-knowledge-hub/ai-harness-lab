@@ -1,7 +1,7 @@
 import { referenceContext } from "./reference-context";
 import { referenceDownloads } from "./reference-downloads";
 import { learningContent } from "./learning";
-import { discoveryGroups, resolveDiscoveryLink } from "./discovery";
+import { caseLinksForTrack, discoveryGroups, resolveDiscoveryLink } from "./discovery";
 import { tracks, labPath, controlPath } from "./site";
 
 export function validateLearningContent(content = learningContent) {
@@ -227,6 +227,20 @@ export function validateLearningContent(content = learningContent) {
         fail(`${label}: expected a different guide`);
       checkLink(label, next);
     }
+    for (const [id, trackLinks] of Object.entries(discovery.caseTracks ?? {})) {
+      const label = `discovery/cases/${id}`;
+      if (guideKind(id) !== "case") fail(`${label}: expected a worked case`);
+      const anchors = new Set();
+      for (const [trackId, link] of Object.entries(trackLinks ?? {})) {
+        const trackLabel = `${label}/${trackId}`;
+        if (!tracks.some((track) => track.slug === trackId)) fail(`${trackLabel}: unknown track`);
+        if (!text(link?.anchor) || anchors.has(link.anchor))
+          fail(`${trackLabel}: expected a distinct case section`);
+        anchors.add(link?.anchor);
+        if (!text(link?.description)) fail(`${trackLabel}: describe the track decision`);
+        checkLink(trackLabel, { ...link, kind: "guide", id });
+      }
+    }
     for (const [id, page] of Object.entries(discovery.tracks ?? {})) {
       const label = `discovery/tracks/${id}`;
       if (!tracks.some((track) => track.slug === id)) fail(`${label}: unknown track`);
@@ -241,12 +255,15 @@ export function validateLearningContent(content = learningContent) {
       const destinations = new Set(starter ? [starter.href] : []);
       const listedGuides = new Set(next?.kind === "guide" ? [next.id] : []);
       for (const [group] of discoveryGroups) {
-        if (page[group] === undefined) continue;
-        if (!Array.isArray(page[group])) {
+        if (page[group] !== undefined && !Array.isArray(page[group])) {
           fail(`${label}/${group}: expected a list`);
           continue;
         }
-        for (const link of page[group]) {
+        const links = [
+          ...(page[group] ?? []),
+          ...(group === "examples" ? caseLinksForTrack(discovery, id) : []),
+        ];
+        for (const link of links) {
           const resource = checkLink(`${label}/${group}`, link);
           if (resource && destinations.has(resource.href))
             fail(`${label}: repeated destination ${resource.href}`);

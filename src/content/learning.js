@@ -133,6 +133,15 @@ export const learningContent = {
       lessonIds: ["chatgpt-ads-reporting"],
     },
     {
+      id: "local-reporting-adapters",
+      title: "Local reporting CLI and MCP tool",
+      status: "available",
+      mode: "sample",
+      href: "https://github.com/ai-knowledge-hub/ai-harness-lab/blob/f8611ae47ff131acce392e90688ef421e41bf01e/docs/chatgpt-ads-reporting-adapters.md",
+      description: "Use Node.js 20.3 or later to run the CLI or connect a local MCP host. Both return the same report from fictional campaign data.",
+      lessonIds: ["chatgpt-ads-reporting"],
+    },
+    {
       id: "live-advertising-reporting",
       title: "Connect to a live account",
       status: "planned",

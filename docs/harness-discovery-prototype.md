@@ -18,6 +18,7 @@ Harness owns the engineering explanation and its reference artifacts. Publicatio
 ## Authoring
 
 - Keep the canonical guide and its existing `kind`, `trackId`, `path`, and `publicationStatus` in the guide registry. A case may have zero or more related platform records; its placement does not depend on a provider. Add a link from another track to the existing guide ID and optionally a section anchor.
+- For a worked case that spans tracks, add its guide ID to `discovery.caseTracks` and give each participating track a distinct section anchor, action, and description. This one mapping supplies the track's Worked examples link, the case's track navigation, and the link back from each section.
 - `src/content/discovery.js` declares the featured case, the pilot track methods and resource placements, and any recommended guide continuation. Resources refer to existing guide, lab, project, publication, or capability IDs. The renderer derives destinations and status from the source record. Context-specific descriptions are optional; use an action that tells readers what they will find.
 - For a pilot track, place each guide owned by that track in Start here or an appropriate group. Empty groups have no heading or navigation link. Planned work has no destination. A draft guide remains a linkable preview and stays out of the sitemap.
 - A local sample project is available in sample mode only. A documented provider API, a runnable fixture, and a verified live setup describe different things. The local report collector and the planned live build are separate records.
@@ -29,6 +30,8 @@ Run `pnpm dev` and open `/`, `/learn/system-design`, and `/learn/software-produc
 
 1. From the homepage, choose System design and find its starting method and API design guide. Follow the recommended next step from that guide to the reporting preview.
 2. From Software & production, open the lease queue lab. Return to the track, find the local collector instructions, and check how the page distinguishes sample execution from future deployment.
-3. Open the featured case directly from the homepage. On the production track, use the link to the specific section on report batches. Check that direct entry preserves the anchor and the owning-track breadcrumb.
+3. Open the featured case directly from the homepage. Follow the five track links into the contract, batch retrieval, recovery, measurement, and agent tool sections. Each section links back to its track, and the breadcrumb points to the case's owning track.
+
+The first example lives at `/learn/system-design/chatgpt-ads-reporting`. The planned `/examples` route remains available by direct link. It can enter the sitemap and navigation when it offers an index readers can use.
 
 Review at desktop and phone widths. The next design decision is whether the starting method and first action are clear at both widths before using the template for the remaining tracks.

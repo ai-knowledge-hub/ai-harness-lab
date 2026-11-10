@@ -32,14 +32,12 @@ export const tracks = [
     question: "Make the underlying logic visible.",
     description:
       "Implement the operations behind a useful integration: traverse pages, deduplicate records, aggregate metrics, rank results and coordinate work. Use reference code and visible state to inspect how a pattern behaves before adapting it.",
-    application:
-      "For ChatGPT Ads, this means retrieving the requested population and producing defensible totals. Reporting-specific code is planned; the existing visualizers provide references for the underlying operations.",
     short: "Search, ranking, scheduling, memory, and deterministic control.",
     availability: "Interactive visualizers",
     topics: [
       [
         "Retrieve the complete population",
-        "Follow continuations, detect repeated cursors and retain the reason a read stopped. Provider-specific reporting examples are planned.",
+        "Follow continuations, detect repeated cursors and retain the reason a read stopped.",
       ],
       [
         "Transform without losing meaning",
@@ -87,8 +85,6 @@ export const tracks = [
     question: "Make better decisions, then test their effect.",
     description:
       "Connect measurement, causal inference, prediction, and optimisation to growth decisions. Start with the objective and evidence needed to know whether an intervention helped.",
-    application:
-      "For ChatGPT Ads, begin with what the reporting metrics mean, which signals inform delivery and which comparison could establish additional business value. Platform-specific measurement and ML implementations are planned.",
     short: "Experiments, incrementality, prediction, and optimisation.",
     availability: "Scope & related analysis",
     topics: [
@@ -132,8 +128,6 @@ export const tracks = [
     question: "Build with agents. Build the systems around them.",
     description:
       "Use coding agents to build and verify integrations, then design the harness that lets agents operate them. Connect context, tools, memory, permissions and evaluation to a concrete workflow.",
-    application:
-      "For ChatGPT Ads, the first operational target is a reporting capability with explicit scope, completeness and failure semantics. Coding-agent walkthroughs and reporting CLI/MCP adapters are planned; the control-plane reference is available now.",
     short: "Coding agents, tools, memory, orchestration, and evaluation.",
     availability: "Reference pattern & labs",
     topics: [

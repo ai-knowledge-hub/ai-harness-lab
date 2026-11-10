@@ -41,7 +41,7 @@ The [local adapter guide](docs/chatgpt-ads-reporting-adapters.md) shows how to r
 | `/learn/algorithms/visualizers` | All 15 interactive visualizers |
 | `/learn/ai-engineering/control-plane` | Agent control-plane reference pattern |
 | `/algorithms`, `/patterns` | Compatibility redirects preserving query strings and anchors |
-| `/examples` | Retained planned case-study page |
+| `/examples` | Planned case index, available by direct URL |
 
 A direct visualizer link uses `?algorithm=<id>#visualizer`, for example `/learn/algorithms/visualizers?algorithm=tokenBucket#visualizer`. Browser history restores the selected algorithm. The anchor targets the working area, including on phones.
 
