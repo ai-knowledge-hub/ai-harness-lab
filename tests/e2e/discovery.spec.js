@@ -87,7 +87,14 @@ test("the new starting paths lead to working references on a phone", async ({ pa
   await page.getByRole("region", { name: "References" })
     .getByRole("link", { name: "Trace a report request through the control plane" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Agent Control Plane" })).toBeVisible();
-  await page.goBack();
+  await page.getByRole("link", { name: "Try the offline mock lab" }).click();
+  const mockLab = page.getByRole("region", { name: "Review evidence before approving an action" });
+  await expect(mockLab.getByRole("heading")).toBeInViewport();
+  await expect(mockLab.getByRole("link", { name: "View the Skills release manifest for 0.2.0" }))
+    .toHaveAttribute("href", "https://skills.ai-knowledge-hub.org/release-manifests/plugins/marketing/chatgpt-advertising-experiment-plugin/0.2.0.yaml");
+  await expect(mockLab.getByRole("link", { name: "try the separate Harness sample collector" }))
+    .toHaveAttribute("href", "/learn/system-design/chatgpt-ads-reporting#try-the-collector");
+  await page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "AI Engineering" }).click();
   await jump.getByRole("link", { name: "Worked examples" }).click();
   await page.getByRole("link", { name: "Step through an approval" }).click();
   await expect(page).toHaveURL(/algorithm=approval#visualizer$/);
