@@ -1,0 +1,85 @@
+{
+  "data_source": "synthetic",
+  "scope": {
+    "account_ref": "synthetic-uk-advertiser",
+    "currency": "GBP",
+    "time_zone": "Europe/London",
+    "start_date": "2026-11-01",
+    "end_date_exclusive": "2026-11-03",
+    "row_grain": "campaign_day",
+    "attribution": {
+      "attribution_window_days": 30,
+      "view_through_attribution_window_days": 1,
+      "attribution_time_basis": "ad_event_time"
+    }
+  },
+  "empty": {
+    "retrieved_at": "2026-11-03T09:00:00Z",
+    "pages": [
+      {
+        "after": null,
+        "response": { "data": [], "count": 0, "first_id": null, "last_id": null, "has_more": false }
+      }
+    ]
+  },
+  "initial": {
+    "retrieved_at": "2026-11-03T09:00:00Z",
+    "pages": [
+      {
+        "after": null,
+        "response": {
+          "data": [
+            { "id": "synthetic-row-1", "campaign_id": "synthetic-gift-guide", "readable_time": "2026-11-01", "impressions": 1200, "clicks": 36, "spend": 18.4, "conversions": 1 },
+            { "id": "synthetic-row-2", "campaign_id": "synthetic-gift-guide", "readable_time": "2026-11-02", "impressions": 800, "clicks": 20, "spend": 12.1, "conversions": 0 }
+          ],
+          "count": 2,
+          "first_id": "synthetic-row-1",
+          "last_id": "synthetic-row-2",
+          "has_more": true
+        }
+      },
+      {
+        "after": "synthetic-row-2",
+        "response": {
+          "data": [
+            { "id": "synthetic-row-3", "campaign_id": "synthetic-winter-offer", "readable_time": "2026-11-02", "impressions": 300, "clicks": 8, "spend": 5.5, "conversions": null }
+          ],
+          "count": 1,
+          "first_id": "synthetic-row-3",
+          "last_id": "synthetic-row-3",
+          "has_more": false
+        }
+      }
+    ]
+  },
+  "refreshed": {
+    "retrieved_at": "2026-11-05T09:00:00Z",
+    "pages": [
+      {
+        "after": null,
+        "response": {
+          "data": [
+            { "id": "synthetic-row-1", "campaign_id": "synthetic-gift-guide", "readable_time": "2026-11-01", "impressions": 1200, "clicks": 36, "spend": 18.4, "conversions": 2 },
+            { "id": "synthetic-row-2", "campaign_id": "synthetic-gift-guide", "readable_time": "2026-11-02", "impressions": 810, "clicks": 22, "spend": 12.4, "conversions": 0 }
+          ],
+          "count": 2,
+          "first_id": "synthetic-row-1",
+          "last_id": "synthetic-row-2",
+          "has_more": true
+        }
+      },
+      {
+        "after": "synthetic-row-2",
+        "response": {
+          "data": [
+            { "id": "synthetic-row-3", "campaign_id": "synthetic-winter-offer", "readable_time": "2026-11-02", "impressions": 300, "clicks": 8, "spend": 5.5, "conversions": 1 }
+          ],
+          "count": 1,
+          "first_id": "synthetic-row-3",
+          "last_id": "synthetic-row-3",
+          "has_more": false
+        }
+      }
+    ]
+  }
+}

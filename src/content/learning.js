@@ -3,9 +3,13 @@ import { chatgptAdsGuide } from "./lessons/chatgpt-ads";
 import { apiDesignLesson } from "./lessons/api-design";
 import { chatgptAdsApisGuide } from "./lessons/chatgpt-ads-apis";
 import { chatgptAdsReportingGuide } from "./lessons/chatgpt-ads-reporting";
-import { articleUrl } from "./site";
+import { attributionAndLiftGuide } from "./lessons/attribution-and-lift";
+import { verifySmallCodeChangeGuide } from "./lessons/verify-small-code-change";
+import { articleUrl, site } from "./site";
+import { discovery } from "./discovery";
 
 export const learningContent = {
+  discovery,
   concepts: [
     {
       id: "http-basics",
@@ -122,11 +126,30 @@ export const learningContent = {
   projects: [
     {
       id: "advertising-reporting",
-      title: "A report collector that can pick up where it left off",
+      title: "Local report collector",
+      status: "available",
+      mode: "sample",
+      href: "https://github.com/ai-knowledge-hub/ai-harness-lab/blob/fbddf8b079578848adc943b85b34d925c870ca34/docs/chatgpt-ads-reporting-collector.md",
+      description:
+        "Run the collector from a checkout with Node.js 20 or later. Compare a complete report with a partial run using fictional data. No account is needed.",
+      lessonIds: ["chatgpt-ads-reporting"],
+    },
+    {
+      id: "local-reporting-adapters",
+      title: "Local reporting CLI and MCP tool",
+      status: "available",
+      mode: "sample",
+      href: "https://github.com/ai-knowledge-hub/ai-harness-lab/blob/f8611ae47ff131acce392e90688ef421e41bf01e/docs/chatgpt-ads-reporting-adapters.md",
+      description: "Use Node.js 20.3 or later to run the CLI or connect a local MCP host. Both return the same report from fictional campaign data.",
+      lessonIds: ["chatgpt-ads-reporting"],
+    },
+    {
+      id: "live-advertising-reporting",
+      title: "Connect to a live account",
       status: "planned",
       href: null,
       description:
-        "A report collector you can try with sample data. A setup with a verified live account is planned separately.",
+        "A deployment walkthrough and verified account setup are in development.",
       lessonIds: ["chatgpt-ads-reporting"],
     },
   ],
@@ -148,6 +171,37 @@ export const learningContent = {
       relationship:
         "How software and AI agents use tools, and why each tool needs a clear job, rules and limits.",
     },
+    {
+      id: "secure-marketing-agents",
+      title: "Secure marketing agents",
+      href: articleUrl("building-secure-marketing-agents-ad-platform-authentication-architecture"),
+      relationship: "See how account permissions shape the boundary between a worker and the platform it calls.",
+    },
+    {
+      id: "deterministic-core",
+      title: "The Deterministic Core",
+      href: articleUrl("deterministic-core-algorithms-data-structures-marketing-agents"),
+      relationship: "See where software can give an agent a repeatable way to search, order, and check data.",
+    },
+    {
+      id: "geo-experiments",
+      title: "Measuring Ad Effectiveness Using Geo Experiments",
+      href: "https://research.google/pubs/measuring-ad-effectiveness-using-geo-experiments/",
+      kind: "research",
+      relationship: "Jon Vaver and Jim Koehler show how to compare regions where a campaign runs with regions where it is held back.",
+    },
+    {
+      id: "building-to-learn",
+      title: "Building to learn",
+      href: articleUrl("building-to-learn-agentic-marketing-optimization"),
+      relationship: "Follow the decisions and trade-offs in a marketing optimisation prototype.",
+    },
+    {
+      id: "code-agent-playbook",
+      title: "The Code Agent’s Playbook · Check a change and evaluate the agent",
+      href: `${articleUrl("agent-maintenance-security-harness")}#separate-validation-of-a-change-from-evaluation-of-the-maintainer`,
+      relationship: "See how an independent check supports a review and how to measure an agent’s reliability across different tasks.",
+    },
   ],
   capabilities: [
     {
@@ -156,6 +210,18 @@ export const learningContent = {
       href: "https://skills.ai-knowledge-hub.org/skills/security/ad-platform-agent-auth-review",
       relationship:
         "A guide in Skills for reviewing how an agent gets permission to use an ad account.",
+    },
+    {
+      id: "code-maintenance",
+      title: "Code Maintenance Plugin",
+      href: `${site.skills}/plugins/engineering/code-maintenance-plugin`,
+      relationship: "Run the local example to turn a proposed code change into a plan with verification steps.",
+    },
+    {
+      id: "harness-governance",
+      title: "Harness Governance Plugin",
+      href: `${site.skills}/plugins/agentops/harness-governance-plugin`,
+      relationship: "Run the local example to record how you would evaluate a change to the rules and tools around an agent before adopting it.",
     },
   ],
   videos: [
@@ -166,7 +232,7 @@ export const learningContent = {
       href: null,
     },
   ],
-  lessons: [advertisingPlatformsGuide, chatgptAdsGuide, chatgptAdsApisGuide, apiDesignLesson, chatgptAdsReportingGuide],
+  lessons: [advertisingPlatformsGuide, chatgptAdsGuide, chatgptAdsApisGuide, apiDesignLesson, chatgptAdsReportingGuide, attributionAndLiftGuide, verifySmallCodeChangeGuide],
 };
 
 export const lessons = learningContent.lessons;
@@ -175,8 +241,6 @@ export const normalizePath = (path) =>
   path === "/" ? path : path.replace(/\/+$/, "");
 export const getLessonByPath = (path) =>
   lessons.find((lesson) => lesson.path === normalizePath(path));
-export const lessonsForTrack = (trackId) =>
-  lessons.filter((lesson) => lesson.trackId === trackId);
 export function relatedContent(lesson, collection, field) {
   return lesson[field].map((id) =>
     learningContent[collection].find((item) => item.id === id),

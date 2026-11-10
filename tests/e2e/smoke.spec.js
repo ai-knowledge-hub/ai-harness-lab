@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test("homepage and algorithms route load", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("main")).toContainText(
-    /build the systems behind ai-powered growth/i,
+    /build and operate ai products/i,
   );
 
   await page.goto("/algorithms");
@@ -31,30 +31,42 @@ test("five tracks connect to the existing labs and preserve deep links", async (
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
   const navigation = page.locator(".desktop-navigation");
-  for (const [label, title] of [
-    ["System design", "Platforms & System Design"],
-    ["Algorithms & data", "Algorithms & Data"],
-    ["Software & production", "Software Design & Production"],
-    ["Measurement & ML", "Measurement & ML"],
-    ["AI engineering", "AI Engineering & Harnesses"],
+  for (const [label, title, slug, caseAction, caseHeading] of [
+    ["System design", "System design", "system-design", "Define the report contract", "Decide what the report should cover"],
+    ["Algorithms & data", "Algorithms & Data", "algorithms", "Check that you have every batch", "Check that you have every batch"],
+    ["Software & production", "Software & production", "software-production", "Handle an interrupted report", "Show what your report is missing"],
+    ["Measurement & ML", "Measurement & ML", "measurement-ml", "Interpret credited conversions", "Interpret credited conversions"],
+    ["AI engineering", "AI Engineering & Harnesses", "ai-engineering", "Give an agent a bounded reporting tool", "Give an agent a bounded reporting tool"],
   ]) {
     await navigation.getByRole("link", { name: label, exact: true }).click();
     await expect(
       page.getByRole("heading", { level: 1, name: title, exact: true }),
     ).toBeVisible();
+    await expect(page.getByRole("region", { name: "Start here" })).toBeVisible();
     await expect(
       navigation.getByRole("link", { name: label, exact: true }),
     ).toHaveAttribute("aria-current", "page");
-    if (label !== "System design") {
-      await page.getByRole("link", { name: "Follow the ChatGPT Ads workflow" }).click();
-      await expect(page.getByRole("heading", { name: "One platform across five tracks" })).toBeInViewport();
-    }
+    await page.getByRole("region", { name: "Worked examples" })
+      .getByRole("link", { name: caseAction, exact: true }).click();
+    await expect(page).toHaveURL(/\/learn\/system-design\/chatgpt-ads-reporting#/);
+    const section = page.getByRole("region", { name: caseHeading, exact: true });
+    await expect(section.getByRole("heading", { level: 2 })).toBeInViewport();
+    await section.getByRole("link", { name: `Explore ${label}`, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/learn/${slug}$`));
   }
   await navigation
     .getByRole("link", { name: "Algorithms & data", exact: true })
     .click();
-  await page
-    .locator(".algorithm-index-list")
+  const visualizers = page.getByRole("region", { name: "Choose a visualizer" });
+  await expect(visualizers.getByRole("heading", { level: 3 })).toHaveCount(4);
+  await expect(visualizers.getByRole("link", { name: "Open all 15 labs" }))
+    .toHaveAttribute("href", "/learn/algorithms/visualizers");
+  await expect(visualizers.locator('a[href$="#visualizer"]')).toHaveCount(15);
+  await page.getByRole("region", { name: "Start here" })
+    .getByRole("link", { name: "Try the top-three campaign lab" }).click();
+  await expect(page).toHaveURL(/algorithm=heap#visualizer$/);
+  await page.goBack();
+  await visualizers
     .getByRole("link", { name: /Dijkstra/ })
     .click();
   await expect(page).toHaveURL(/algorithm=dijkstra#visualizer/);
@@ -240,7 +252,7 @@ test("repeated navigation returns to the same tracks anchor", async ({
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
   const tracksHeading = page.getByRole("heading", {
-    name: "Five tracks. One connected practice.",
+    name: "Engineering tracks",
   });
   await page
     .getByRole("link", { name: "Explore the tracks", exact: true })
@@ -366,6 +378,7 @@ test("the guide is readable as static HTML without JavaScript", async ({
     );
     expect(sitemapText).toContain("/learn/system-design/api-design");
     expect(sitemapText).not.toContain("/learn/system-design/chatgpt-ads-reporting");
+    expect(sitemapText).not.toContain("/examples");
     for (const [slug, title] of [
       ["advertising-platforms", "How advertising platforms work"],
       ["chatgpt-ads", "How ChatGPT Ads works"],
@@ -375,9 +388,12 @@ test("the guide is readable as static HTML without JavaScript", async ({
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "index, follow");
       await expect(page.locator(".source-citation").first()).toBeVisible();
-      await expect(page.locator(".lesson-next")).toHaveCount(0);
+      await expect(page.locator("#try-the-collector")).toHaveCount(0);
       expect(sitemapText).toContain(`/learn/system-design/${slug}`);
       if (slug === "chatgpt-ads") {
+        await expect(page.locator("#across-five-tracks")).toHaveCount(1);
+        await expect(page.getByRole("link", { name: "Read the reporting case" }))
+          .toHaveAttribute("href", "/learn/system-design/chatgpt-ads-reporting");
         await expect(page.getByRole("region", { name: "Architecture diagram" })).toBeVisible();
         await expect(page.locator('.ads-node[data-node="worker"]')).toContainText("Harness · proposed");
         await expect(page.locator(".ads-stage-copy")).toHaveCount(5);
@@ -469,7 +485,8 @@ test("guide navigation, hydration, saved theme and metadata stay coherent", asyn
     .click();
   await page
     .getByRole("link", {
-      name: /Platform overview.*How advertising platforms work/,
+      name: "Read the platform overview",
+      exact: true,
     })
     .click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("How advertising platforms work");

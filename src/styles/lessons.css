@@ -301,6 +301,9 @@ html:has(.lesson-page) {
 .lesson-next p {
   font-size: 16px;
 }
+.lesson-project + .lesson-project {
+  margin-top: 26px;
+}
 .lesson-next .lesson-video-note {
   margin-top: 18px;
   font-size: 14px;
@@ -448,7 +451,6 @@ html:has(.lesson-page) {
 }
 @media (max-width: 640px) {
   .guide-case-study { padding: 20px; }
-  .track-resources { margin-top: 48px; }
 }
 .lesson-table-wide .lesson-table {
   min-width: 620px;
@@ -477,6 +479,22 @@ html:has(.lesson-page) {
 .reference-context strong { color: var(--text); font-weight: 400; margin-bottom: 6px; }
 .reference-context a[aria-current="page"] strong { text-decoration: underline; text-underline-offset: 5px; font-weight: 700; }
 .reference-context a:hover strong { text-decoration: underline; text-underline-offset: 5px; }
+.case-track-nav h2 {
+  font-size: clamp(21px, 2.4vw, 27px);
+}
+.case-track-nav ol {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.case-track-nav strong {
+  font-weight: 700;
+}
+.case-track-nav > .text-link {
+  display: inline-flex;
+  margin-top: 8px;
+}
+.case-track-return {
+  margin-top: 16px;
+}
 .reference-small, .lesson-section .reference-small { font-size: 14px; line-height: 1.7; color: var(--muted); }
 .reference-provenance { display: block; color: var(--muted); font-size: 12px; line-height: 1.7; }
 .reference-definitions { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 3fr); gap: 14px 24px; font-size: 15px; line-height: 1.7; margin-block: 24px; }
@@ -503,7 +521,6 @@ html:has(.lesson-page) {
 .orchestrator-flow { display: grid; grid-template-columns: minmax(0, 1fr) 50px minmax(0, 1fr); align-items: center; gap: 16px; margin-block: 22px; }
 .orchestrator-flow > span { border-block: 1px solid var(--line-strong); padding: 18px 0; font-size: 17px; line-height: 1.5; }
 .orchestrator-flow svg { width: 100%; }
-.track-lessons + .track-lessons { margin-top: 52px; }
 @media (max-width: 640px) {
   .reference-context ol { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 14px; }
   .reference-definitions { grid-template-columns: 1fr; gap: 6px; }
@@ -511,4 +528,82 @@ html:has(.lesson-page) {
   .orchestrator-flow { grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr); gap: 10px; }
   .orchestrator-flow > span { font-size: 15px; }
   .orchestrator-views summary { font-size: 18px; }
+}
+
+.report-reference > h3 {
+  margin-block: 12px;
+  font-size: 22px;
+}
+.report-reference p {
+  max-width: 70ch;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.report-example-list {
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.report-example-list details {
+  border-bottom: 1px solid var(--line);
+}
+.report-example-list summary {
+  padding: 16px 12px;
+}
+.report-example-list summary:hover,
+.report-example-list details[open] > summary {
+  background: var(--surface);
+}
+.report-example-list summary strong {
+  font-size: 17px;
+}
+.report-example-list summary span {
+  display: block;
+  margin: 4px 0 0 17px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.report-example-body {
+  padding: 18px 12px 22px;
+}
+.report-example-body h4 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.report-example-body p + h4,
+.report-example-body p + p {
+  margin-top: 16px;
+}
+.report-example-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  margin-block: 18px;
+}
+.report-example-facts dt {
+  color: var(--muted);
+  font-size: 14px;
+}
+.report-example-facts dd {
+  margin: 6px 0 0;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.report-example-comparison {
+  width: 100%;
+  margin-block: 18px;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+}
+.report-example-comparison caption {
+  margin-bottom: 6px;
+  color: var(--muted);
+  text-align: left;
+}
+.report-example-comparison th,
+.report-example-comparison td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
 }

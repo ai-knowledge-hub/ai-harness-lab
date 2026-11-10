@@ -27,7 +27,7 @@ Cross-track relevance creates relationships, not copies of the guide. A reusable
 
 A guide defines `id`, `path`, `title`, optional `shortTitle`, `description`, `trackId`, `kind`, `publicationStatus`, `format`, `readingMinutes`, `updatedAt`, `introduction`, `objectives`, `prerequisiteConceptIds`, `conceptIds`, `projectIds`, `platformIds`, `publicationIds`, `capabilityIds`, `videoIds`, `relatedGuideIds`, and ordered `sections`.
 
-Canonical paths use `/learn/<trackId>/<lessonId>`. A section has a stable `id`, `title`, and blocks. Current prose block types are paragraph, list, callout, code, flow and table. Closed visual blocks are `ads-architecture`, `ads-orchestrator` and `ads-capabilities`; `reference-downloads` selects a known collection from `src/content/reference-downloads.js`. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
+Canonical paths use `/learn/<trackId>/<lessonId>`. A section has a stable `id`, `title`, and blocks. Current prose block types are paragraph, list, callout, code, flow and table. Closed visual blocks are `ads-architecture`, `ads-orchestrator`, `ads-capabilities` and `ads-reporting-reference`. The `reference-downloads` block selects a known collection from `src/content/reference-downloads.js`. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
 
 Supported lifecycle rules:
 
@@ -55,6 +55,8 @@ The client hydrates a matching canonical page. Query-selected algorithms and leg
 The site remains a static deployment with the existing Vercel filesystem-first rewrite fallback. `cleanUrls: true` serves extensionless HTML paths. The build emits flat HTML and directory-index copies so the canonical path and its trailing-slash form work in static previews. Vercel routing has been checked against its configuration documentation, not a deployment; deployment itself is outside this slice.
 
 ## Platform references and supporting cases
+
+See [Harness discovery prototype](harness-discovery-prototype.md) for the page roles, pilot track placement rules, and local review paths. The pilot uses guide IDs and section anchors for navigation without changing canonical guide routes.
 
 Each guide declares a `kind`: overview, platform, capabilities, principle or case. The track groups platform references, reusable principles and implementation cases, preserving registry order inside each group. `reference-context.js` defines the small workflow navigation shared by the current principles, platform, public-capability and reporting-case pages. Extend it deliberately when another case is added; do not copy provider details back into the reusable principles. `relatedGuideIds` resolve to canonical guide records and are validated with other relationships. Paragraph blocks may include a `source` with an HTTPS `href` and descriptive `title`; the reader renders it beside the claim.
 

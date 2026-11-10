@@ -80,13 +80,7 @@ export const chatgptAdsGuide = {
       id: "across-five-tracks",
       title: "One platform across five tracks",
       blocks: [
-        { type: "table", columns: ["Track", "Practical focus", "Current starting point"], rows: [
-          ["Platforms & System Design", "See how ads are shown and what advertisers can measure.", "This guide, the advertiser APIs, design principles and the reporting example."],
-          ["Algorithms & Data", "Collect every batch, remove duplicates and total the results by campaign and date.", "Explore the visualizers. Reporting examples are planned."],
-          ["Software Design & Production", "Schedule report collection, pick up after interruptions and flag missing data.", "Read the track guide. A report collector is planned."],
-          ["Measurement & ML", "Understand what the numbers measure and test whether a change helped.", "Read the track guide. ChatGPT Ads measurement examples are planned."],
-          ["AI Engineering & Harnesses", "Use AI coding tools to build the connection and give agents specific tasks they have permission to run.", "See how to set rules and permissions for agents. Agent reporting tools are planned."],
-        ] },
+        { type: "paragraph", text: "The worked reporting case takes one request for daily campaign spend through the five tracks. It covers the contract, batch retrieval, recovery, interpretation, and how an agent can use the result." },
       ],
     },
   ],

@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { tracks, trackPath } from "../content/site";
-import { getLesson, relatedContent } from "../content/learning";
+import { getLesson, learningContent, relatedContent } from "../content/learning";
+import { resolveDiscoveryLink } from "../content/discovery";
 import { ChatGPTAdsArchitecture } from "../components/ChatGPTAdsArchitecture";
 import { AdsCapabilities, ReferenceDownloads } from "../components/AdsReference";
 import { AdsOrchestrator } from "../components/AdsOrchestrator";
+import { AdsReportingReference } from "../components/AdsReportingReference";
 import { referenceContext } from "../content/reference-context";
 import { SiteLink } from "../components/SiteLink";
 
@@ -33,9 +35,31 @@ function Contents({ sections }) {
   );
 }
 
+function ReferenceContext({ lessonId, label }) {
+  return (
+    <nav className="reference-context" aria-label="Reference context">
+      <p className="eyebrow">{label}</p>
+      <ol>
+        {referenceContext.map((item) => (
+          <li key={item.guideId}>
+            <Link
+              to={getLesson(item.guideId).path}
+              aria-current={item.guideId === lessonId ? "page" : undefined}
+            >
+              <strong>{item.label}</strong>
+              <span>{item.purpose}</span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
 function LessonBlock({ block, blockId }) {
   if (block.type === "ads-capabilities") return <AdsCapabilities />;
   if (block.type === "ads-orchestrator") return <AdsOrchestrator />;
+  if (block.type === "ads-reporting-reference") return <AdsReportingReference id={blockId} />;
   if (block.type === "reference-downloads") return <ReferenceDownloads collection={block.collection} />;
   if (block.type === "ads-architecture") return <ChatGPTAdsArchitecture id={blockId} />;
   if (block.type === "paragraph")
@@ -141,7 +165,18 @@ export function LessonPage({ lesson }) {
   const publications = relatedContent(lesson, "publications", "publicationIds");
   const caseStudies = publications.filter((item) => item.kind === "case-study");
   const relatedReading = publications.filter((item) => item.kind !== "case-study");
-  const relatedGuides = lesson.relatedGuideIds.map(getLesson);
+  const nextLink = learningContent.discovery.nextByGuide[lesson.id];
+  const next = resolveDiscoveryLink(learningContent, nextLink);
+  const trackLinks = learningContent.discovery.caseTracks[lesson.id];
+  const caseTracks = tracks.filter((item) => trackLinks?.[item.slug]);
+  const caseTracksByAnchor = new Map(
+    caseTracks.map((item) => [trackLinks[item.slug].anchor, item]),
+  );
+  const hasReferenceContext = referenceContext.some((item) => item.guideId === lesson.id);
+  const relatedGuides = lesson.relatedGuideIds
+    .filter((id) => id !== nextLink?.id)
+    .filter((id) => !trackLinks || !hasReferenceContext || !referenceContext.some((item) => item.guideId === id))
+    .map(getLesson);
   const capabilities = relatedContent(lesson, "capabilities", "capabilityIds");
   const platforms = relatedContent(lesson, "platforms", "platformIds");
   const videos = relatedContent(lesson, "videos", "videoIds");
@@ -184,15 +219,8 @@ export function LessonPage({ lesson }) {
             </div>
             <p className="lesson-lede">{lesson.introduction}</p>
           </header>
-          {referenceContext.some((item) => item.guideId === lesson.id) && (
-            <nav className="reference-context" aria-label="Reference context">
-              <p className="eyebrow">Read these guides in any order</p>
-              <ol>{referenceContext.map((item) => <li key={item.guideId}>
-                <Link to={getLesson(item.guideId).path} aria-current={item.guideId === lesson.id ? "page" : undefined}>
-                  <strong>{item.label}</strong><span>{item.purpose}</span>
-                </Link>
-              </li>)}</ol>
-            </nav>
+          {hasReferenceContext && !trackLinks && (
+            <ReferenceContext lessonId={lesson.id} label="Read these guides in any order" />
           )}
           <details className="lesson-mobile-contents">
             <summary>On this page</summary>
@@ -220,6 +248,24 @@ export function LessonPage({ lesson }) {
               </p>
             </div>
           </section>
+          {caseTracks.length > 0 && (
+            <nav className="reference-context case-track-nav" aria-labelledby="case-tracks-title">
+              <h2 id="case-tracks-title">Explore the case by track</h2>
+              <ol role="list">
+                {caseTracks.map((item) => (
+                  <li key={item.slug}>
+                    <a href={`#${trackLinks[item.slug].anchor}`}>
+                      <strong>{item.nav}</strong>
+                      <span>{trackLinks[item.slug].action}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+              {projects.some((project) => project.mode === "sample") && (
+                <a className="text-link" href="#try-the-collector">Run the samples locally</a>
+              )}
+            </nav>
+          )}
           {lesson.sections.map((section) => (
             <section
               className="lesson-section"
@@ -231,8 +277,24 @@ export function LessonPage({ lesson }) {
               {section.blocks.map((block, index) => (
                 <LessonBlock block={block} blockId={`${lesson.id}-${section.id}-${index}`} key={index} />
               ))}
+              {caseTracksByAnchor.has(section.id) && (
+                <Link className="text-link case-track-return" to={trackPath(caseTracksByAnchor.get(section.id))}>
+                  Explore {caseTracksByAnchor.get(section.id).nav}
+                </Link>
+              )}
             </section>
           ))}
+          {next && (
+            <section className="lesson-next" aria-labelledby="next-guide-title">
+              <p className="eyebrow">Next · {next.label}</p>
+              <h2 id="next-guide-title">{next.title}</h2>
+              <p>{next.description}</p>
+              <SiteLink href={next.href} className="text-link">{next.action}</SiteLink>
+            </section>
+          )}
+          {hasReferenceContext && trackLinks && (
+            <ReferenceContext lessonId={lesson.id} label="Guides and platform references" />
+          )}
           {caseStudies.map((publication) => (
             <aside className="guide-case-study" aria-label="Supporting case study" key={publication.id}>
               <p className="eyebrow">Supporting case study · Publication</p>
@@ -310,26 +372,30 @@ export function LessonPage({ lesson }) {
             </section>
           )}
           {(projects.length > 0 || videos.length > 0) && (
-            <section className="lesson-next" aria-labelledby="lesson-next-title">
+            <section id="try-the-collector" className="lesson-next" aria-labelledby="lesson-next-title">
               <p className="eyebrow">Build on this</p>
-              <h2 id="lesson-next-title">
-                Build a report collector
-              </h2>
+              <h2 id="lesson-next-title">Try the report collector</h2>
               {projects.map((project) => (
-                <div key={project.id}>
+                <div className="lesson-project" key={project.id}>
                   <h3>
                     {project.title}{" "}
                     <span className="resource-kind">
                       {project.status === "planned"
                         ? "Planned build"
-                        : "Available build"}
+                        : project.mode === "sample"
+                          ? "Run locally · Sample data"
+                          : "Available build"}
                     </span>
                   </h3>
                   <p>{project.description}</p>
                   {project.status === "available" && (
-                    <a className="text-link" href={project.href}>
-                      Open the build
-                    </a>
+                    <SiteLink
+                      className="text-link"
+                      href={project.href}
+                      aria-label={project.mode === "sample" ? `Open run instructions for ${project.title}` : undefined}
+                    >
+                      {project.mode === "sample" ? "Open run instructions" : "Open the build"}
+                    </SiteLink>
                   )}
                 </div>
               ))}
