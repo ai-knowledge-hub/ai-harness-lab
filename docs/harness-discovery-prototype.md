@@ -15,6 +15,8 @@ Harness is a practical reference for people building and operating AI products. 
 
 Harness owns the engineering explanation and its reference artifacts. Publication owns research, evidence, and domain context. Skills owns reusable packages and their versions, setup, and evidence of availability. Use curated links with a reason to follow them. Prefer a specific article or module for a concrete decision; use category links for broader context. The sites build independently.
 
+See the [Publication link and guide discovery map](publication-lens-discovery.md) for proposed paths and gaps in Enterprise software, Measurement & ML, and AI Engineering.
+
 ## Authoring
 
 - Keep the canonical guide and its existing `kind`, `trackId`, `path`, and `publicationStatus` in the guide registry. A case may have zero or more related platform records; its placement does not depend on a provider. Add a link from another track to the existing guide ID and optionally a section anchor.
