@@ -36,11 +36,11 @@ Supported lifecycle rules:
 - Platforms distinguish `research-planned`, `documented`, and `account-verified`, plus `unverified`, `verified`, or `unavailable` account access. Source review alone does not establish account access.
 - Publication and capability links are curated reference relationships, not claims that an article's example and a package are identical or that an integration has been deployed.
 
-To add a guide, add its authored data and registry relationships, then run `pnpm check`. The track index and route catalogue derive guide discovery from the registry. Do not add a navigation entry pointing to a future guide.
+To add a guide, create a `.ts` file in `src/content/lessons/` and declare the record with `satisfies Guide` from `src/content/guide-types.ts`. Add its registry and discovery relationships, then run `pnpm check`. The track index and route catalogue derive guide discovery from the registry. Do not add a navigation entry pointing to a future guide.
 
 ## Validation
 
-`validateLearningContent` checks IDs, paths, track membership, relationship targets, metadata, objectives, sections, anchors, block shapes and lifecycle consistency. The production build invokes it and fails on invalid content. Failure cases have unit coverage.
+TypeScript checks guide and block shapes during authoring. `validateLearningContent` checks IDs, paths, track membership, relationship targets, metadata, objectives, sections, anchors, block shapes and lifecycle consistency. The production build invokes it and fails on invalid content. Failure cases have unit coverage.
 
 Current validation is structural. It does not establish the accuracy of an external article, API compatibility, permissions, causal conclusions, or actual account availability. Those require source and implementation review.
 

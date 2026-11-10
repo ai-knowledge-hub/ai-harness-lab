@@ -12,7 +12,8 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "check": "pnpm test:run && pnpm build"
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm typecheck && pnpm test:run && pnpm build"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
@@ -26,11 +27,13 @@
     "@playwright/test": "^1.55.0",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
+    "@types/react": "19.2",
     "@vitejs/plugin-react": "^5.0.0",
     "@vitest/coverage-v8": "^3.2.4",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "jsdom": "^26.1.0",
+    "typescript": "6.0.3",
     "vite": "^7.0.0",
     "vitest": "^3.2.4",
     "zod": "4.6.7"

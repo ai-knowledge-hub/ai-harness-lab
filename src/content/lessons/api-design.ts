@@ -1,3 +1,5 @@
+import type { Guide } from "../guide-types";
+
 export const apiDesignLesson = {
   id: "api-design",
   path: "/learn/system-design/api-design",
@@ -54,4 +56,4 @@ export const apiDesignLesson = {
       { type: "callout", title: "Find the API you need", text: "Use the advertiser API guide to find the right tool. Open the reporting example for a sample request. The platform guide explains how ads are chosen, shown and measured." },
     ] },
   ],
-};
+} satisfies Guide;

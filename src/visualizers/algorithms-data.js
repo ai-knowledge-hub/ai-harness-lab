@@ -1,17 +1,6 @@
+import { binarySearch } from "./binary-search";
+
 const code = {
-  binary: [
-    "def find_threshold_date(series, target):",
-    "    lo, hi = 0, len(series) - 1",
-    "    result = None",
-    "    while lo <= hi:",
-    "        mid = (lo + hi) // 2",
-    "        if series[mid].value >= target:",
-    "            result = series[mid]",
-    "            hi = mid - 1",
-    "        else:",
-    "            lo = mid + 1",
-    "    return result",
-  ],
   bfs: [
     "queue = deque([(start_url, 0)])",
     "seen.add(start_url)",
@@ -268,27 +257,7 @@ export const operations = [
 ];
 
 const algorithmItems = [
-  {
-    id: "binary",
-    title: "Binary Search",
-    operation: "Find",
-    short: "Campaign threshold finder",
-    complexity: "O(log n)",
-    summary:
-      "Find the first day a sorted campaign metric crosses a target without scanning every row.",
-    agentUse:
-      "A skill or MCP endpoint can answer threshold questions over long time series without spending tokens or API time on a full scan.",
-    code: code.binary,
-    steps: [
-      { line: 1, label: "Initial bounds", note: "The CPA series is sorted by date. We start with the full window and target 6.00.", lo: 0, hi: 6, mid: null, result: null },
-      { line: 5, label: "Check middle", note: "The middle value is 5.80, still below the target, so the breach must be to the right.", lo: 0, hi: 6, mid: 3, result: null },
-      { line: 10, label: "Move right", note: "Discard the earlier half. The search window now covers 2026-03-05 to 2026-03-07.", lo: 4, hi: 6, mid: null, result: null },
-      { line: 5, label: "Check middle", note: "The middle value is 7.40, which crosses the target. Store it, then keep searching earlier.", lo: 4, hi: 6, mid: 5, result: 5 },
-      { line: 8, label: "Tighten left", note: "Move the high pointer left to test whether the breach happened before 2026-03-06.", lo: 4, hi: 4, mid: null, result: 5 },
-      { line: 5, label: "Earliest breach", note: "2026-03-05 is 6.25, also above target. It becomes the earliest known breach.", lo: 4, hi: 4, mid: 4, result: 4 },
-      { line: 11, label: "Return", note: "The first threshold crossing is 2026-03-05.", lo: 4, hi: 3, mid: null, result: 4 },
-    ],
-  },
+  binarySearch,
   {
     id: "bfs",
     title: "BFS",

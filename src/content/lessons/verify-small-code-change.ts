@@ -1,3 +1,4 @@
+import type { Guide } from "../guide-types";
 import { site } from "../site";
 
 export const verifySmallCodeChangeGuide = {
@@ -110,4 +111,4 @@ export const verifySmallCodeChangeGuide = {
       ],
     },
   ],
-};
+} satisfies Guide;
