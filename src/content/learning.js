@@ -4,6 +4,7 @@ import { apiDesignLesson } from "./lessons/api-design";
 import { chatgptAdsApisGuide } from "./lessons/chatgpt-ads-apis";
 import { chatgptAdsReportingGuide } from "./lessons/chatgpt-ads-reporting";
 import { attributionAndLiftGuide } from "./lessons/attribution-and-lift";
+import { verifySmallCodeChangeGuide } from "./lessons/verify-small-code-change";
 import { articleUrl, site } from "./site";
 import { discovery } from "./discovery";
 
@@ -195,6 +196,12 @@ export const learningContent = {
       href: articleUrl("building-to-learn-agentic-marketing-optimization"),
       relationship: "Follow the decisions and trade-offs in a marketing optimisation prototype.",
     },
+    {
+      id: "code-agent-playbook",
+      title: "The Code Agent’s Playbook · Check a change and evaluate the agent",
+      href: `${articleUrl("agent-maintenance-security-harness")}#separate-validation-of-a-change-from-evaluation-of-the-maintainer`,
+      relationship: "See how an independent check supports a review and how to measure an agent’s reliability across different tasks.",
+    },
   ],
   capabilities: [
     {
@@ -225,7 +232,7 @@ export const learningContent = {
       href: null,
     },
   ],
-  lessons: [advertisingPlatformsGuide, chatgptAdsGuide, chatgptAdsApisGuide, apiDesignLesson, chatgptAdsReportingGuide, attributionAndLiftGuide],
+  lessons: [advertisingPlatformsGuide, chatgptAdsGuide, chatgptAdsApisGuide, apiDesignLesson, chatgptAdsReportingGuide, attributionAndLiftGuide, verifySmallCodeChangeGuide],
 };
 
 export const lessons = learningContent.lessons;

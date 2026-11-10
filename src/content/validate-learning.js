@@ -211,7 +211,7 @@ export function validateLearningContent(content = learningContent) {
     const groupRoles = {
       guides: ["principle"],
       examples: ["case", "project", "lab"],
-      references: ["overview", "platform", "capabilities", "publication", "capability"],
+      references: ["overview", "platform", "capabilities", "pattern", "publication", "capability"],
     };
     const checkLink = (label, link) => {
       const resolved = resolveDiscoveryLink(content, link);

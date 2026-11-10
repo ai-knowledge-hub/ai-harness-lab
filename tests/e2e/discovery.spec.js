@@ -77,7 +77,15 @@ test("the new starting paths lead to working references on a phone", async ({ pa
   await page.goto("/learn/ai-engineering");
   await expect(start.getByText("Use an agent to build software.", { exact: true })).toBeVisible();
   await expect(start.getByText("Design a system for an agent to operate.", { exact: true })).toBeVisible();
-  await start.getByRole("link", { name: "Trace a report request through the control plane" }).click();
+  await start.getByRole("link", { name: "Verify a small code change with an agent" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Verify a small code change with an agent" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /The Code Agent’s Playbook/ }))
+    .toHaveAttribute("href", "https://ai-knowledge-hub.org/library/agent-maintenance-security-harness/#separate-validation-of-a-change-from-evaluation-of-the-maintainer");
+  await expect(page.getByRole("link", { name: "Download Code Maintenance Plugin 0.2.0 from Skills" }))
+    .toHaveAttribute("href", "https://skills.ai-knowledge-hub.org/artifacts/engineering/code-maintenance-plugin/0.2.0.tar.gz");
+  await page.getByRole("navigation", { name: "Breadcrumb" }).getByRole("link", { name: "AI engineering" }).click();
+  await page.getByRole("region", { name: "References" })
+    .getByRole("link", { name: "Trace a report request through the control plane" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Agent Control Plane" })).toBeVisible();
   await page.goBack();
   await jump.getByRole("link", { name: "Worked examples" }).click();
