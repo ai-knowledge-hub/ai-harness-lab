@@ -5,8 +5,7 @@ type SourceCitation = {
   href: string;
 };
 
-export type GuideBlock = { source?: SourceCitation } & (
-  | { type: "paragraph"; text: string }
+type BlockWithoutSource =
   | { type: "list"; items: string[] }
   | { type: "callout"; title: string; text: string }
   | { type: "code"; label: string; language: string; code: string }
@@ -16,8 +15,11 @@ export type GuideBlock = { source?: SourceCitation } & (
   | { type: "ads-orchestrator" }
   | { type: "ads-capabilities" }
   | { type: "ads-reporting-reference" }
-  | { type: "reference-downloads"; collection: keyof typeof referenceDownloads }
-);
+  | { type: "reference-downloads"; collection: keyof typeof referenceDownloads };
+
+export type GuideBlock =
+  | { type: "paragraph"; text: string; source?: SourceCitation }
+  | (BlockWithoutSource & { source?: never });
 
 export type GuideSection = {
   id: string;

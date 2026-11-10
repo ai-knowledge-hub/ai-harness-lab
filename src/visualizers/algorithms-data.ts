@@ -1,4 +1,4 @@
-import { binarySearch } from "./binary-search";
+import { binarySearch, type BinarySearchStep } from "./binary-search";
 
 const code = {
   bfs: [
@@ -256,7 +256,23 @@ export const operations = [
   "Control",
 ];
 
-const algorithmItems = [
+type LegacyAlgorithmId = Exclude<keyof typeof algorithmContext, "binary">;
+type LegacyStep = Pick<BinarySearchStep, "line" | "label" | "note"> & Record<string, unknown>;
+
+type AlgorithmItem = {
+  title: string;
+  operation: string;
+  short: string;
+  complexity: string;
+  summary: string;
+  agentUse: string;
+  code: string[];
+} & (
+  | { id: "binary"; steps: BinarySearchStep[] }
+  | { id: LegacyAlgorithmId; steps: LegacyStep[] }
+);
+
+const algorithmItems: AlgorithmItem[] = [
   binarySearch,
   {
     id: "bfs",
@@ -528,7 +544,11 @@ const algorithmItems = [
   },
 ];
 
-export const algorithms = algorithmItems.map((item) => ({
+export type Algorithm = AlgorithmItem & {
+  context: (typeof algorithmContext)[keyof typeof algorithmContext];
+};
+
+export const algorithms: Algorithm[] = algorithmItems.map((item) => ({
   ...item,
   context: algorithmContext[item.id],
 }));

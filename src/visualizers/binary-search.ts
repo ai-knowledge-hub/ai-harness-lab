@@ -1,4 +1,4 @@
-type BinarySearchStep = {
+export type BinarySearchStep = {
   line: number;
   label: string;
   note: string;
@@ -9,7 +9,7 @@ type BinarySearchStep = {
 };
 
 export const binarySearch = {
-  id: "binary",
+  id: "binary" as const,
   title: "Binary Search",
   operation: "Find",
   short: "Campaign threshold finder",

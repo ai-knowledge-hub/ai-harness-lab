@@ -27,7 +27,7 @@ Cross-track relevance creates relationships, not copies of the guide. A reusable
 
 A guide defines `id`, `path`, `title`, optional `shortTitle`, `description`, `trackId`, `kind`, `publicationStatus`, `format`, `readingMinutes`, `updatedAt`, `introduction`, `objectives`, `prerequisiteConceptIds`, `conceptIds`, `projectIds`, `platformIds`, `publicationIds`, `capabilityIds`, `videoIds`, `relatedGuideIds`, and ordered `sections`.
 
-Canonical paths use `/learn/<trackId>/<lessonId>`. A section has a stable `id`, `title`, and blocks. Current prose block types are paragraph, list, callout, code, flow and table. Closed visual blocks are `ads-architecture`, `ads-orchestrator`, `ads-capabilities` and `ads-reporting-reference`. The `reference-downloads` block selects a known collection from `src/content/reference-downloads.js`. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
+Canonical paths use `/learn/<trackId>/<lessonId>`. A section has a stable `id`, `title`, and blocks. Current prose block types are paragraph, list, callout, code, flow and table. Closed visual blocks are `ads-architecture`, `ads-orchestrator`, `ads-capabilities` and `ads-reporting-reference`. The `reference-downloads` block selects a known collection from `src/content/reference-downloads.js`. Paragraph blocks can carry a source citation. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
 
 Supported lifecycle rules:
 
@@ -46,7 +46,7 @@ Current validation is structural. It does not establish the accuracy of an exter
 
 ## Rendering and metadata
 
-`src/pages/LessonPage.jsx` supplies the shared reader: breadcrumbs, desktop contents, native mobile contents, intended outcomes, working context, typed content blocks, related resources, source dates and planned-next-step information. Data drives labels and update dates.
+`src/pages/LessonPage.tsx` supplies the shared reader: breadcrumbs, desktop contents, native mobile contents, intended outcomes, working context, typed content blocks, related resources, source dates and planned-next-step information. Data drives labels and update dates.
 
 `pnpm build` builds the client, creates a temporary server renderer using the existing React/Vite dependencies, validates content, and writes complete HTML for each canonical route. The renderer is removed from `dist` afterwards; no server runtime or listening build server is required. `sitemap.xml` includes indexable canonical routes, and `robots.txt` points to it.
 

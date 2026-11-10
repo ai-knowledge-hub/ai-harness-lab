@@ -142,8 +142,12 @@ export function validateLearningContent(content = learningContent) {
                             row.every(text),
                         )
                       : false;
-        if (block.source && !(text(block.source.title) && https(block.source.href)))
-          fail(`${label}/${section.id}: invalid source reference`);
+        if (block.source !== undefined) {
+          if (block.type !== "paragraph")
+            fail(`${label}/${section.id}: only paragraph blocks can cite a source`);
+          else if (!(text(block.source?.title) && https(block.source?.href)))
+            fail(`${label}/${section.id}: invalid source reference`);
+        }
         if (!valid) fail(`${label}/${section.id}: invalid ${block.type} block`);
       }
     }

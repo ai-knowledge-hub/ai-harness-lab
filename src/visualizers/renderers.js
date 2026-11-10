@@ -1,6 +1,4 @@
-import { renderBinary } from "./binary-search";
-
-function escapeHtml(value) {
+export function escapeHtml(value) {
   return value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -423,8 +421,7 @@ function renderHashChain(step) {
   `;
 }
 
-const renderers = {
-  binary: renderBinary,
+export const renderers = {
   bfs: renderGraphTraversal,
   dfs: renderDfs,
   rabin: renderRabin,
@@ -440,10 +437,3 @@ const renderers = {
   permissionGraph: renderPermissionGraph,
   hashChain: renderHashChain,
 };
-
-export function renderVisualization(id, step) {
-  return renderers[id](step).replace(
-    "<svg ",
-    `<svg aria-label="${escapeHtml(step.label)}" `,
-  );
-}

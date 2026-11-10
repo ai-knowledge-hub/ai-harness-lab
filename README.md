@@ -52,7 +52,7 @@ A direct visualizer link uses `?algorithm=<id>#visualizer`, for example `/learn/
 - `src/content/site.js` owns the working identity, family URLs, five tracks, and curated resources.
 - `src/pages/TrackPage.jsx` renders each track from that catalogue.
 - `styles.css` owns the shared tokens, site shell, homepage, and track layouts. `src/styles/labs.css` retains the existing visualizer and reference-surface rules.
-- `src/visualizers/algorithms-data.js` retains the existing algorithms, code examples, steps, and practical context.
+- `src/visualizers/algorithms-data.ts` retains the existing algorithms, code examples, steps, and practical context.
 - `public/brand/provenance.json` records the exact copied optical artwork and its source hashes. No sibling checkout is imported at build or runtime.
 - `docs/brand-tokens.reference.json` captures the selected shared brand foundation, version 0.1.0.
 - [Rebrand implementation and verification](docs/rebrand-2026-11-07.md) records the first slice.
