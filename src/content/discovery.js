@@ -135,12 +135,18 @@ export const discovery = {
           ["Use an agent to build software", "Give a coding agent one small change, a concrete example of the expected result, and a check it can run. Review the diff and the check before accepting the change."],
           ["Design a system for an agent to operate", "Write down one task, such as reading a report. The control plane is the part of the system that checks who is asking, what they can do, and what gets recorded."],
         ],
-        next: { kind: "pattern", id: "control-plane", action: "Trace a report request through the control plane" },
+        next: { kind: "guide", id: "verify-small-code-change", action: "Verify a small code change with an agent" },
       },
       examples: [
         { kind: "lab", id: "approval", action: "Step through an approval", description: "See where a proposed change waits for a person and what happens when the rules reject it." },
       ],
       references: [
+        {
+          kind: "pattern",
+          id: "control-plane",
+          action: "Trace a report request through the control plane",
+          description: "Follow how the system checks an agent’s identity and permissions before it acts.",
+        },
         { kind: "capability", id: "code-maintenance", action: "Run the coding workflow example in Skills" },
         { kind: "capability", id: "harness-governance", action: "Run the harness review example in Skills" },
       ],
@@ -198,6 +204,7 @@ export function resolveDiscoveryLink(content, link) {
   if (kind === "pattern" && id === "control-plane") {
     return {
       title: "Agent control plane",
+      description,
       label: "Reference pattern",
       href: controlPath,
       action,
