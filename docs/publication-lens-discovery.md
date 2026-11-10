@@ -30,6 +30,8 @@ Keep these boundaries provisional. Enterprise software owns the operation of the
 
 ## What #32 can test
 
+The [reader walkthrough and findings](discovery-fit-check.md) and [Google Ads reporting brief](google-ads-reporting-case-brief.md) record the results of this discovery.
+
 - **A workflow outside advertising.** Start with the proposed small-code-change guide, follow the Playbook section, then find the [Code Maintenance plugin in Skills](https://skills.ai-knowledge-hub.org/plugins/engineering/code-maintenance-plugin). Ask the reader to locate version `0.2.0`, identify the Node.js 22 requirement, and explain what the first-use sample produces. Skills documents a local maintenance plan with an explicit verification step. Issue [#31](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/31) owns the versioned link and sample-run verification.
 - **A second provider brief.** Start with Google Ads as the candidate for a daily campaign report using documented interfaces and a fictional example. Compare account access, entities, date and metric definitions, how results are retrieved, and partial or failed responses. Use the fit check to identify which explanations transfer and which need a provider reference. Confirm the provider and scope against the evidence in #32.
 - **Findings that lead to guides.** Record where a reader cannot tell what to do, what they can run, or what result to expect. Check the guide, case, and lab on desktop and mobile, including direct entry, return links, preview visibility, downloads, static reading, and existing lab behaviour. Use the observed gaps to choose the next guide in each module. [Issue #32](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/32)
