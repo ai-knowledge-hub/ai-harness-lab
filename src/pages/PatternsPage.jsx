@@ -1,5 +1,17 @@
 import { Link } from "react-router-dom";
-import { articleUrl } from "../content/site";
+import { articleUrl, site } from "../content/site";
+
+const mockLabCommands = [
+  "lab_dir=$(mktemp -d) &&",
+  "./bin/skills-hub install \\",
+  "  --source remote --module plugins \\",
+  `  --registry-url ${site.skills}/registry/plugins-index.json \\`,
+  "  --entry marketing/chatgpt-advertising-experiment-plugin@0.2.0 \\",
+  "  --runtime codex --execution-runtime python3 \\",
+  '  --target "$lab_dir/plugins" --cache-dir "$lab_dir/cache" &&',
+  'cd "$lab_dir/plugins/marketing/chatgpt-advertising-experiment-plugin" &&',
+  "python3 scripts/run_mock_lab.py",
+].join("\n");
 
 const controlLayers = [
   {
@@ -116,6 +128,7 @@ export function PatternsPage() {
             Read article
           </a>
         </div>
+        <a className="inline-link" href="#offline-mock-lab">Try the offline mock lab</a>
       </section>
 
       <section className="control-plane" aria-labelledby="control-plane-title">
@@ -253,6 +266,65 @@ export function PatternsPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section id="offline-mock-lab" className="build-notes" aria-labelledby="mock-lab-title">
+        <div className="section-head">
+          <p className="eyebrow">Skills · Run locally</p>
+          <h2 id="mock-lab-title">Review evidence before approving an action</h2>
+        </div>
+        <p>
+          Before a reviewer approves a campaign action, they need to know which
+          data the agent used and how it checked the result. The ChatGPT
+          Advertising Experiment Plugin 0.2.0 lets you inspect that evidence
+          with fictional account and campaign data.{" "}
+          <a
+            className="source-citation"
+            href={`${site.skills}/release-manifests/plugins/marketing/chatgpt-advertising-experiment-plugin/0.2.0.yaml`}
+          >
+            View the Skills release manifest for 0.2.0
+          </a>
+        </p>
+        <p>
+          Use Python 3.9 or newer and run these commands from the Skills
+          repository. If you need to build <code>./bin/skills-hub</code>, install
+          Go and run <code>make cli-build</code> there first.{" "}
+          <a className="source-citation" href="https://github.com/ai-knowledge-hub/ai-skills-guide">
+            Open the Skills repository
+          </a>
+        </p>
+        <p>
+          Installation downloads the pinned release into a temporary directory.
+          The mock run then uses the bundled data without credentials or
+          network access.{" "}
+          <a
+            className="source-citation"
+            href={`${site.skills}/plugins/marketing/chatgpt-advertising-experiment-plugin`}
+          >
+            Open the plugin in the Skills catalogue
+          </a>
+        </p>
+        <figure className="lesson-code">
+          <figcaption>Install and run the local mock lab</figcaption>
+          <pre tabIndex={0} aria-label="Install and run the local mock lab"><code>{mockLabCommands}</code></pre>
+        </figure>
+        <p>
+          Open <code>output/mock-evidence-bundle.json</code> in the installed
+          plugin directory. The sample records zero network calls and one
+          valid test conversion. In a separate matching example, it finds two
+          event records, removes one duplicate, and matches one business
+          outcome. Check those counts before using the bundle to inform a
+          review.
+        </p>
+        <p>
+          The lab exercises the evidence step. A live account read requires
+          separate setup and verification, and the release has no live write
+          adapter. To practise collecting report pages and handling missing
+          results,{" "}
+          <Link className="source-citation" to="/learn/system-design/chatgpt-ads-reporting#try-the-collector">
+            try the separate Harness sample collector
+          </Link>.
+        </p>
       </section>
 
       <section className="build-notes" aria-labelledby="questions-title">
