@@ -1,3 +1,5 @@
+import type { Guide } from "../guide-types";
+
 export const advertisingPlatformsGuide = {
   id: "advertising-platforms",
   path: "/learn/system-design/advertising-platforms",
@@ -85,4 +87,4 @@ export const advertisingPlatformsGuide = {
       ],
     },
   ],
-};
+} satisfies Guide;

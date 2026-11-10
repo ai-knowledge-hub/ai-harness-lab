@@ -1,3 +1,5 @@
+import type { Guide } from "../guide-types";
+
 export const chatgptAdsGuide = {
   id: "chatgpt-ads",
   path: "/learn/system-design/chatgpt-ads",
@@ -84,4 +86,4 @@ export const chatgptAdsGuide = {
       ],
     },
   ],
-};
+} satisfies Guide;

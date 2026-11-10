@@ -1,3 +1,5 @@
+import type { Guide } from "../guide-types";
+
 export const attributionAndLiftGuide = {
   id: "attribution-and-lift",
   path: "/learn/measurement-ml/attribution-and-lift",
@@ -55,4 +57,4 @@ export const attributionAndLiftGuide = {
       ],
     },
   ],
-};
+} satisfies Guide;
