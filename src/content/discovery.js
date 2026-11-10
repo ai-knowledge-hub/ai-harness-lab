@@ -1,4 +1,4 @@
-import { visualizerUrl } from "./site";
+import { controlPath, visualizerUrl } from "./site";
 import { algorithms } from "../visualizers/algorithms-data";
 
 export const discovery = {
@@ -20,6 +20,13 @@ export const discovery = {
       id: "chatgpt-ads-reporting",
       action: "Read the reporting case",
       description: "Start with one reporting request and follow it across the five engineering tracks.",
+    },
+    "attribution-and-lift": {
+      kind: "guide",
+      id: "chatgpt-ads-reporting",
+      anchor: "interpret-metrics",
+      action: "Interpret credited conversions in the reporting case",
+      description: "Check what a campaign report can tell you before you use it to make a budget decision.",
     },
   },
   caseTracks: {
@@ -68,6 +75,20 @@ export const discovery = {
         { kind: "guide", id: "chatgpt-ads-apis", action: "Find an advertiser API" },
       ],
     },
+    algorithms: {
+      start: {
+        title: "Choose a pattern for the work it needs to do",
+        steps: [
+          ["Name the operation", "Write down what goes in and what must come out. Finding the first match and keeping the best five results are different jobs."],
+          ["Write down the limits", "Can you sort the whole list, or do records arrive one at a time? How much can you keep in memory? Can you afford to miss a match?"],
+          ["Try a small example", "Open the Heap lab and step through a list of campaigns as they arrive. Check which campaigns the lab keeps when it can only store the top three."],
+        ],
+        next: { kind: "lab", id: "heap", action: "Try the top-three campaign lab" },
+      },
+      references: [
+        { kind: "publication", id: "deterministic-core", action: "Read why agents use these patterns" },
+      ],
+    },
     "software-production": {
       start: {
         title: "Design for an interrupted run",
@@ -88,8 +109,51 @@ export const discovery = {
         "Deploy a reporting service with durable checkpoints, backfills, and monitoring.",
       ],
     },
+    "measurement-ml": {
+      start: {
+        title: "Start with a decision you need to make",
+        steps: [
+          ["Name the decision", "Write down what you would do differently, such as increasing next month’s ad budget."],
+          ["Pick one outcome", "Choose what you want to change and when you will measure it, such as completed orders over two weeks."],
+          ["Plan the comparison", "Decide what evidence would change your mind. A platform can credit an ad for an order. To estimate how many extra orders the ads caused, compare outcomes with and without the campaign."],
+        ],
+        next: { kind: "guide", id: "attribution-and-lift", action: "Compare credited conversions and lift" },
+      },
+      references: [
+        { kind: "publication", id: "geo-experiments", action: "Read the research on geographic experiments" },
+        { kind: "publication", id: "building-to-learn", action: "Read the optimisation prototype write-up" },
+      ],
+      future: [
+        "Build a demand forecast and compare it with a simple baseline.",
+        "Test a budget allocation rule with past data before using it in a live campaign.",
+      ],
+    },
+    "ai-engineering": {
+      start: {
+        title: "Decide what job the agent will do",
+        steps: [
+          ["Use an agent to build software", "Give a coding agent one small change, a concrete example of the expected result, and a check it can run. Review the diff and the check before accepting the change."],
+          ["Design a system for an agent to operate", "Write down one task, such as reading a report. The control plane is the part of the system that checks who is asking, what they can do, and what gets recorded."],
+        ],
+        next: { kind: "pattern", id: "control-plane", action: "Trace a report request through the control plane" },
+      },
+      examples: [
+        { kind: "lab", id: "approval", action: "Step through an approval", description: "See where a proposed change waits for a person and what happens when the rules reject it." },
+      ],
+      references: [
+        { kind: "capability", id: "code-maintenance", action: "Run the coding workflow example in Skills" },
+        { kind: "capability", id: "harness-governance", action: "Run the harness review example in Skills" },
+      ],
+    },
   },
 };
+
+export const algorithmGroups = [
+  { title: "Find, explore, or rank records", ids: ["binary", "bfs", "dfs", "heap"] },
+  { title: "Spot duplicates and keep recent data", ids: ["bloom", "union", "buffer"] },
+  { title: "Schedule and limit work", ids: ["topo", "dijkstra", "leaseQueue", "tokenBucket"] },
+  { title: "Check access, content, and history", ids: ["permissionGraph", "approval", "rabin", "hashChain"] },
+];
 
 export const discoveryGroups = [
   ["guides", "Reusable guides"],
@@ -131,6 +195,14 @@ export function resolveDiscoveryLink(content, link) {
       action,
     } : null;
   }
+  if (kind === "pattern" && id === "control-plane") {
+    return {
+      title: "Agent control plane",
+      label: "Reference pattern",
+      href: controlPath,
+      action,
+    };
+  }
   if (kind === "project") {
     const project = content.projects.find((item) => item.id === id);
     return project?.status === "available" && project.href ? {
@@ -146,7 +218,7 @@ export function resolveDiscoveryLink(content, link) {
   return item ? {
     title: item.title,
     description: description ?? item.relationship,
-    label: kind === "publication" ? "Publication" : "Skills",
+    label: kind === "publication" ? (item.kind === "research" ? "Research" : "Publication") : "Skills",
     href: item.href,
     action,
   } : null;

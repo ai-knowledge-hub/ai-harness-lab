@@ -59,3 +59,29 @@ test.describe("production discovery on a phone without JavaScript", () => {
     await expect(page).toHaveURL(/\/learn\/software-production$/);
   });
 });
+
+test("the new starting paths lead to working references on a phone", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/learn/measurement-ml");
+  const start = page.getByRole("region", { name: "Start here" });
+  const jump = page.getByRole("navigation", { name: "On this track" });
+  await expect(jump.getByRole("link", { name: "Reusable guides" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "In development" }).getByRole("link")).toHaveCount(0);
+  await start.getByRole("link", { name: "Compare credited conversions and lift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "How to compare attributed conversions and lift" })).toBeVisible();
+  await expect(page.getByRole("table").getByRole("cell", { name: "2.0%", exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Interpret credited conversions in the reporting case" }).click();
+  await expect(page).toHaveURL(/chatgpt-ads-reporting#interpret-metrics$/);
+  await expect(page.getByRole("heading", { name: "Interpret credited conversions", exact: true })).toBeInViewport();
+
+  await page.goto("/learn/ai-engineering");
+  await expect(start.getByText("Use an agent to build software.", { exact: true })).toBeVisible();
+  await expect(start.getByText("Design a system for an agent to operate.", { exact: true })).toBeVisible();
+  await start.getByRole("link", { name: "Trace a report request through the control plane" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Agent Control Plane" })).toBeVisible();
+  await page.goBack();
+  await jump.getByRole("link", { name: "Worked examples" }).click();
+  await page.getByRole("link", { name: "Step through an approval" }).click();
+  await expect(page).toHaveURL(/algorithm=approval#visualizer$/);
+  await expect(page.getByRole("heading", { name: "Approval State Machine", exact: true })).toBeInViewport();
+});

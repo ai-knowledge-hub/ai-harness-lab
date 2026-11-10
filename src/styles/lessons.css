@@ -451,7 +451,6 @@ html:has(.lesson-page) {
 }
 @media (max-width: 640px) {
   .guide-case-study { padding: 20px; }
-  .track-resources { margin-top: 48px; }
 }
 .lesson-table-wide .lesson-table {
   min-width: 620px;
@@ -522,7 +521,6 @@ html:has(.lesson-page) {
 .orchestrator-flow { display: grid; grid-template-columns: minmax(0, 1fr) 50px minmax(0, 1fr); align-items: center; gap: 16px; margin-block: 22px; }
 .orchestrator-flow > span { border-block: 1px solid var(--line-strong); padding: 18px 0; font-size: 17px; line-height: 1.5; }
 .orchestrator-flow svg { width: 100%; }
-.track-lessons + .track-lessons { margin-top: 52px; }
 @media (max-width: 640px) {
   .reference-context ol { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 14px; }
   .reference-definitions { grid-template-columns: 1fr; gap: 6px; }
