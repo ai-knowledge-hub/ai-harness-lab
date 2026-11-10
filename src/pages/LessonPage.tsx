@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Guide, GuideSection } from "../content/guide-types";
 import { Link } from "react-router-dom";
 import { tracks, trackPath } from "../content/site";
@@ -72,7 +73,7 @@ function ReferenceContext({ lessonId, label }: { lessonId: string; label: string
   );
 }
 
-export function LessonPage({ lesson }: { lesson: Guide }) {
+export function LessonPage({ lesson, architecture }: { lesson: Guide; architecture?: { id: string; content: ReactNode } }) {
   const track = tracks.find((item) => item.slug === lesson.trackId);
   if (!track) throw new Error(`Unknown guide track: ${lesson.trackId}`);
   const prerequisites = relatedContent(learningContent.concepts, lesson.prerequisiteConceptIds);
@@ -194,9 +195,17 @@ export function LessonPage({ lesson }: { lesson: Guide }) {
                 key={section.id}
               >
                 <h2 id={`${section.id}-title`}>{section.title}</h2>
-                {section.blocks.map((block, index) => (
-                  <LessonBlock block={block} blockId={`${lesson.id}-${section.id}-${index}`} key={index} />
-                ))}
+                {section.blocks.map((block, index) => {
+                  const blockId = `${lesson.id}-${section.id}-${index}`;
+                  return (
+                    <LessonBlock
+                      key={index}
+                      block={block}
+                      blockId={blockId}
+                      architecture={architecture?.id === blockId ? architecture.content : undefined}
+                    />
+                  );
+                })}
                 {caseTrack && (
                   <Link className="text-link case-track-return" to={trackPath(caseTrack)}>
                     Explore {caseTrack.nav}

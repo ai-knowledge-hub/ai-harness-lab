@@ -36,3 +36,11 @@ jobs:
 
       - name: Build app
         run: pnpm build
+
+      - name: Setup Node for the Astro pilot
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build Astro pilot
+        run: pnpm build:astro-pilot

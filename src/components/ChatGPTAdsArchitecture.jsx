@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   architectureNodes,
   architectureSources,
@@ -53,7 +52,8 @@ const connections = [
   connection("worker", "evidence", { start: "left", end: "right", reference: true }),
 ];
 
-export function ChatGPTAdsArchitecture({ id: diagramId }) {
+/** @param {{ id: string, GuideLink?: "a" | typeof import("./SiteLink").SiteLink }} props */
+export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a" }) {
   const [enhanced, setEnhanced] = useState(false);
   const [stage, setStage] = useState(0);
   const [complete, setComplete] = useState(false);
@@ -186,9 +186,9 @@ export function ChatGPTAdsArchitecture({ id: diagramId }) {
             </dl>
             <a className="source-citation" href={architectureSources[item.source].href}>{architectureSources[item.source].title}</a>
             {index === 1 && <p><a className="text-link" href="#orchestrator-detail">See six steps involved in choosing an ad</a></p>}
-            {index === 3 && <p><Link className="text-link" to="/learn/system-design/chatgpt-ads-apis">See what advertisers can do with the APIs</Link></p>}
+            {index === 3 && <p><GuideLink className="text-link" href="/learn/system-design/chatgpt-ads-apis">See what advertisers can do with the APIs</GuideLink></p>}
             {index === 3 && <> · <a className="source-citation" href={architectureSources.engineering.href}>How OpenAI records events and feedback</a></>}
-            {item.proposal && <p><Link className="text-link" to="/learn/system-design/chatgpt-ads-reporting">Open the reporting example</Link></p>}
+            {item.proposal && <p><GuideLink className="text-link" href="/learn/system-design/chatgpt-ads-reporting">Open the reporting example</GuideLink></p>}
           </section>
         ))}
       </div>

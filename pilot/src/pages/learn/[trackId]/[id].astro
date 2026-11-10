@@ -1,0 +1,71 @@
+---
+import type { GetStaticPaths } from "astro";
+import { GuideFrame } from "../../../GuideFrame";
+import { ChatGPTAdsArchitecture } from "../../../../../src/components/ChatGPTAdsArchitecture";
+import type { Guide } from "../../../../../src/content/guide-types";
+import { site } from "../../../../../src/content/site";
+import { validateLearningContent } from "../../../../../src/content/validate-learning";
+import "../../../../../styles.css";
+
+export const getStaticPaths = (() => {
+  validateLearningContent();
+  const guides = import.meta.glob<Guide>("../../../guides/*.ts", {
+    eager: true,
+    import: "default",
+  });
+  return Object.values(guides).map((guide) => {
+    const { trackId, id } = guide;
+    if (guide.path !== `/learn/${trackId}/${id}`)
+      throw new Error(`Pilot guide path does not match its route: ${guide.path}`);
+    return { params: { trackId, id }, props: { guide } };
+  });
+}) satisfies GetStaticPaths;
+
+const { guide } = Astro.props;
+const title = `${guide.title} · ${site.name} · ${site.family}`;
+const canonical = `${site.origin}${guide.path}`;
+const section = guide.sections.find(({ blocks }) => blocks.some((block) => block.type === "ads-architecture"));
+const index = section?.blocks.findIndex((block) => block.type === "ads-architecture");
+const architectureId = section ? `${guide.id}-${section.id}-${index}` : undefined;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={guide.description} />
+    <meta name="theme-color" content="#000000" />
+    <meta name="robots" content="noindex, follow" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={guide.description} />
+    <meta property="og:url" content={canonical} />
+    <title>{title}</title>
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      try {
+        const theme = localStorage.getItem("harness-theme");
+        if (theme === "light" || theme === "dark")
+          document.documentElement.dataset.theme = theme;
+      } catch {
+        /* Use the default reading theme when storage is unavailable. */
+      }
+    </script>
+  </head>
+  <body>
+    <GuideFrame guide={guide} architectureId={architectureId}>
+      <Fragment slot="architecture">
+        {architectureId && (
+          <ChatGPTAdsArchitecture
+            client:visible
+            id={architectureId}
+          />
+        )}
+      </Fragment>
+    </GuideFrame>
+    <script>
+      import "../../../shell";
+    </script>
+  </body>
+</html>

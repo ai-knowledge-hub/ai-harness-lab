@@ -1,4 +1,6 @@
 {
+  "buildCommand": "pnpm build:deployment",
+  "outputDirectory": "dist",
   "cleanUrls": true,
   "rewrites": [
     {
