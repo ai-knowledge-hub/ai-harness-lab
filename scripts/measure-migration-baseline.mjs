@@ -120,6 +120,7 @@ async function measurePaint(browser, route) {
         return {
           fcpMs: performance.getEntriesByName("first-contentful-paint")[0]?.startTime,
           lcpMs: latestLcp?.startTime,
+          documentResponseEnd: performance.getEntriesByType("navigation")[0]?.responseEnd,
           unfinishedImages,
           fontsLoading: document.fonts.status === "loading",
         };
@@ -129,10 +130,12 @@ async function measurePaint(browser, route) {
     await navigate(page, route, "commit");
     await page.waitForFunction((windowMs) => performance.now() >= windowMs, paintWindowMs);
     const pendingCount = pending.size;
-    const { fcpMs, lcpMs, unfinishedImages, fontsLoading } = await page.evaluate(
-      () => window.readBaselinePaint(),
-    );
+    const { fcpMs, lcpMs, documentResponseEnd, unfinishedImages, fontsLoading } =
+      await page.evaluate(() => window.readBaselinePaint());
     const paintInconclusive = [];
+    if (!(documentResponseEnd > 0 && documentResponseEnd <= paintWindowMs)) {
+      paintInconclusive.push("main document response did not finish by the paint cutoff");
+    }
     if (pendingCount) paintInconclusive.push(`${pendingCount} render resource requests still pending`);
     if (unfinishedImages) paintInconclusive.push(`${unfinishedImages} viewport images unfinished or failed`);
     if (fontsLoading) paintInconclusive.push("document fonts still loading");
