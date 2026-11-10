@@ -1,9 +1,16 @@
+import { parseArgs } from "node:util";
 import { gzipSync } from "node:zlib";
 import { chromium } from "@playwright/test";
 
-const origin = new URL(process.argv[2] ?? "http://127.0.0.1:4173").origin;
+const { positionals, values } = parseArgs({
+  allowPositionals: true,
+  options: { route: { type: "string" } },
+});
+if (positionals.length > 1) throw new Error("Expected one preview origin");
+const origin = new URL(positionals[0] ?? "http://127.0.0.1:4173").origin;
 const sampleCount = 5;
-const observeMs = 1_000;
+const paintWindowMs = 5_000;
+const scriptWindowMs = 1_000;
 const profile = {
   viewport: { width: 390, height: 844 },
   deviceScaleFactor: 3,
@@ -26,16 +33,26 @@ const routes = [
   {
     path: "/learn/system-design/chatgpt-ads",
     heading: "How ChatGPT Ads works",
-    controls: "#visual-deep-dive",
-    afterNext: (page) => page.getByText("Stage 2 of 5", { exact: true }),
+    controls: "#visual-deep-dive .ads-deep-dive",
+    step: (controls, number) => controls.getByRole("status").filter({
+      hasText: new RegExp(`^Stage ${number} of 5$`),
+    }),
   },
   {
     path: "/learn/algorithms/visualizers",
     heading: "Algorithms inside marketing agents",
     controls: "#visualizer",
-    afterNext: (page) => page.locator("#visualizer .step-meter").getByText("2", { exact: true }),
+    step: (controls, number) => controls.locator(".step-meter span").first().filter({
+      hasText: new RegExp(`^${number}$`),
+    }),
   },
 ];
+const selectedRoutes = values.route === undefined
+  ? routes
+  : routes.filter(({ path }) => path === values.route);
+if (!selectedRoutes.length) {
+  throw new Error(`Unknown --route ${values.route}. Choose ${routes.map(({ path }) => path).join(", ")}`);
+}
 
 async function scriptBytes(page, responses) {
   const external = await Promise.all(
@@ -51,7 +68,7 @@ async function scriptBytes(page, responses) {
   return external.reduce((total, bytes) => total + bytes, inlineBytes);
 }
 
-async function measure(browser, route, sample) {
+async function withMobilePage(browser, run) {
   const context = await browser.newContext({ ...profile, serviceWorkers: "block" });
   try {
     const page = await context.newPage();
@@ -61,12 +78,75 @@ async function measure(browser, route, sample) {
     await session.send("Network.setCacheDisabled", { cacheDisabled: true });
     await session.send("Network.emulateNetworkConditions", network);
     await session.send("Emulation.setCPUThrottlingRate", { rate: cpuRate });
+    return await run(page);
+  } finally {
+    await context.close();
+  }
+}
+
+async function navigate(page, route, waitUntil) {
+  const response = await page.goto(origin + route.path, { waitUntil });
+  if (!response?.ok()) throw new Error(`Failed to load ${route.path}`);
+}
+
+async function measurePaint(browser, route) {
+  return withMobilePage(browser, async (page) => {
+    // Include any pending request that could supply visible content, including
+    // CSS background images and cross-origin fonts.
+    const pending = new Set();
+    const renderResources = new Set(["image", "font", "stylesheet", "script"]);
+    page.on("request", (request) => {
+      if (renderResources.has(request.resourceType())) pending.add(request);
+    });
+    page.on("requestfinished", (request) => pending.delete(request));
+    page.on("requestfailed", (request) => pending.delete(request));
     await page.addInitScript(() => {
-      new PerformanceObserver((list) => {
-        window.baselineLcp = list.getEntries().at(-1)?.startTime;
-      }).observe({ type: "largest-contentful-paint", buffered: true });
+      let lcp;
+      const observer = new PerformanceObserver((list) => {
+        lcp = list.getEntries().at(-1);
+      });
+      observer.observe({ type: "largest-contentful-paint", buffered: true });
+      window.readBaselinePaint = () => {
+        const unfinishedImages = [...document.images].filter((img) => {
+          if (img.complete && img.naturalWidth > 0) return false;
+          if (!img.currentSrc && !img.getAttribute("src") && !img.getAttribute("srcset")) return false;
+          const rect = img.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0 &&
+            rect.bottom > 0 && rect.top < window.innerHeight &&
+            rect.right > 0 && rect.left < window.innerWidth &&
+            getComputedStyle(img).visibility === "visible";
+        }).length;
+        const latestLcp = observer.takeRecords().at(-1) ?? lcp;
+        return {
+          fcpMs: performance.getEntriesByName("first-contentful-paint")[0]?.startTime,
+          lcpMs: latestLcp?.startTime,
+          unfinishedImages,
+          fontsLoading: document.fonts.status === "loading",
+        };
+      };
     });
 
+    await navigate(page, route, "commit");
+    await page.waitForFunction((windowMs) => performance.now() >= windowMs, paintWindowMs);
+    const pendingCount = pending.size;
+    const { fcpMs, lcpMs, unfinishedImages, fontsLoading } = await page.evaluate(
+      () => window.readBaselinePaint(),
+    );
+    const paintInconclusive = [];
+    if (pendingCount) paintInconclusive.push(`${pendingCount} render resource requests still pending`);
+    if (unfinishedImages) paintInconclusive.push(`${unfinishedImages} viewport images unfinished or failed`);
+    if (fontsLoading) paintInconclusive.push("document fonts still loading");
+    if (!Number.isFinite(fcpMs) || !Number.isFinite(lcpMs)) paintInconclusive.push("missing paint timing");
+    return {
+      fcpMs: paintInconclusive.length ? null : Math.round(fcpMs),
+      lcpMs: paintInconclusive.length ? null : Math.round(lcpMs),
+      paintInconclusive,
+    };
+  });
+}
+
+async function measureScripts(browser, route) {
+  return withMobilePage(browser, async (page) => {
     const responses = new Map();
     page.on("response", (response) => {
       const url = new URL(response.url());
@@ -79,44 +159,36 @@ async function measure(browser, route, sample) {
         responses.set(response.url(), response);
       }
     });
-    const documentResponse = await page.goto(origin + route.path, { waitUntil: "load" });
-    if (!documentResponse?.ok()) throw new Error(`Failed to load ${route.path}`);
+    await navigate(page, route, "load");
     await page.getByRole("heading", { level: 1, name: route.heading }).waitFor();
-    await page.waitForTimeout(observeMs);
-    const timing = await page.evaluate(() => ({
-      fcpMs: performance.getEntriesByName("first-contentful-paint")[0]?.startTime,
-      lcpMs: window.baselineLcp,
-    }));
-    if (!Number.isFinite(timing.fcpMs) || !Number.isFinite(timing.lcpMs)) {
-      throw new Error(`Missing paint timing for ${route.path}`);
-    }
+    await page.waitForTimeout(scriptWindowMs);
     const initialJsGzipBytes = await scriptBytes(page, responses);
     let jsGzipBytesThroughNext = null;
     if (route.controls) {
       const controls = page.locator(route.controls);
       await controls.scrollIntoViewIfNeeded();
+      await route.step(controls, 1).waitFor();
       await controls.getByRole("button", { name: "Next", exact: true }).click();
-      await route.afterNext(page).waitFor();
+      await route.step(controls, 2).waitFor();
       jsGzipBytesThroughNext = await scriptBytes(page, responses);
     }
-    return {
-      route: route.path,
-      sample,
-      fcpMs: Math.round(timing.fcpMs),
-      lcpMs: Math.round(timing.lcpMs),
-      initialJsGzipBytes,
-      jsGzipBytesThroughNext,
-    };
-  } finally {
-    await context.close();
-  }
+    return { initialJsGzipBytes, jsGzipBytesThroughNext };
+  });
+}
+
+async function measure(browser, route, sample) {
+  const paint = await measurePaint(browser, route);
+  const scripts = paint.paintInconclusive.length
+    ? { initialJsGzipBytes: null, jsGzipBytesThroughNext: null }
+    : await measureScripts(browser, route);
+  return { route: route.path, sample, ...paint, ...scripts };
 }
 
 const browser = await chromium.launch();
 try {
   const results = [];
   for (let sample = 1; sample <= sampleCount; sample += 1) {
-    for (const route of routes) {
+    for (const route of selectedRoutes) {
       results.push(await measure(browser, route, sample));
     }
   }
@@ -126,10 +198,12 @@ try {
     profile,
     cpuRate,
     network,
-    observeMs,
+    paintWindowMs,
+    scriptWindowMs,
     sampleCount,
     results,
   }, null, 2));
+  if (results.some(({ paintInconclusive }) => paintInconclusive.length)) process.exitCode = 2;
 } finally {
   await browser.close();
 }

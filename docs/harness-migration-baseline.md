@@ -88,19 +88,27 @@ node scripts/measure-migration-baseline.mjs http://127.0.0.1:4173 > mobile-a.jso
 node scripts/measure-migration-baseline.mjs http://127.0.0.1:4173 > mobile-b.json
 ```
 
-The script captures first contentful paint (FCP) and largest contentful paint (LCP) one second after the load event and before scrolling or clicking. JavaScript bytes are a normalized gzip count of same-origin script responses, once per URL, plus independently gzipped executable inline scripts. The architecture guide and visualizer also record cumulative JavaScript bytes after scrolling to the component and verifying that the first **Next** click changes its state. This counts code loaded on first use as well as code loaded during navigation. Paint timings come from the local preview, with its own transfer encoding, and do not include Vercel delivery or analytics.
+For the Astro pilot, run the same guide-only command twice against each preview. This works when the preview serves only the pilot route.
+
+```sh
+node scripts/measure-migration-baseline.mjs http://127.0.0.1:4173 --route /learn/system-design/chatgpt-ads
+```
+
+Paint and interaction use separate cold navigations. The paint navigation stays at the top of the page without clicks or scrolling. At five seconds from navigation start, the script takes first contentful paint (FCP) and the latest largest contentful paint (LCP) candidate. Any pending image, font, stylesheet, or script request, any incomplete or failed viewport image, loading fonts, or missing paint data makes the sample inconclusive. Pending requests are counted even when their effect on the viewport is unknown. An inconclusive sample has null measurements and reasons in `paintInconclusive`. If any sample is inconclusive, the script prints the results and exits with status 2. Resolve the cause before comparing the two builds. [Largest Contentful Paint specification](https://www.w3.org/TR/largest-contentful-paint/)
+
+In the separate navigation, the script counts JavaScript one second after the load event. The count adds normalized gzip bytes of same-origin script responses, once per URL, and independently gzipped executable inline scripts. For the architecture guide and visualizer, the script scrolls to the component, checks it starts at step 1, clicks **Next**, and checks step 2 in that component before counting cumulative JavaScript. This includes code loaded on first use. The timings reflect the local preview and its transfer encoding.
 
 | Route | FCP in ms, median (range) | LCP in ms, median (range) | Initial gzip bytes | Gzip bytes through first Next |
 | --- | ---: | ---: | ---: | ---: |
-| `/` | 608 (564–996) | 1310 (1292–1452) | 126,954 | — |
-| `/learn/system-design/api-design` | 544 (516–888) | 544 (516–888) | 126,954 | — |
-| `/learn/system-design/chatgpt-ads` | 602 (544–724) | 602 (544–724) | 126,954 | 126,954 |
-| `/learn/algorithms/visualizers` | 576 (544–632) | 576 (544–632) | 126,954 | 126,954 |
+| `/` | 554 (536–640) | 1284 (1268–1328) | 126,954 | — |
+| `/learn/system-design/api-design` | 504 (476–588) | 504 (476–588) | 126,954 | — |
+| `/learn/system-design/chatgpt-ads` | 518 (496–616) | 518 (496–616) | 126,954 | 126,954 |
+| `/learn/algorithms/visualizers` | 524 (512–552) | 524 (512–552) | 126,954 | 126,954 |
 
-All 40 navigations reported the same JavaScript count. Across the four routes, the two batches' median paint times differed by 12–40 ms. Individual runs varied more, especially on home and the plain guide, so use medians and keep the ranges in the comparison.
+All 40 script measurements returned the same initial JavaScript count. Across the four routes, the two batches' median paint times differed by 4–16 ms. Use medians and keep the sample ranges in the comparison.
 
 ## Astro pilot acceptance
 
 - The architecture guide must use **63,477 gzip bytes or fewer** through the first successful stage change. That is a 50% reduction from the 126,954-byte baseline and includes code loaded when the reader reaches the walkthrough.
-- Use the same browser, machine, throttle settings, and two batches of five samples for each build. Allow a median FCP or LCP increase of up to the greater of 100 ms or 10% of the baseline median. On the architecture guide, both limits are 702 ms. If a result is within 40 ms of either limit, repeat both builds on the same machine before deciding.
+- Use the same browser, machine, throttle settings, and two batches of five samples for each build. Allow a median FCP or LCP increase of up to the greater of 100 ms or 10% of the baseline median. On the architecture guide, both limits are 618 ms. If a result is within 40 ms of either limit, repeat both builds on the same machine before deciding.
 - Repeat the guide authoring trial and compare the files and steps required. Verify the guide without JavaScript, the first interactive stage change, mobile and keyboard operation, and the compatibility cases above. Recheck routes and indexing on the deployed preview before cutover.
