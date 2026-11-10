@@ -525,15 +525,9 @@ pre {
   max-width: 900px;
   text-wrap: balance;
 }
-.track-intro > p:not(.eyebrow):not(.track-question) {
+.track-intro > p:not(.eyebrow) {
   max-width: 740px;
   margin-top: 22px;
-}
-.track-question {
-  margin-top: 30px;
-  font-size: 23px;
-  line-height: 1.45;
-  color: var(--text);
 }
 .resource-list {
   border-top: 1px solid var(--line-strong);
@@ -564,58 +558,6 @@ pre {
   padding-top: 5px;
   font-size: 13px;
   color: var(--muted);
-}
-.algorithm-index,
-.track-outline {
-  margin-top: 80px;
-}
-.algorithm-index-list {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0 40px;
-}
-.algorithm-index-list a {
-  display: block;
-  padding: 26px 0;
-  border-top: 1px solid var(--line);
-}
-.algorithm-index-list a:hover h3 {
-  text-decoration: underline;
-  text-underline-offset: 5px;
-}
-.algorithm-index-list h3 {
-  font-size: 23px;
-  margin: 14px 0 8px;
-}
-.algorithm-index-list p {
-  font-size: 15px;
-}
-.algorithm-complexity {
-  display: block;
-  margin-top: 16px;
-  color: var(--muted);
-  font-family: var(--font-code);
-  font-size: 12px;
-}
-.outline-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.outline-list li {
-  display: grid;
-  grid-template-columns: 45px minmax(0, 1fr);
-  gap: 24px;
-  padding: 25px 0;
-  border-top: 1px solid var(--line);
-}
-.outline-list h3 {
-  font-size: 23px;
-  margin-bottom: 10px;
-}
-.outline-list p {
-  font-size: 17px;
-  max-width: 850px;
 }
 .track-page > .text-link {
   margin: 36px 0 80px;
@@ -1146,9 +1088,6 @@ pre {
   .algorithm-button {
     height: 100%;
   }
-  .algorithm-index-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .resource-row {
     grid-template-columns: 130px minmax(0, 1fr);
     gap: 18px;
@@ -1268,11 +1207,7 @@ pre {
   .track-intro h1 {
     font-size: clamp(40px, 9vw, 58px);
   }
-  .track-question {
-    font-size: 21px;
-    margin-top: 24px;
-  }
-  .track-intro > p:not(.eyebrow):not(.track-question) {
+  .track-intro > p:not(.eyebrow) {
     font-size: 16px;
   }
   .resource-row {
@@ -1285,37 +1220,6 @@ pre {
   }
   .resource-row p {
     font-size: 15px;
-  }
-  .algorithm-index,
-  .track-outline {
-    margin-top: 56px;
-  }
-  .algorithm-index-list {
-    grid-template-columns: 1fr;
-  }
-  .algorithm-index-list a {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 0 12px;
-  }
-  .algorithm-index-list .resource-kind,
-  .algorithm-index-list p {
-    grid-column: 1 / -1;
-  }
-  .algorithm-index-list h3 {
-    grid-column: 1;
-  }
-  .algorithm-complexity {
-    grid-column: 2;
-    grid-row: 2;
-    align-self: center;
-  }
-  .outline-list li {
-    grid-template-columns: 24px minmax(0, 1fr);
-    gap: 18px;
-  }
-  .outline-list p {
-    font-size: 16px;
   }
   .track-page > .text-link {
     margin-bottom: 56px;
@@ -1461,19 +1365,7 @@ pre {
   }
 }
 
-/* Track introductions lead; supporting material follows the practical scope. */
-.track-intro > .text-link {
-  margin-top: 24px;
-}
-.track-resources {
-  margin-top: 70px;
-}
-
-.track-intro + .track-outline {
-  margin-top: 0;
-}
-
-/* Track discovery pilot: a compact introduction, then decisions and resources. */
+/* Track discovery: a compact introduction, then decisions and resources. */
 html:has(.pilot-track-page) {
   scroll-behavior: auto;
 }
@@ -1520,7 +1412,8 @@ html:has(.pilot-track-page) {
   padding-block: clamp(30px, 4.5vw, 65px);
   border-bottom: 1px solid var(--line);
 }
-.pilot-section > h2 {
+.pilot-section > h2,
+#patterns-title {
   font-size: clamp(25px, 3vw, 39px);
 }
 .track-start {
@@ -1591,6 +1484,31 @@ html:has(.pilot-track-page) {
 .pilot-resources .text-link {
   margin-top: 4px;
 }
+.track-patterns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(20px, 3vw, 36px);
+}
+.track-patterns ul {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+.track-patterns a {
+  display: grid;
+  gap: 4px;
+  padding-block: 10px;
+  border-top: 1px solid var(--line);
+}
+.track-patterns a:hover strong,
+.track-patterns a:focus-visible strong {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.track-patterns a span {
+  color: var(--muted);
+  font-size: 14px;
+}
 .track-future ul {
   margin: 0;
   padding-left: 18px;
@@ -1598,7 +1516,8 @@ html:has(.pilot-track-page) {
   line-height: 1.6;
 }
 @media (max-width: 640px) {
-  .pilot-section {
+  .pilot-section,
+  .track-patterns {
     grid-template-columns: minmax(0, 1fr);
   }
   .track-start {

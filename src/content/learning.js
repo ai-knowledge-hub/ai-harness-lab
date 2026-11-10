@@ -3,7 +3,8 @@ import { chatgptAdsGuide } from "./lessons/chatgpt-ads";
 import { apiDesignLesson } from "./lessons/api-design";
 import { chatgptAdsApisGuide } from "./lessons/chatgpt-ads-apis";
 import { chatgptAdsReportingGuide } from "./lessons/chatgpt-ads-reporting";
-import { articleUrl } from "./site";
+import { attributionAndLiftGuide } from "./lessons/attribution-and-lift";
+import { articleUrl, site } from "./site";
 import { discovery } from "./discovery";
 
 export const learningContent = {
@@ -175,6 +176,25 @@ export const learningContent = {
       href: articleUrl("building-secure-marketing-agents-ad-platform-authentication-architecture"),
       relationship: "See how account permissions shape the boundary between a worker and the platform it calls.",
     },
+    {
+      id: "deterministic-core",
+      title: "The Deterministic Core",
+      href: articleUrl("deterministic-core-algorithms-data-structures-marketing-agents"),
+      relationship: "See where software can give an agent a repeatable way to search, order, and check data.",
+    },
+    {
+      id: "geo-experiments",
+      title: "Measuring Ad Effectiveness Using Geo Experiments",
+      href: "https://research.google/pubs/measuring-ad-effectiveness-using-geo-experiments/",
+      kind: "research",
+      relationship: "Jon Vaver and Jim Koehler show how to compare regions where a campaign runs with regions where it is held back.",
+    },
+    {
+      id: "building-to-learn",
+      title: "Building to learn",
+      href: articleUrl("building-to-learn-agentic-marketing-optimization"),
+      relationship: "Follow the decisions and trade-offs in a marketing optimisation prototype.",
+    },
   ],
   capabilities: [
     {
@@ -183,6 +203,18 @@ export const learningContent = {
       href: "https://skills.ai-knowledge-hub.org/skills/security/ad-platform-agent-auth-review",
       relationship:
         "A guide in Skills for reviewing how an agent gets permission to use an ad account.",
+    },
+    {
+      id: "code-maintenance",
+      title: "Code Maintenance Plugin",
+      href: `${site.skills}/plugins/engineering/code-maintenance-plugin`,
+      relationship: "Run the local example to turn a proposed code change into a plan with verification steps.",
+    },
+    {
+      id: "harness-governance",
+      title: "Harness Governance Plugin",
+      href: `${site.skills}/plugins/agentops/harness-governance-plugin`,
+      relationship: "Run the local example to record how you would evaluate a change to the rules and tools around an agent before adopting it.",
     },
   ],
   videos: [
@@ -193,7 +225,7 @@ export const learningContent = {
       href: null,
     },
   ],
-  lessons: [advertisingPlatformsGuide, chatgptAdsGuide, chatgptAdsApisGuide, apiDesignLesson, chatgptAdsReportingGuide],
+  lessons: [advertisingPlatformsGuide, chatgptAdsGuide, chatgptAdsApisGuide, apiDesignLesson, chatgptAdsReportingGuide, attributionAndLiftGuide],
 };
 
 export const lessons = learningContent.lessons;
@@ -202,8 +234,6 @@ export const normalizePath = (path) =>
   path === "/" ? path : path.replace(/\/+$/, "");
 export const getLessonByPath = (path) =>
   lessons.find((lesson) => lesson.path === normalizePath(path));
-export const lessonsForTrack = (trackId) =>
-  lessons.filter((lesson) => lesson.trackId === trackId);
 export function relatedContent(lesson, collection, field) {
   return lesson[field].map((id) =>
     learningContent[collection].find((item) => item.id === id),

@@ -1,8 +1,9 @@
 import { referenceContext } from "./reference-context";
 import { referenceDownloads } from "./reference-downloads";
 import { learningContent } from "./learning";
-import { caseLinksForTrack, discoveryGroups, resolveDiscoveryLink } from "./discovery";
+import { algorithmGroups, caseLinksForTrack, discoveryGroups, resolveDiscoveryLink } from "./discovery";
 import { tracks, labPath, controlPath } from "./site";
+import { algorithms } from "../visualizers/algorithms-data";
 
 export function validateLearningContent(content = learningContent) {
   const errors = [];
@@ -199,6 +200,10 @@ export function validateLearningContent(content = learningContent) {
       fail(`platform/${platform.id}: source review date required`);
   }
   const discovery = content.discovery;
+  const groupedAlgorithms = algorithmGroups.flatMap((group) => group.ids);
+  if (groupedAlgorithms.length !== algorithms.length ||
+      !algorithms.every((algorithm) => groupedAlgorithms.includes(algorithm.id)))
+    fail("discovery/tracks/algorithms: group each visualizer exactly once");
   if (!discovery) {
     fail("discovery: expected a page directory");
   } else {
@@ -241,6 +246,9 @@ export function validateLearningContent(content = learningContent) {
         checkLink(trackLabel, { ...link, kind: "guide", id });
       }
     }
+    for (const track of tracks)
+      if (!discovery.tracks?.[track.slug])
+        fail(`discovery/tracks/${track.slug}: missing starting method`);
     for (const [id, page] of Object.entries(discovery.tracks ?? {})) {
       const label = `discovery/tracks/${id}`;
       if (!tracks.some((track) => track.slug === id)) fail(`${label}: unknown track`);
@@ -250,8 +258,8 @@ export function validateLearningContent(content = learningContent) {
         fail(`${label}: a starting method needs a title and named steps`);
       const next = page.start?.next;
       const starter = checkLink(`${label}/start`, next);
-      if (!(next?.kind === "lab" || (next?.kind === "guide" && guideKind(next.id) === "principle" && !starter?.preview)))
-        fail(`${label}/start: expected a published principle or a lab`);
+      if (!(["lab", "pattern"].includes(next?.kind) || (next?.kind === "guide" && guideKind(next.id) === "principle" && !starter?.preview)))
+        fail(`${label}/start: expected a published principle, reference pattern, or lab`);
       const destinations = new Set(starter ? [starter.href] : []);
       const listedGuides = new Set(next?.kind === "guide" ? [next.id] : []);
       for (const [group] of discoveryGroups) {

@@ -42,6 +42,7 @@ test("five tracks connect to the existing labs and preserve deep links", async (
     await expect(
       page.getByRole("heading", { level: 1, name: title, exact: true }),
     ).toBeVisible();
+    await expect(page.getByRole("region", { name: "Start here" })).toBeVisible();
     await expect(
       navigation.getByRole("link", { name: label, exact: true }),
     ).toHaveAttribute("aria-current", "page");
@@ -56,8 +57,16 @@ test("five tracks connect to the existing labs and preserve deep links", async (
   await navigation
     .getByRole("link", { name: "Algorithms & data", exact: true })
     .click();
-  await page
-    .locator(".algorithm-index-list")
+  const visualizers = page.getByRole("region", { name: "Choose a visualizer" });
+  await expect(visualizers.getByRole("heading", { level: 3 })).toHaveCount(4);
+  await expect(visualizers.getByRole("link", { name: "Open all 15 labs" }))
+    .toHaveAttribute("href", "/learn/algorithms/visualizers");
+  await expect(visualizers.locator('a[href$="#visualizer"]')).toHaveCount(15);
+  await page.getByRole("region", { name: "Start here" })
+    .getByRole("link", { name: "Try the top-three campaign lab" }).click();
+  await expect(page).toHaveURL(/algorithm=heap#visualizer$/);
+  await page.goBack();
+  await visualizers
     .getByRole("link", { name: /Dijkstra/ })
     .click();
   await expect(page).toHaveURL(/algorithm=dijkstra#visualizer/);
