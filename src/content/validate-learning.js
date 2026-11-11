@@ -57,6 +57,8 @@ export function validateLearningContent(content = learningContent) {
   };
   for (const lesson of content.lessons ?? []) {
     const label = `lesson/${lesson.id}`;
+    if (lesson.id === "index")
+      fail(`${label}: guide ID index is reserved because its flat HTML alias conflicts with the track page`);
     if (!tracks.some((track) => track.slug === lesson.trackId))
       fail(`${label}: unknown track`);
     if (

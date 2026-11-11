@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { Guide, GuideSection } from "../content/guide-types";
 import { Link } from "react-router-dom";
 import { tracks, trackPath } from "../content/site";
@@ -73,7 +72,7 @@ function ReferenceContext({ lessonId, label }: { lessonId: string; label: string
   );
 }
 
-export function LessonPage({ lesson, architecture }: { lesson: Guide; architecture?: { id: string; content: ReactNode } }) {
+export function LessonPage({ lesson, staticArchitecture = false }: { lesson: Guide; staticArchitecture?: boolean }) {
   const track = tracks.find((item) => item.slug === lesson.trackId);
   if (!track) throw new Error(`Unknown guide track: ${lesson.trackId}`);
   const prerequisites = relatedContent(learningContent.concepts, lesson.prerequisiteConceptIds);
@@ -202,7 +201,7 @@ export function LessonPage({ lesson, architecture }: { lesson: Guide; architectu
                       key={index}
                       block={block}
                       blockId={blockId}
-                      architecture={architecture?.id === blockId ? architecture.content : undefined}
+                      staticArchitecture={staticArchitecture}
                     />
                   );
                 })}

@@ -1,0 +1,10 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+import AlgorithmLabIsland from "./AlgorithmLabIsland";
+import { labPath } from "../content/site";
+interface Props { legacy?: boolean }
+const { legacy = false } = Astro.props;
+---
+<SiteLayout path={labPath} redirectTo={legacy ? labPath : undefined} noindex={legacy}>
+  <AlgorithmLabIsland client:load />
+</SiteLayout>

@@ -1,15 +1,9 @@
-import { advertisingPlatformsGuide } from "./lessons/advertising-platforms";
-import { chatgptAdsGuide } from "./lessons/chatgpt-ads";
-import { apiDesignLesson } from "./lessons/api-design";
-import { chatgptAdsApisGuide } from "./lessons/chatgpt-ads-apis";
-import { chatgptAdsReportingGuide } from "./lessons/chatgpt-ads-reporting";
-import { attributionAndLiftGuide } from "./lessons/attribution-and-lift";
-import { verifySmallCodeChangeGuide } from "./lessons/verify-small-code-change";
+import { guides } from "./guides";
 import { articleUrl, site } from "./site";
-import { discovery } from "./discovery";
+import { discovery, discoverGuides } from "./discovery";
 
 export const learningContent = {
-  discovery,
+  discovery: discoverGuides(discovery, guides),
   concepts: [
     {
       id: "http-basics",
@@ -232,7 +226,7 @@ export const learningContent = {
       href: null,
     },
   ],
-  lessons: [advertisingPlatformsGuide, chatgptAdsGuide, chatgptAdsApisGuide, apiDesignLesson, chatgptAdsReportingGuide, attributionAndLiftGuide, verifySmallCodeChangeGuide],
+  lessons: guides,
 };
 
 export const lessons = learningContent.lessons;

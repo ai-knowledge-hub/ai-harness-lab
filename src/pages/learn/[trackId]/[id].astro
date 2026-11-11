@@ -1,0 +1,17 @@
+---
+import SiteLayout from "../../../layouts/SiteLayout.astro";
+import { StaticPage } from "../../../components/StaticPage";
+import Architecture from "../../../components/Architecture.astro";
+import { lessons } from "../../../content/learning";
+import { validateLearningContent } from "../../../content/validate-learning";
+export function getStaticPaths() {
+  validateLearningContent();
+  return lessons.map((guide) => ({ params: { trackId: guide.trackId, id: guide.id }, props: { guide } }));
+}
+const { guide } = Astro.props;
+const hasArchitecture = guide.sections.some(({ blocks }) => blocks.some((block) => block.type === "ads-architecture"));
+---
+<SiteLayout path={guide.path}>
+  <StaticPage path={guide.path} page={{ kind: "guide", guide }} />
+  {hasArchitecture && <Architecture />}
+</SiteLayout>

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { AlgorithmLabPage } from "../../src/pages/AlgorithmLabPage";
+import { AlgorithmLabPage } from "../../src/views/AlgorithmLabPage";
 
 describe("AlgorithmLabPage", () => {
   it("switches algorithms from the catalogue", () => {

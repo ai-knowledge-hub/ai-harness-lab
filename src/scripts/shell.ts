@@ -28,3 +28,20 @@ menu?.addEventListener("keydown", (event) => {
     menu.querySelector("summary")?.focus();
   }
 });
+import { inject } from "@vercel/analytics";
+
+// Full document navigation supplies page views without a React analytics island.
+// Local previews keep the same SDK in their measured bundle, without requesting
+// the platform-only endpoint or sending development visits to production.
+if (import.meta.env.PROD && !["localhost", "127.0.0.1", "[::1]"].includes(location.hostname))
+  inject({
+    framework: "astro", mode: "production",
+    basePath: import.meta.env.PUBLIC_VERCEL_OBSERVABILITY_BASEPATH,
+  }, import.meta.env.PUBLIC_VERCEL_OBSERVABILITY_CLIENT_CONFIG);
+
+menu?.addEventListener("click", (event) => {
+  if (event.target instanceof Element && event.target.closest("a[href]")) {
+    menu.open = false;
+    menu.querySelector("summary")?.focus();
+  }
+});

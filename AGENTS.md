@@ -18,8 +18,15 @@ The project does not opt in to Origin Trials or volatile features. Preserve
 reading and reference downloads without JavaScript, keyboard operation, and the
 pilot's 63,477-gzip-byte budget through the first successful stage change.
 
-`pnpm check` runs TypeScript, unit/component tests, and the normal production
-build. `pnpm test:e2e` checks that normal build. The combined Astro pilot requires
-Node 22.12+; `pnpm test:astro-pilot` builds it and runs its integration checks and
-the existing browser suite. See `docs/harness-astro-pilot.md` for the baseline,
-measurements, and migration scope.
+The Astro site requires Node 22.12+. `pnpm check` runs strict TypeScript and Astro
+template diagnostics, unit/component tests, and the Astro build. `pnpm test:e2e`
+checks the retained browser behaviour; `pnpm test:site` checks search, fragments,
+accessibility, and island boundaries in Chromium/WebKit. `pnpm check:routes`
+compares the independent #42 snapshot and download hashes. `pnpm check:authoring`
+temporarily adds one record, tests published/draft/invalid variants, restores
+the source, and rebuilds. Run it before browser tests, not concurrently.
+
+The original pilot command remains an alias for the full Astro site. Vercel
+previews use Astro. Production retains `pnpm build:legacy` until #47 authorises
+cutover; #46 owns the dedicated React-lab integration audit. See
+`docs/harness-astro-site.md` for the boundary, verification, and measurements.

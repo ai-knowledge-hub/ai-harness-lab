@@ -1,5 +1,10 @@
 # Astro pilot for the ChatGPT Ads guide
 
+This records the completed #44 pilot. #45 replaces its build setup with the
+[full Astro site](harness-astro-site.md); the pilot commands now alias that site.
+The sections below retain the historical pilot implementation and measurements;
+use the full-site report for current build, preview and authoring instructions.
+
 The pilot serves `/learn/system-design/chatgpt-ads` from Astro 6.4.8 using `@astrojs/react` 5.0.7 and React 19.2.5 for build-time rendering. It reuses the typed guide, reader, navigation, styles, and architecture component. The browser receives complete HTML and a small TypeScript module for the walkthrough, reading theme, and mobile menu. It loads no React hydration runtime.
 
 The original React island measured 68,465 gzip bytes through first Next and missed the 63,477-byte gate. On 11 November 2026, the user approved changing #44's React-island requirement to Astro/TypeScript controls. The optimisation keeps content, node positions, connections, and outcomes in the shared React renderer and content records. Astro supplies inert control templates; the script enhances the diagram when it becomes visible. A missing script leaves all 18 nodes, five explanations, and three outcomes readable. [Astro scripts and event handling](https://v6.docs.astro.build/en/guides/client-side-scripts/)

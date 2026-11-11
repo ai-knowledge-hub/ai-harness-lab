@@ -59,3 +59,5 @@ export const chatgptAdsReportingGuide = {
     { id: "reference-downloads", title: "Reference downloads", blocks: [{ type: "reference-downloads", collection: "reporting" }] },
   ],
 } satisfies Guide;
+
+export default chatgptAdsReportingGuide;

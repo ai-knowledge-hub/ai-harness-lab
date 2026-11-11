@@ -7,8 +7,8 @@ import { pathToFileURL } from "node:url";
 // Build both entry points without a listening server. The temporary renderer
 // uses the same components as the client and is removed from deploy output.
 await checkReferenceContracts();
-await build();
-const rendererDirectory = resolve("dist/.prerender");
+await build({ build: { outDir: "legacy-dist" } });
+const rendererDirectory = resolve("legacy-dist/.prerender");
 try {
   await build({
     build: {
@@ -21,7 +21,7 @@ try {
     pathToFileURL(resolve(rendererDirectory, "entry-server.js")).href
   );
   rendering.validateLearningContent();
-  const template = await readFile(resolve("dist/index.html"), "utf8");
+  const template = await readFile(resolve("legacy-dist/index.html"), "utf8");
   if (
     !template.includes('<div id="root"></div>') ||
     !template.includes("<!--page-metadata-->")
@@ -55,10 +55,10 @@ try {
       );
     const files =
       path === "/"
-        ? [resolve("dist/index.html")]
+        ? [resolve("legacy-dist/index.html")]
         : [
-            resolve("dist", `${path.slice(1)}.html`),
-            resolve("dist", path.slice(1), "index.html"),
+            resolve("legacy-dist", `${path.slice(1)}.html`),
+            resolve("legacy-dist", path.slice(1), "index.html"),
           ];
     for (const file of files) {
       await mkdir(dirname(file), { recursive: true });
@@ -67,11 +67,11 @@ try {
     if (metadata.robots.startsWith("index")) sitemap.push(metadata.canonical);
   }
   await writeFile(
-    resolve("dist/sitemap.xml"),
+    resolve("legacy-dist/sitemap.xml"),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemap.map((url) => `\n  <url><loc>${escape(url)}</loc></url>`).join("")}\n</urlset>\n`,
   );
   await writeFile(
-    resolve("dist/robots.txt"),
+    resolve("legacy-dist/robots.txt"),
     `User-agent: *\nAllow: /\nSitemap: https://harness.ai-knowledge-hub.org/sitemap.xml\n`,
   );
   console.log(

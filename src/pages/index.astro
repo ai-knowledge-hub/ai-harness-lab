@@ -1,0 +1,7 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+import { StaticPage } from "../components/StaticPage";
+import { validateLearningContent } from "../content/validate-learning";
+validateLearningContent();
+---
+<SiteLayout path="/"><StaticPage path="/" page={{ kind: "home" }} /></SiteLayout>
