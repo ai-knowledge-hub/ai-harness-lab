@@ -16,7 +16,7 @@ pnpm test:e2e
 pnpm test:site
 ```
 
-Use Node 22.12 or later. `pnpm check` runs strict TypeScript and Astro template checks, the unit/component suite, and the static Astro build. Browser tests use the built output, so run it before the browser commands. Playwright starts its own previews; install the required engines with `pnpm exec playwright install chromium webkit`.
+Use Node 22.12 or later. `pnpm check` runs strict TypeScript and Astro template checks, the unit/component suite, and the static Astro build. Browser tests use the built output, so run it before the browser commands. Playwright starts its own previews; install the required engines locally with `pnpm exec playwright install chromium webkit`. CI uses the version-matched official Playwright image with engines and OS libraries preinstalled; see the [CI coverage rationale](docs/harness-astro-site.md#ci-scope-and-cost).
 
 `pnpm build` and `pnpm preview` serve the full Astro site. The earlier `build:astro-pilot` and `preview:astro-pilot` commands remain aliases. `pnpm test:astro-pilot` rebuilds and runs the retained guide checks and browser suite. `pnpm check:routes` verifies the independent route/download baseline; `pnpm check:authoring` checks the single-record authoring workflow. See the [site migration report](docs/harness-astro-site.md) and the [original pilot report](docs/harness-astro-pilot.md).
 

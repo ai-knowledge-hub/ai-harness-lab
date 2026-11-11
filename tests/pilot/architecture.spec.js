@@ -98,21 +98,7 @@ test("walkthrough preserves stage, outcome and keyboard behaviour", async ({ pag
   await diagram.getByRole("button", { name: "Return to staged view", exact: true }).click();
   await expect(status).toHaveText("Stage 3 of 5");
   await expect(diagram.locator(".ads-stage-copy:visible")).toHaveCount(1);
-  await page.getByRole("button", { name: "Switch to light mode" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  if (page.viewportSize().width < 640) {
-    const menu = page.locator(".mobile-navigation");
-    await menu.locator("summary").click();
-    await page.keyboard.press("Escape");
-    await expect(menu).not.toHaveAttribute("open");
-    await expect(menu.locator("summary")).toBeFocused();
-    const contents = page.locator(".lesson-mobile-contents");
-    await contents.locator("summary").click();
-    await contents.getByRole("link", { name: "Follow the path of an ad" }).click();
-    await expect(page).toHaveURL(/#visual-deep-dive$/);
-  }
+  // Theme, menu focus and guide contents are covered in tests/e2e/smoke.spec.js.
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect(errors).toEqual([]);
 });
