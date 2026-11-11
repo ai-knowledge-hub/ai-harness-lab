@@ -52,8 +52,8 @@ const connections = [
   connection("worker", "evidence", { start: "left", end: "right", reference: true }),
 ];
 
-/** @param {{ id: string, GuideLink?: "a" | typeof import("./SiteLink").SiteLink }} props */
-export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a" }) {
+/** @param {{ id: string, GuideLink?: "a" | typeof import("./SiteLink").SiteLink, staticEnhancement?: boolean }} props */
+export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a", staticEnhancement = false }) {
   const [enhanced, setEnhanced] = useState(false);
   const [stage, setStage] = useState(0);
   const [complete, setComplete] = useState(false);
@@ -126,6 +126,7 @@ export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a" }) {
                   d={edge.path}
                   data-from={edge.from}
                   data-to={edge.to}
+                  data-outcomes={staticEnhancement ? edge.outcomes?.join(" ") : undefined}
                   className={`ads-connection${edge.reference ? " ads-reference-connection" : ""}`}
                   data-muted={enhanced && edge.outcomes && !edge.outcomes.includes(example) ? "true" : undefined}
                   markerEnd={`url(#${diagramId}-arrow)`}
@@ -138,6 +139,7 @@ export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a" }) {
                 <li
                   key={node.id}
                   data-node={node.id}
+                  data-stage={staticEnhancement ? node.stage : undefined}
                   data-origin={node.origin}
                   className="ads-node"
                   style={{ left: node.x, top: node.y, width: BOX_WIDTH, height: BOX_HEIGHT }}
@@ -166,8 +168,8 @@ export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a" }) {
           ) : (
             <>
               <p>Example ad outcomes</p>
-              <ul>{Object.values(deliveryExamples).map((item) => (
-                <li key={item.label}><strong>{item.label}.</strong> {item.outcome}</li>
+              <ul>{Object.entries(deliveryExamples).map(([value, item]) => (
+                <li key={item.label} data-example={staticEnhancement ? value : undefined}><strong>{item.label}.</strong> {item.outcome}</li>
               ))}</ul>
             </>
           )}
@@ -176,7 +178,7 @@ export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a" }) {
       )}
       <div className="ads-explanations" id={`${diagramId}-explanations`}>
         {architectureStages.map((item, index) => (showAll || index === stage) && (
-          <section className="ads-stage-copy" key={item.short} aria-labelledby={`${diagramId}-stage-${index}`}>
+          <section className="ads-stage-copy" key={item.short} data-stage={staticEnhancement ? index : undefined} aria-labelledby={`${diagramId}-stage-${index}`}>
             <p className="eyebrow">{item.proposal ? "Harness proposal · Planned" : "OpenAI documented · Simplified"}</p>
             <h3 id={`${diagramId}-stage-${index}`}>{index + 1}. {item.title}</h3>
             <p>{item.documented ?? item.proposal}</p>

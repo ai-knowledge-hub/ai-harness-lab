@@ -44,3 +44,9 @@ jobs:
 
       - name: Build Astro pilot
         run: pnpm build:astro-pilot
+
+      - name: Install pilot test browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Verify Astro pilot behaviour
+        run: pnpm exec playwright test --config playwright.pilot.config.js

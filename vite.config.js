@@ -8,6 +8,6 @@ export default defineConfig({
     setupFiles: "./vitest.setup.js",
     globals: true,
     css: true,
-    exclude: ["tests/e2e/**", "node_modules/**"],
+    exclude: ["tests/e2e/**", "tests/pilot/**", "node_modules/**"],
   },
 });

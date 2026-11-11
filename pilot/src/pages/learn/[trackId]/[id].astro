@@ -1,7 +1,7 @@
 ---
 import type { GetStaticPaths } from "astro";
 import { GuideFrame } from "../../../GuideFrame";
-import { ChatGPTAdsArchitecture } from "../../../../../src/components/ChatGPTAdsArchitecture";
+import Architecture from "../../../Architecture.astro";
 import type { Guide } from "../../../../../src/content/guide-types";
 import { site } from "../../../../../src/content/site";
 import { validateLearningContent } from "../../../../../src/content/validate-learning";
@@ -57,15 +57,13 @@ const architectureId = section ? `${guide.id}-${section.id}-${index}` : undefine
     <GuideFrame guide={guide} architectureId={architectureId}>
       <Fragment slot="architecture">
         {architectureId && (
-          <ChatGPTAdsArchitecture
-            client:visible
-            id={architectureId}
-          />
+          <Architecture id={architectureId} />
         )}
       </Fragment>
     </GuideFrame>
     <script>
       import "../../../shell";
+      import "../../../architecture";
     </script>
   </body>
 </html>

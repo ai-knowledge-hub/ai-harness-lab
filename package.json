@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "build:astro-pilot": "astro build --config astro.pilot.config.mjs",
     "preview:astro-pilot": "astro preview --config astro.pilot.config.mjs",
+    "test:astro-pilot": "pnpm build:astro-pilot && playwright test --config playwright.pilot.config.js",
     "build:deployment": "pnpm build && node scripts/stage-astro-pilot.mjs",
     "test": "vitest",
     "test:run": "vitest run",
