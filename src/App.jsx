@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { AlgorithmLabPage } from "./pages/AlgorithmLabPage";
-import { ExamplesPage } from "./pages/ExamplesPage";
-import { HomePage } from "./pages/HomePage";
-import { PatternsPage } from "./pages/PatternsPage";
-import { TrackPage } from "./pages/TrackPage";
-import { LessonPage } from "./pages/LessonPage";
+import { AlgorithmLabPage } from "./views/AlgorithmLabPage";
+import { ExamplesPage } from "./views/ExamplesPage";
+import { HomePage } from "./views/HomePage";
+import { PatternsPage } from "./views/PatternsPage";
+import { TrackPage } from "./views/TrackPage";
+import { LessonPage } from "./views/LessonPage";
 import { lessons } from "./content/learning";
 import { getPageMetadata } from "./content/page-metadata";
 import { site, tracks, trackPath, labPath, controlPath } from "./content/site";

@@ -1,0 +1,40 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { getPageMetadata } from "../content/page-metadata";
+import "../../styles.css";
+interface Props { path: string; redirectTo?: string; noindex?: boolean }
+const { path, redirectTo, noindex } = Astro.props;
+const metadata = getPageMetadata(path);
+---
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={metadata.description} />
+    <meta name="theme-color" content="#000000" />
+    <meta name="robots" content={noindex ? "noindex, follow" : metadata.robots} />
+    <meta property="og:title" content={metadata.title} />
+    <meta property="og:description" content={metadata.description} />
+    <meta property="og:url" content={metadata.canonical} />
+    <title>{metadata.title}</title>
+    <link rel="canonical" href={metadata.canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      try {
+        const theme = localStorage.getItem("harness-theme");
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+      } catch { /* Keep the approved dark default when storage is unavailable. */ }
+    </script>
+    {redirectTo && <script is:inline define:vars={{ redirectTo }}>
+      location.replace(redirectTo + location.search + location.hash);
+    </script>}
+  </head>
+  <body>
+    <Header pathname={path} />
+    <slot />
+    <Footer />
+    <script>import "../scripts/shell";</script>
+  </body>
+</html>

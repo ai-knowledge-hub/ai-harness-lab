@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { algorithms, operations, type Algorithm } from "../visualizers/algorithms-data";
 import { renderVisualization } from "../visualizers/render-visualization";
 import {
-  Link,
   useLocation,
   useNavigate,
   useSearchParams,
@@ -65,12 +64,16 @@ function ContextView({ context }: { context: Algorithm["context"] }) {
   );
 }
 
-export function AlgorithmLabPage() {
+export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQueryUntilMounted?: boolean }) {
   const [filter, setFilter] = useState("All");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const requestedId = searchParams.get("algorithm");
+  const [queryReady, setQueryReady] = useState(!deferQueryUntilMounted);
+  useEffect(() => {
+    if (deferQueryUntilMounted) setQueryReady(true);
+  }, [deferQueryUntilMounted]);
+  const requestedId = queryReady ? searchParams.get("algorithm") : null;
   const currentId = algorithms.some((item) => item.id === requestedId)
     ? requestedId
     : "binary";
@@ -134,9 +137,9 @@ export function AlgorithmLabPage() {
   return (
     <main id="main-content" className="lab-page" tabIndex={-1}>
       <nav className="breadcrumbs editorial-wrap" aria-label="Breadcrumb">
-        <Link to="/">Harness</Link>
+        <a href="/">Harness</a>
         <span aria-hidden="true">/</span>
-        <Link to={trackPath(tracks[1])}>Algorithms & Data</Link>
+        <a href={trackPath(tracks[1])}>Algorithms & Data</a>
         <span aria-hidden="true">/</span>
         <span>Visualizers</span>
       </nav>

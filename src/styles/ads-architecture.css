@@ -142,6 +142,7 @@
 .ads-delivery-example p { margin-top: 14px; font-size: 16px; line-height: 1.7; }
 .ads-delivery-example .ads-example-note { font-size: 13px; }
 .ads-stage-copy { margin-top: 32px; }
+.ads-stage-copy[hidden="until-found"] { margin-top: 0; }
 .ads-stage-copy h3 { font-size: 25px; line-height: 1.3; margin: 12px 0 18px; }
 .ads-stage-copy > p:not(.eyebrow) { font-size: 17px; line-height: 1.75; }
 .ads-stage-copy dl { margin: 22px 0; }

@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
@@ -38,19 +38,23 @@ jobs:
       - name: Build app
         run: pnpm build
 
-      - name: Setup Node for the Astro pilot
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+      - name: Compare independent route and download baseline
+        run: node scripts/check-astro-output.mjs
 
-      - name: Build combined Astro pilot
-        run: pnpm build:astro-pilot
+      - name: Verify one-record authoring and draft eligibility
+        run: node scripts/check-astro-authoring.mjs
 
-      - name: Install pilot test browser
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Install test browsers
+        run: pnpm exec playwright install --with-deps chromium webkit
 
       - name: Verify Astro pilot behaviour
         run: pnpm exec playwright test --config playwright.pilot.config.js
 
-      - name: Run existing browser suite against combined preview
-        run: pnpm exec playwright test --config playwright.staged.config.js
+      - name: Verify retained browser behaviour
+        run: pnpm test:e2e
+
+      - name: Verify search, accessibility and island boundaries
+        run: pnpm exec playwright test --config playwright.site.config.js
+
+      - name: Verify retained production renderer
+        run: pnpm build:legacy && pnpm exec playwright test --config playwright.legacy.config.js

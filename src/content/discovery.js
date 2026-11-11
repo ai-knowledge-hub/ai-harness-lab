@@ -167,6 +167,24 @@ export const discoveryGroups = [
   ["references", "References"],
 ];
 
+// Preserve the curated starting paths and cross-track relationships. A newly
+// authored guide joins its primary track without another registration edit.
+/** @template {object} T @param {T} directory @param {import("./guide-types").Guide[]} guides @returns {T} */
+export function discoverGuides(directory, guides) {
+  const result = structuredClone(directory);
+  for (const guide of guides) {
+    const page = result.tracks[guide.trackId];
+    if (!page) continue; // The validator reports the invalid track.
+    const listed = page.start?.next?.kind === "guide" && page.start.next.id === guide.id ||
+      discoveryGroups.some(([group]) => page[group]?.some((link) => link.kind === "guide" && link.id === guide.id)) ||
+      Boolean(result.caseTracks?.[guide.id]?.[guide.trackId]);
+    if (listed) continue;
+    const group = guide.kind === "principle" ? "guides" : guide.kind === "case" ? "examples" : "references";
+    (page[group] ??= []).push({ kind: "guide", id: guide.id, action: `Read ${guide.shortTitle ?? guide.title}` });
+  }
+  return result;
+}
+
 export function caseLinksForTrack(discovery, trackId) {
   return Object.entries(discovery.caseTracks ?? {}).flatMap(([id, trackLinks]) => {
     const link = trackLinks?.[trackId];

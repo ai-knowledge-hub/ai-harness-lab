@@ -87,3 +87,5 @@ export const chatgptAdsGuide = {
     },
   ],
 } satisfies Guide;
+
+export default chatgptAdsGuide;

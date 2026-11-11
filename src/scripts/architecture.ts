@@ -11,7 +11,7 @@ function show(element: HTMLElement | SVGElement, visible: boolean) {
 }
 
 function enhance(root: HTMLElement) {
-  const diagram = required<HTMLElement>(root, ".ads-deep-dive");
+  const diagram = root;
   const controls = required<HTMLTemplateElement>(root, "template[data-controls]").content.cloneNode(true) as DocumentFragment;
   const deliveryControls = required<HTMLTemplateElement>(root, "template[data-delivery-controls]").content.cloneNode(true) as DocumentFragment;
   const buttons = [...controls.querySelectorAll<HTMLButtonElement>("[data-stage]")];
@@ -35,6 +35,7 @@ function enhance(root: HTMLElement) {
   ]));
   let stage = 0;
   let complete = false;
+  const searchablePanels = "onbeforematch" in HTMLElement.prototype;
 
   function render() {
     const visibleIds = new Set<string>();
@@ -58,7 +59,14 @@ function enhance(root: HTMLElement) {
     map.style.height = `${height}px`;
     svg.setAttribute("height", String(height));
     svg.setAttribute("viewBox", `0 0 800 ${height}`);
-    for (const section of explanations) show(section, complete || Number(section.dataset.stage) === stage);
+    for (const section of explanations) {
+      // until-found keeps inactive copy searchable. Safari gets the complete
+      // linear reference below the interactive diagram instead of hidden text.
+      section.style.removeProperty("display");
+      if (complete || !searchablePanels || Number(section.dataset.stage) === stage)
+        section.removeAttribute("hidden");
+      else section.setAttribute("hidden", "until-found");
+    }
     buttons.forEach((button, index) => {
       if (!complete && stage === index) button.setAttribute("aria-current", "step");
       else button.removeAttribute("aria-current");
@@ -82,23 +90,30 @@ function enhance(root: HTMLElement) {
   next.addEventListener("click", () => selectStage(stage + 1));
   completeToggle.addEventListener("click", () => { complete = !complete; render(); });
   select.addEventListener("change", render);
+  explanations.forEach((section) => section.addEventListener("beforematch", () => {
+    selectStage(Number(section.dataset.stage));
+  }));
+
+  function revealFragment() {
+    let id: string;
+    try { id = decodeURIComponent(location.hash.slice(1)); } catch { return; }
+    const target = document.getElementById(id);
+    const section = target && explanations.find((section) => section.contains(target));
+    if (section) {
+      selectStage(Number(section.dataset.stage));
+      target.scrollIntoView({ block: "start" });
+    }
+  }
 
   required(diagram, ".ads-figure").before(controls);
   delivery.prepend(deliveryControls);
   show(fallbackLabel, false);
   show(fallbackExamples, false);
   render();
+  revealFragment();
+  window.addEventListener("hashchange", revealFragment);
 }
 
-// Leave the full reference intact until the reader reaches it. If this module
-// fails to load, the server-rendered diagram and every explanation stay visible.
-const roots = document.querySelectorAll<HTMLElement>("[data-ads-walkthrough]");
-if ("IntersectionObserver" in window) {
-  const observer = new IntersectionObserver((entries) => {
-    for (const entry of entries) if (entry.isIntersecting) {
-      observer.unobserve(entry.target);
-      enhance(entry.target as HTMLElement);
-    }
-  });
-  roots.forEach((root) => observer.observe(root));
-} else roots.forEach(enhance);
+// Initialise searchable panels before find-in-page can jump to an explanation.
+// A failed module download leaves the complete server-rendered reference intact.
+document.querySelectorAll<HTMLElement>("[data-ads-walkthrough]").forEach(enhance);

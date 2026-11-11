@@ -386,8 +386,7 @@ test("the guide is readable as static HTML without JavaScript", async ({
     ]) {
       await page.goto(`http://127.0.0.1:4173/learn/system-design/${slug}`);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
-      const robots = testInfo.config.metadata.astroPilot && slug === "chatgpt-ads"
-        ? "noindex, follow" : "index, follow";
+      const robots = "index, follow";
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", robots);
       await expect(page.locator(".source-citation").first()).toBeVisible();
       await expect(page.locator("#try-the-collector")).toHaveCount(0);

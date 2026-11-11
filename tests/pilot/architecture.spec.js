@@ -18,7 +18,7 @@ async function expectReference(page) {
   await expect(diagram.getByRole("button", { name: "Next", exact: true })).not.toBeVisible();
   await expect(diagram.locator('[data-node="worker"]')).toContainText("Harness · proposed");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://harness.ai-knowledge-hub.org" + path);
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "index, follow");
 }
 
 test("reading, complete diagram and downloads survive without JavaScript", async ({ browser, baseURL }, testInfo) => {

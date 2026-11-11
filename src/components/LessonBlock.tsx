@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { GuideBlock } from "../content/guide-types";
 import { ChatGPTAdsArchitecture } from "./ChatGPTAdsArchitecture";
 import { AdsCapabilities, ReferenceDownloads } from "./AdsReference";
@@ -7,16 +6,16 @@ import { AdsReportingReference } from "./AdsReportingReference";
 
 import { SiteLink } from "./SiteLink";
 
-export function LessonBlock({ block, blockId, architecture }: {
+export function LessonBlock({ block, blockId, staticArchitecture = false }: {
   block: GuideBlock;
   blockId: string;
-  architecture?: ReactNode;
+  staticArchitecture?: boolean;
 }) {
   if (block.type === "ads-capabilities") return <AdsCapabilities />;
   if (block.type === "ads-orchestrator") return <AdsOrchestrator />;
   if (block.type === "ads-reporting-reference") return <AdsReportingReference id={blockId} />;
   if (block.type === "reference-downloads") return <ReferenceDownloads collection={block.collection} />;
-  if (block.type === "ads-architecture") return architecture ?? <ChatGPTAdsArchitecture id={blockId} GuideLink={SiteLink} />;
+  if (block.type === "ads-architecture") return <ChatGPTAdsArchitecture id={blockId} GuideLink={SiteLink} staticEnhancement={staticArchitecture} />;
   if (block.type === "paragraph")
     return (
       <p>

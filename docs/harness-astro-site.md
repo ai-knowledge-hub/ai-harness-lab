@@ -1,0 +1,53 @@
+# Astro shell, tracks and guides
+
+Implementation for [#45](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/45), following the successful [#44 pilot](harness-astro-pilot.md). Main was updated through [PR #52](https://github.com/ai-knowledge-hub/ai-harness-lab/pull/52) at `a90b4ca` before this branch was created.
+
+## Rendering and authoring
+
+Astro now owns the document, shared header/footer, track navigation, home, tracks, guides, reference routes, sitemap and robots file. The existing React reading components render only at build time inside a static router. Their browser output is ordinary HTML links; navigating from a track or related guide requests the destination Astro document. Reading pages do not load React, React Router or the lab island.
+
+The typed guide catalogue eagerly discovers default exports in `src/content/lessons/*.ts`. Each record supplies its canonical path, metadata, publication state and sections. Existing curated starting paths and cross-track actions remain intact. An unlisted guide automatically joins its primary track's guide, example or reference group according to its kind. Authors can still customise the curated action independently. Validation continues to reject duplicate paths, invalid metadata and unknown relationships.
+
+`pnpm check:authoring` temporarily adds one typed record, builds a published route with an anchor, canonical/OG metadata, track action and sitemap entry, and checks two architecture blocks receive independent templates and IDs. It then verifies draft preview/noindex/sitemap exclusion and an invalid-reference build failure. A `finally` block removes the fixture and restores the normal build. The original #42 trial required three files; the standard Astro trial requires one.
+
+The architecture walkthrough shares its server-rendered content and inert control templates with the retained React renderer. A TypeScript enhancement supplies stage/outcome controls. Missing or failed JavaScript leaves all nodes, explanations and sample outcomes readable. Inactive explanations use feature-detected `hidden="until-found"`; `beforematch` synchronises the selected stage and diagram. Browsers without that capability retain all five explanations below the interactive map. Initial and changed explanation fragments reveal and scroll to their stage. Every stage button includes its visible label in its accessible name.
+
+The only hydrated React island is the existing 15-visualizer lab. It hydrates the server-rendered default in place before applying the actual query, keeping the scrolling target connected even when its module arrives late. Query selection, Back, invalid/default IDs, playback, filters and working-position behaviour remain covered by the existing suite. `/algorithms` and `/patterns` preserve query strings and fragments when replacing their compatibility address. Their static fallback content remains readable without JavaScript.
+
+## Run and verify
+
+Use Node 22.12 or later and the frozen pnpm lockfile:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm check
+pnpm check:routes
+pnpm check:authoring
+pnpm exec playwright install chromium webkit
+pnpm exec playwright test --config playwright.pilot.config.js
+pnpm test:e2e
+pnpm test:site
+pnpm build:legacy
+pnpm exec playwright test --config playwright.legacy.config.js
+pnpm preview --host 127.0.0.1 --port 4174
+```
+
+Run the authoring check before browser checks because it temporarily rebuilds the output. The former pilot build/preview commands now alias the full Astro site. `src/pages` contains native routes; existing React bodies are in `src/views`. The final build emits 18 document routes: the 16 baseline routes plus the two compatibility addresses. Nested routes retain identical flat `.html` and directory-index copies. Fourteen canonical URLs remain eligible for the sitemap.
+
+Local verification on Node 22.22.0 passed strict TypeScript and Astro diagnostics, 31 unit/component tests, 18 retained browser tests, 16 guide/navigation checks, eight Chromium/WebKit search/accessibility/island checks, and all 18 checks on the retained production renderer. A temporary malformed `GuideSection` passed to the actual `.astro` guide route was rejected with TS2740, confirming template handoffs are checked.
+
+`tests/fixtures/reading-baseline.json` was captured independently from the preserved #42 Vite artifact (`cc921b2`, preserved checkout `5c8d173`), rather than generated from the candidate catalogue. `pnpm check:routes` compares all 16 routes' full no-JavaScript reading text, baseline anchors, exact links, canonical/OG metadata and indexing, plus five SHA-256 download hashes. Text normalisation ignores serialization whitespace and inert templates. The fixture includes the reporting draft and coding-agent guide; the current catalogue is also checked so future records cannot silently omit their route/discovery/indexing. The robots file remains byte-identical to the baseline.
+
+## Performance
+
+The unchanged reviewed #42 script measures home, API design, ChatGPT Ads and the lab against the independent artifact. Paint uses a separate five-second untouched navigation; outstanding rendering assets make a sample inconclusive. Script measurement verifies stage 1 before a successful Next to stage 2. Two alternating batches of five cold samples per build use identical local Vite 7.3.2 transport, Chromium 147.0.7727.15, Node 25.8.2, Apple M2, a 390 × 844 viewport at DPR 3, fourfold CPU throttling, 150 ms latency, 1.6 Mb/s download and 0.75 Mb/s upload. Artifacts were built with Node 22.22.0.
+
+See [raw measurements and artifact identities](benchmarks/2026-11-11-astro-site/README.md) for final results. The reading-page gate remains 63,477 gzip bytes through the first successful stage change. The lab is measured separately and retains its dedicated #46 audit.
+
+The reading count includes the analytics SDK and executable inline theme script. Loopback previews suppress the Vercel-only analytics request, as they do not have its hosting endpoint. Hosted verification must separately check the platform analytics script; local synthetic timings are not real-user production measurements.
+
+## Preview and release boundary
+
+Vercel previews build the full Astro site. Shared TypeScript controls preserve saved-theme selection, dark default, native mobile disclosure and Escape/focus behaviour. The official analytics SDK is injected once per hosted document with the Astro framework tag and optional public observability configuration. Published guides use their existing `index, follow` metadata through both direct and site navigation. The reporting draft and planned examples page remain directly accessible with `noindex, follow` and no sitemap entry.
+
+Production deliberately retains the compatibility renderer through `pnpm build:legacy`. `pnpm build:deployment` copies that output to `dist` only when `VERCEL_ENV=production`; other builds use Astro. This PR does not authorise production cutover or retire the old entry point. #46 owns the dedicated lab integration/performance audit; #47 owns production cutover, renderer retirement and the hosting-header inventory. The dependency reachability review and remaining version matches are recorded [separately](reviews/2026-11-11-astro-site-dependencies.md).

@@ -7,9 +7,9 @@ export default defineConfig({
     headless: true,
   },
   webServer: {
-    command: "pnpm vite preview --host 127.0.0.1 --port 4173",
+    command: "pnpm preview --host 127.0.0.1 --port 4173",
     port: 4173,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120000,
   },
 });

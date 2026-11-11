@@ -57,3 +57,5 @@ export const apiDesignLesson = {
     ] },
   ],
 } satisfies Guide;
+
+export default apiDesignLesson;

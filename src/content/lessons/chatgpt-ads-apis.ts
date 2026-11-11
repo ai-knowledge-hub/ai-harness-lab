@@ -18,3 +18,5 @@ export const chatgptAdsApisGuide = {
     { id: "reference-downloads", title: "API documentation and downloads", blocks: [{ type: "reference-downloads", collection: "capabilities" }] },
   ],
 } satisfies Guide;
+
+export default chatgptAdsApisGuide;
