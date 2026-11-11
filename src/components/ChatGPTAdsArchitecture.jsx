@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   architectureNodes,
   architectureSources,
@@ -53,7 +52,8 @@ const connections = [
   connection("worker", "evidence", { start: "left", end: "right", reference: true }),
 ];
 
-export function ChatGPTAdsArchitecture({ id: diagramId }) {
+/** @param {{ id: string, GuideLink?: "a" | typeof import("./SiteLink").SiteLink, staticEnhancement?: boolean }} props */
+export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a", staticEnhancement = false }) {
   const [enhanced, setEnhanced] = useState(false);
   const [stage, setStage] = useState(0);
   const [complete, setComplete] = useState(false);
@@ -126,6 +126,7 @@ export function ChatGPTAdsArchitecture({ id: diagramId }) {
                   d={edge.path}
                   data-from={edge.from}
                   data-to={edge.to}
+                  data-outcomes={staticEnhancement ? edge.outcomes?.join(" ") : undefined}
                   className={`ads-connection${edge.reference ? " ads-reference-connection" : ""}`}
                   data-muted={enhanced && edge.outcomes && !edge.outcomes.includes(example) ? "true" : undefined}
                   markerEnd={`url(#${diagramId}-arrow)`}
@@ -138,6 +139,7 @@ export function ChatGPTAdsArchitecture({ id: diagramId }) {
                 <li
                   key={node.id}
                   data-node={node.id}
+                  data-stage={staticEnhancement ? node.stage : undefined}
                   data-origin={node.origin}
                   className="ads-node"
                   style={{ left: node.x, top: node.y, width: BOX_WIDTH, height: BOX_HEIGHT }}
@@ -166,8 +168,8 @@ export function ChatGPTAdsArchitecture({ id: diagramId }) {
           ) : (
             <>
               <p>Example ad outcomes</p>
-              <ul>{Object.values(deliveryExamples).map((item) => (
-                <li key={item.label}><strong>{item.label}.</strong> {item.outcome}</li>
+              <ul>{Object.entries(deliveryExamples).map(([value, item]) => (
+                <li key={item.label} data-example={staticEnhancement ? value : undefined}><strong>{item.label}.</strong> {item.outcome}</li>
               ))}</ul>
             </>
           )}
@@ -176,7 +178,7 @@ export function ChatGPTAdsArchitecture({ id: diagramId }) {
       )}
       <div className="ads-explanations" id={`${diagramId}-explanations`}>
         {architectureStages.map((item, index) => (showAll || index === stage) && (
-          <section className="ads-stage-copy" key={item.short} aria-labelledby={`${diagramId}-stage-${index}`}>
+          <section className="ads-stage-copy" key={item.short} data-stage={staticEnhancement ? index : undefined} aria-labelledby={`${diagramId}-stage-${index}`}>
             <p className="eyebrow">{item.proposal ? "Harness proposal · Planned" : "OpenAI documented · Simplified"}</p>
             <h3 id={`${diagramId}-stage-${index}`}>{index + 1}. {item.title}</h3>
             <p>{item.documented ?? item.proposal}</p>
@@ -186,9 +188,9 @@ export function ChatGPTAdsArchitecture({ id: diagramId }) {
             </dl>
             <a className="source-citation" href={architectureSources[item.source].href}>{architectureSources[item.source].title}</a>
             {index === 1 && <p><a className="text-link" href="#orchestrator-detail">See six steps involved in choosing an ad</a></p>}
-            {index === 3 && <p><Link className="text-link" to="/learn/system-design/chatgpt-ads-apis">See what advertisers can do with the APIs</Link></p>}
+            {index === 3 && <p><GuideLink className="text-link" href="/learn/system-design/chatgpt-ads-apis">See what advertisers can do with the APIs</GuideLink></p>}
             {index === 3 && <> · <a className="source-citation" href={architectureSources.engineering.href}>How OpenAI records events and feedback</a></>}
-            {item.proposal && <p><Link className="text-link" to="/learn/system-design/chatgpt-ads-reporting">Open the reporting example</Link></p>}
+            {item.proposal && <p><GuideLink className="text-link" href="/learn/system-design/chatgpt-ads-reporting">Open the reporting example</GuideLink></p>}
           </section>
         ))}
       </div>

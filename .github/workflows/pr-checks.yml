@@ -8,7 +8,8 @@ on:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    # Playwright 1.59 supports Ubuntu 24.04; ubuntu-latest also selects 26.04.
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
@@ -36,3 +37,20 @@ jobs:
 
       - name: Build app
         run: pnpm build
+
+      - name: Setup Node for the Astro pilot
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build combined Astro pilot
+        run: pnpm build:astro-pilot
+
+      - name: Install pilot test browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Verify Astro pilot behaviour
+        run: pnpm exec playwright test --config playwright.pilot.config.js
+
+      - name: Run existing browser suite against combined preview
+        run: pnpm exec playwright test --config playwright.staged.config.js
