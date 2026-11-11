@@ -30,7 +30,7 @@ function TrackNavigation({ onNavigate }) {
   );
 }
 
-function Header() {
+export function Header() {
   const [theme, setTheme] = useState("dark");
   useEffect(() => {
     setTheme(
@@ -169,7 +169,7 @@ function LegacyRoute({ to }) {
   return <Navigate replace to={`${to}${search}${hash}`} />;
 }
 
-function Footer() {
+export function Footer() {
   return (
     <footer className="site-footer">
       <Link className="footer-brand" to="/">

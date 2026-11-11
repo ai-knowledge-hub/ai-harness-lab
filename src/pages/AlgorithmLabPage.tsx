@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { algorithms, operations } from "../visualizers/algorithms-data";
-import { renderVisualization } from "../visualizers/renderers";
+import { algorithms, operations, type Algorithm } from "../visualizers/algorithms-data";
+import { renderVisualization } from "../visualizers/render-visualization";
 import {
   Link,
   useLocation,
@@ -19,7 +19,7 @@ const AD_PLATFORM_SECURITY_URL = articleUrl(
   "building-secure-marketing-agents-ad-platform-authentication-architecture",
 );
 
-function CodeView({ lines, activeLine }) {
+function CodeView({ lines, activeLine }: { lines: string[]; activeLine: number }) {
   return (
     <pre>
       <code>
@@ -40,7 +40,7 @@ function CodeView({ lines, activeLine }) {
   );
 }
 
-function ContextView({ context }) {
+function ContextView({ context }: { context: Algorithm["context"] }) {
   const rows = [
     ["Why it exists", context.why],
     ["What it optimizes", context.optimizes],
@@ -112,7 +112,7 @@ export function AlgorithmLabPage() {
     (item) => activeFilter === "All" || item.operation === activeFilter,
   );
 
-  function setAlgorithm(id) {
+  function setAlgorithm(id: Algorithm["id"]) {
     // Reselecting the active entry resets playback without creating a new
     // navigation key, which would be treated as an intentional anchor revisit.
     if (requestedId !== id) {
@@ -302,10 +302,7 @@ export function AlgorithmLabPage() {
                   <div
                     className="visualization"
                     dangerouslySetInnerHTML={{
-                      __html: renderVisualization(
-                        currentAlgorithm.id,
-                        currentStep,
-                      ),
+                      __html: renderVisualization(currentAlgorithm, stepIndex),
                     }}
                   />
                 </article>

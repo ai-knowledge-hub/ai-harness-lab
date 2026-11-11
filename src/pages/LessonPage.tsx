@@ -1,13 +1,12 @@
+import type { ReactNode } from "react";
+import type { Guide, GuideSection } from "../content/guide-types";
 import { Link } from "react-router-dom";
 import { tracks, trackPath } from "../content/site";
-import { getLesson, learningContent, relatedContent } from "../content/learning";
+import { getLesson, learningContent } from "../content/learning";
 import { resolveDiscoveryLink } from "../content/discovery";
-import { ChatGPTAdsArchitecture } from "../components/ChatGPTAdsArchitecture";
-import { AdsCapabilities, ReferenceDownloads } from "../components/AdsReference";
-import { AdsOrchestrator } from "../components/AdsOrchestrator";
-import { AdsReportingReference } from "../components/AdsReportingReference";
 import { referenceContext } from "../content/reference-context";
 import { SiteLink } from "../components/SiteLink";
+import { LessonBlock } from "../components/LessonBlock";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -16,7 +15,25 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
 });
 
-function Contents({ sections }) {
+function requireGuide(id: string) {
+  const guide = getLesson(id);
+  if (!guide) throw new Error(`Unknown guide: ${id}`);
+  return guide;
+}
+
+function relatedContent<Item extends { id: string }>(items: Item[], ids: string[]) {
+  return ids.map((id) => {
+    const item = items.find((entry) => entry.id === id);
+    if (!item) throw new Error(`Unknown related content: ${id}`);
+    return item;
+  });
+}
+
+function lookup<Value>(entries: Partial<Record<string, Value>>, id: string) {
+  return entries[id];
+}
+
+function Contents({ sections }: { sections: GuideSection[] }) {
   return (
     <nav aria-label="Guide contents">
       <ol>
@@ -35,20 +52,20 @@ function Contents({ sections }) {
   );
 }
 
-function ReferenceContext({ lessonId, label }) {
+function ReferenceContext({ lessonId, label }: { lessonId: string; label: string }) {
   return (
     <nav className="reference-context" aria-label="Reference context">
       <p className="eyebrow">{label}</p>
       <ol>
         {referenceContext.map((item) => (
           <li key={item.guideId}>
-            <Link
-              to={getLesson(item.guideId).path}
+            <SiteLink
+              href={requireGuide(item.guideId).path}
               aria-current={item.guideId === lessonId ? "page" : undefined}
             >
               <strong>{item.label}</strong>
               <span>{item.purpose}</span>
-            </Link>
+            </SiteLink>
           </li>
         ))}
       </ol>
@@ -56,130 +73,32 @@ function ReferenceContext({ lessonId, label }) {
   );
 }
 
-function LessonBlock({ block, blockId }) {
-  if (block.type === "ads-capabilities") return <AdsCapabilities />;
-  if (block.type === "ads-orchestrator") return <AdsOrchestrator />;
-  if (block.type === "ads-reporting-reference") return <AdsReportingReference id={blockId} />;
-  if (block.type === "reference-downloads") return <ReferenceDownloads collection={block.collection} />;
-  if (block.type === "ads-architecture") return <ChatGPTAdsArchitecture id={blockId} />;
-  if (block.type === "paragraph")
-    return (
-      <p>
-        {block.text}
-        {block.source && (
-          <>{" "}<a className="source-citation" href={block.source.href}>{block.source.title}</a></>
-        )}
-      </p>
-    );
-  if (block.type === "list")
-    return (
-      <ul className="lesson-list">
-        {block.items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    );
-  if (block.type === "callout")
-    return (
-      <aside className="lesson-note">
-        <h3>{block.title}</h3>
-        <p>{block.text}</p>
-      </aside>
-    );
-  if (block.type === "code")
-    return (
-      <figure className="lesson-code">
-        <figcaption>
-          {block.label}
-          <span>{block.language}</span>
-        </figcaption>
-        <pre tabIndex={0} aria-label={block.label}>
-          <code>{block.code}</code>
-        </pre>
-      </figure>
-    );
-  if (block.type === "flow")
-    return (
-      <figure className="lesson-flow">
-        <figcaption>{block.label}</figcaption>
-        <ol>
-          {block.steps.map((step, index) => (
-            <li key={step}>
-              <span className="track-number">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <span>{step}</span>
-            </li>
-          ))}
-        </ol>
-      </figure>
-    );
-  if (block.type === "table")
-    return (
-      <div
-        className={`lesson-table-wrap${block.columns.length > 2 ? " lesson-table-wide" : ""}`}
-        tabIndex={block.columns.length > 2 ? 0 : undefined}
-        role={block.columns.length > 2 ? "region" : undefined}
-        aria-label={block.columns.length > 2 ? "Scrollable comparison table" : undefined}
-      >
-        {block.columns.length > 2 && <p className="table-scroll-hint">Scroll across to compare all columns →</p>}
-        <table className="lesson-table">
-          <thead>
-            <tr>
-              {block.columns.map((column) => (
-                <th key={column} scope="col">
-                  {column}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {block.rows.map((row, index) => (
-              <tr key={index}>
-                {row.map((cell, cellIndex) =>
-                  cellIndex === 0 ? (
-                    <th key={cellIndex} scope="row">
-                      {cell}
-                    </th>
-                  ) : (
-                    <td key={cellIndex}>{cell}</td>
-                  ),
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  return null;
-}
-
-export function LessonPage({ lesson }) {
+export function LessonPage({ lesson, architecture }: { lesson: Guide; architecture?: { id: string; content: ReactNode } }) {
   const track = tracks.find((item) => item.slug === lesson.trackId);
-  const prerequisites = relatedContent(
-    lesson,
-    "concepts",
-    "prerequisiteConceptIds",
-  );
-  const projects = relatedContent(lesson, "projects", "projectIds");
-  const publications = relatedContent(lesson, "publications", "publicationIds");
+  if (!track) throw new Error(`Unknown guide track: ${lesson.trackId}`);
+  const prerequisites = relatedContent(learningContent.concepts, lesson.prerequisiteConceptIds);
+  const projects = relatedContent(learningContent.projects, lesson.projectIds);
+  const publications = relatedContent(learningContent.publications, lesson.publicationIds);
   const caseStudies = publications.filter((item) => item.kind === "case-study");
   const relatedReading = publications.filter((item) => item.kind !== "case-study");
-  const nextLink = learningContent.discovery.nextByGuide[lesson.id];
+  const nextLink = lookup(learningContent.discovery.nextByGuide, lesson.id);
   const next = resolveDiscoveryLink(learningContent, nextLink);
-  const trackLinks = learningContent.discovery.caseTracks[lesson.id];
-  const caseTracks = tracks.filter((item) => trackLinks?.[item.slug]);
+  const trackLinks = lookup(learningContent.discovery.caseTracks, lesson.id);
+  const caseTracks = tracks.flatMap((track) => {
+    const link = trackLinks && lookup(trackLinks, track.slug);
+    return link ? [{ track, link }] : [];
+  });
   const caseTracksByAnchor = new Map(
-    caseTracks.map((item) => [trackLinks[item.slug].anchor, item]),
+    caseTracks.map(({ track, link }) => [link.anchor, track]),
   );
   const hasReferenceContext = referenceContext.some((item) => item.guideId === lesson.id);
   const relatedGuides = lesson.relatedGuideIds
     .filter((id) => id !== nextLink?.id)
     .filter((id) => !trackLinks || !hasReferenceContext || !referenceContext.some((item) => item.guideId === id))
-    .map(getLesson);
-  const capabilities = relatedContent(lesson, "capabilities", "capabilityIds");
-  const platforms = relatedContent(lesson, "platforms", "platformIds");
-  const videos = relatedContent(lesson, "videos", "videoIds");
+    .map(requireGuide);
+  const capabilities = relatedContent(learningContent.capabilities, lesson.capabilityIds);
+  const platforms = relatedContent(learningContent.platforms, lesson.platformIds);
+  const videos = relatedContent(learningContent.videos, lesson.videoIds);
   return (
     <main id="main-content" className="lesson-page" tabIndex={-1}>
       <nav className="breadcrumbs editorial-wrap" aria-label="Breadcrumb">
@@ -252,11 +171,11 @@ export function LessonPage({ lesson }) {
             <nav className="reference-context case-track-nav" aria-labelledby="case-tracks-title">
               <h2 id="case-tracks-title">Explore the case by track</h2>
               <ol role="list">
-                {caseTracks.map((item) => (
-                  <li key={item.slug}>
-                    <a href={`#${trackLinks[item.slug].anchor}`}>
-                      <strong>{item.nav}</strong>
-                      <span>{trackLinks[item.slug].action}</span>
+                {caseTracks.map(({ track, link }) => (
+                  <li key={track.slug}>
+                    <a href={`#${link.anchor}`}>
+                      <strong>{track.nav}</strong>
+                      <span>{link.action}</span>
                     </a>
                   </li>
                 ))}
@@ -266,24 +185,35 @@ export function LessonPage({ lesson }) {
               )}
             </nav>
           )}
-          {lesson.sections.map((section) => (
-            <section
-              className="lesson-section"
-              id={section.id}
-              aria-labelledby={`${section.id}-title`}
-              key={section.id}
-            >
-              <h2 id={`${section.id}-title`}>{section.title}</h2>
-              {section.blocks.map((block, index) => (
-                <LessonBlock block={block} blockId={`${lesson.id}-${section.id}-${index}`} key={index} />
-              ))}
-              {caseTracksByAnchor.has(section.id) && (
-                <Link className="text-link case-track-return" to={trackPath(caseTracksByAnchor.get(section.id))}>
-                  Explore {caseTracksByAnchor.get(section.id).nav}
-                </Link>
-              )}
-            </section>
-          ))}
+          {lesson.sections.map((section) => {
+            const caseTrack = caseTracksByAnchor.get(section.id);
+            return (
+              <section
+                className="lesson-section"
+                id={section.id}
+                aria-labelledby={`${section.id}-title`}
+                key={section.id}
+              >
+                <h2 id={`${section.id}-title`}>{section.title}</h2>
+                {section.blocks.map((block, index) => {
+                  const blockId = `${lesson.id}-${section.id}-${index}`;
+                  return (
+                    <LessonBlock
+                      key={index}
+                      block={block}
+                      blockId={blockId}
+                      architecture={architecture?.id === blockId ? architecture.content : undefined}
+                    />
+                  );
+                })}
+                {caseTrack && (
+                  <Link className="text-link case-track-return" to={trackPath(caseTrack)}>
+                    Explore {caseTrack.nav}
+                  </Link>
+                )}
+              </section>
+            );
+          })}
           {next && (
             <section className="lesson-next" aria-labelledby="next-guide-title">
               <p className="eyebrow">Next · {next.label}</p>
@@ -404,7 +334,7 @@ export function LessonPage({ lesson }) {
                   {video.status === "planned" ? (
                     "A video walkthrough is planned. The written reference is available independently."
                   ) : (
-                    <a href={video.href}>{video.title}</a>
+                    <a href={video.href ?? undefined}>{video.title}</a>
                   )}
                 </p>
               ))}

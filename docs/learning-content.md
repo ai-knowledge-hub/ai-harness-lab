@@ -27,7 +27,7 @@ Cross-track relevance creates relationships, not copies of the guide. A reusable
 
 A guide defines `id`, `path`, `title`, optional `shortTitle`, `description`, `trackId`, `kind`, `publicationStatus`, `format`, `readingMinutes`, `updatedAt`, `introduction`, `objectives`, `prerequisiteConceptIds`, `conceptIds`, `projectIds`, `platformIds`, `publicationIds`, `capabilityIds`, `videoIds`, `relatedGuideIds`, and ordered `sections`.
 
-Canonical paths use `/learn/<trackId>/<lessonId>`. A section has a stable `id`, `title`, and blocks. Current prose block types are paragraph, list, callout, code, flow and table. Closed visual blocks are `ads-architecture`, `ads-orchestrator`, `ads-capabilities` and `ads-reporting-reference`. The `reference-downloads` block selects a known collection from `src/content/reference-downloads.js`. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
+Canonical paths use `/learn/<trackId>/<lessonId>`. A section has a stable `id`, `title`, and blocks. Current prose block types are paragraph, list, callout, code, flow and table. Closed visual blocks are `ads-architecture`, `ads-orchestrator`, `ads-capabilities` and `ads-reporting-reference`. The `reference-downloads` block selects a known collection from `src/content/reference-downloads.js`. Paragraph blocks can carry a source citation. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
 
 Supported lifecycle rules:
 
@@ -36,17 +36,17 @@ Supported lifecycle rules:
 - Platforms distinguish `research-planned`, `documented`, and `account-verified`, plus `unverified`, `verified`, or `unavailable` account access. Source review alone does not establish account access.
 - Publication and capability links are curated reference relationships, not claims that an article's example and a package are identical or that an integration has been deployed.
 
-To add a guide, add its authored data and registry relationships, then run `pnpm check`. The track index and route catalogue derive guide discovery from the registry. Do not add a navigation entry pointing to a future guide.
+To add a guide, create a `.ts` file in `src/content/lessons/` and declare the record with `satisfies Guide` from `src/content/guide-types.ts`. Add its registry and discovery relationships, then run `pnpm check`. The track index and route catalogue derive guide discovery from the registry. Do not add a navigation entry pointing to a future guide.
 
 ## Validation
 
-`validateLearningContent` checks IDs, paths, track membership, relationship targets, metadata, objectives, sections, anchors, block shapes and lifecycle consistency. The production build invokes it and fails on invalid content. Failure cases have unit coverage.
+TypeScript checks guide and block shapes during authoring. `validateLearningContent` checks IDs, paths, track membership, relationship targets, metadata, objectives, sections, anchors, block shapes and lifecycle consistency. The production build invokes it and fails on invalid content. Failure cases have unit coverage.
 
 Current validation is structural. It does not establish the accuracy of an external article, API compatibility, permissions, causal conclusions, or actual account availability. Those require source and implementation review.
 
 ## Rendering and metadata
 
-`src/pages/LessonPage.jsx` supplies the shared reader: breadcrumbs, desktop contents, native mobile contents, intended outcomes, working context, typed content blocks, related resources, source dates and planned-next-step information. Data drives labels and update dates.
+`src/pages/LessonPage.tsx` supplies the shared reader: breadcrumbs, desktop contents, native mobile contents, intended outcomes, working context, typed content blocks, related resources, source dates and planned-next-step information. Data drives labels and update dates.
 
 `pnpm build` builds the client, creates a temporary server renderer using the existing React/Vite dependencies, validates content, and writes complete HTML for each canonical route. The renderer is removed from `dist` afterwards; no server runtime or listening build server is required. `sitemap.xml` includes indexable canonical routes, and `robots.txt` points to it.
 

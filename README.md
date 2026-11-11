@@ -15,7 +15,11 @@ pnpm check
 pnpm test:e2e
 ```
 
-`pnpm check` runs the unit/component suite and production build. Browser tests use the production output, so run it before `pnpm test:e2e`. Playwright starts its own preview on port 4173; install its Chromium browser when needed with `pnpm exec playwright install chromium`.
+`pnpm check` runs TypeScript checks, the unit/component suite, and the production build. Browser tests use the production output, so run it before `pnpm test:e2e`. Playwright starts its own preview on port 4173; install its Chromium browser when needed with `pnpm exec playwright install chromium`.
+
+For the [Astro pilot](docs/harness-astro-pilot.md), run `pnpm build:astro-pilot` and then `pnpm preview:astro-pilot`. This serves the combined site, including the Astro ChatGPT Ads guide and the linked Vite pages. `pnpm test:astro-pilot` rebuilds that output and runs both the pilot integration checks and the existing browser suite against it. The pilot requires Node 22.12 or later.
+
+Use `.ts` for new or migrated typed modules and `.tsx` for React components that use JSX. `pnpm typecheck` checks these files while they coexist with the rest of the JavaScript app.
 
 Run the synthetic ChatGPT Ads reporting experiment locally with `node scripts/chatgpt-ads-reporting-experiment.mjs`. The script, sample data and [experiment notes](docs/chatgpt-ads-reporting-experiment.md) live in the repository, outside the website build.
 
@@ -50,7 +54,7 @@ A direct visualizer link uses `?algorithm=<id>#visualizer`, for example `/learn/
 - `src/content/site.js` owns the working identity, family URLs, five tracks, and curated resources.
 - `src/pages/TrackPage.jsx` renders each track from that catalogue.
 - `styles.css` owns the shared tokens, site shell, homepage, and track layouts. `src/styles/labs.css` retains the existing visualizer and reference-surface rules.
-- `src/visualizers/algorithms-data.js` retains the existing algorithms, code examples, steps, and practical context.
+- `src/visualizers/algorithms-data.ts` retains the existing algorithms, code examples, steps, and practical context.
 - `public/brand/provenance.json` records the exact copied optical artwork and its source hashes. No sibling checkout is imported at build or runtime.
 - `docs/brand-tokens.reference.json` captures the selected shared brand foundation, version 0.1.0.
 - [Rebrand implementation and verification](docs/rebrand-2026-11-07.md) records the first slice.

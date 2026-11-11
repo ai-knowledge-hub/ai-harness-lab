@@ -326,7 +326,7 @@ for (const hash of ["", "#visualizer"]) {
 test("the guide is readable as static HTML without JavaScript", async ({
   browser,
   request,
-}) => {
+}, testInfo) => {
   const context = await browser.newContext({
     javaScriptEnabled: false,
     viewport: { width: 1440, height: 1000 },
@@ -386,7 +386,9 @@ test("the guide is readable as static HTML without JavaScript", async ({
     ]) {
       await page.goto(`http://127.0.0.1:4173/learn/system-design/${slug}`);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
-      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "index, follow");
+      const robots = testInfo.config.metadata.astroPilot && slug === "chatgpt-ads"
+        ? "noindex, follow" : "index, follow";
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", robots);
       await expect(page.locator(".source-citation").first()).toBeVisible();
       await expect(page.locator("#try-the-collector")).toHaveCount(0);
       expect(sitemapText).toContain(`/learn/system-design/${slug}`);
@@ -413,7 +415,7 @@ test("the architecture walkthrough preserves stages, evidence labels and deliver
   const worker = walkthrough.locator('[data-node="worker"]');
   await expect(walkthrough.getByRole("button", { name: "Previous", exact: true })).toBeDisabled();
   await expect(walkthrough.getByRole("status")).toHaveText("Stage 1 of 5");
-  await expect(worker).toHaveCount(0);
+  await expect(worker).toBeHidden();
   for (let stage = 2; stage <= 5; stage++) {
     await walkthrough.getByRole("button", { name: "Next", exact: true }).click();
     await expect(walkthrough.locator(".ads-step-actions [role=status]")).toHaveText(`Stage ${stage} of 5`);
@@ -435,13 +437,13 @@ test("the architecture walkthrough preserves stages, evidence labels and deliver
       await expect(edge("bundle", "display")).toHaveCSS("opacity", "0.18");
       await expect(edge("display", "late")).toHaveCSS("opacity", "0.18");
     }
-    if (stage < 5) await expect(worker).toHaveCount(0);
+    if (stage < 5) await expect(worker).toBeHidden();
   }
   await expect(worker).toContainText("Harness · proposed");
   await expect(worker).toHaveCSS("border-top-style", "dashed");
   await expect(walkthrough.getByRole("button", { name: "Next", exact: true })).toBeDisabled();
   await walkthrough.getByRole("button", { name: "Previous", exact: true }).click();
-  await expect(worker).toHaveCount(0);
+  await expect(worker).toBeHidden();
   const tools = walkthrough.getByRole("button", { name: /Stage 2:/ });
   await tools.focus();
   await page.keyboard.press("Enter");
@@ -462,7 +464,7 @@ test("the architecture walkthrough preserves stages, evidence labels and deliver
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await walkthrough.getByRole("button", { name: "Return to staged view" }).click();
   await expect(tools).toHaveAttribute("aria-current", "step");
-  await expect(worker).toHaveCount(0);
+  await expect(worker).toBeHidden();
 });
 
 test("guide navigation, hydration, saved theme and metadata stay coherent", async ({

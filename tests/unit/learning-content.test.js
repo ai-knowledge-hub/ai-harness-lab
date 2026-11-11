@@ -96,6 +96,19 @@ describe("Learning content integrity", () => {
       ),
     ).toThrow("invalid unsupported block");
   });
+  it("rejects a source citation on a block that cannot render it", () => {
+    const content = changed((draft) => {
+      draft.lessons[0].sections[0].blocks.push({
+        type: "callout",
+        title: "Example",
+        text: "A callout with an unsupported citation.",
+        source: { title: "Source", href: "https://example.com/" },
+      });
+    });
+    expect(() => validateLearningContent(content)).toThrow(
+      "only paragraph blocks can cite a source",
+    );
+  });
   it("rejects a working destination for a planned video", () => {
     expect(() =>
       validateLearningContent(

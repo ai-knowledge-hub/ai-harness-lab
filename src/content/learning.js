@@ -241,8 +241,3 @@ export const normalizePath = (path) =>
   path === "/" ? path : path.replace(/\/+$/, "");
 export const getLessonByPath = (path) =>
   lessons.find((lesson) => lesson.path === normalizePath(path));
-export function relatedContent(lesson, collection, field) {
-  return lesson[field].map((id) =>
-    learningContent[collection].find((item) => item.id === id),
-  );
-}
