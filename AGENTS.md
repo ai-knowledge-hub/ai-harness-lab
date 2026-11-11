@@ -18,7 +18,7 @@ The project does not opt in to Origin Trials or volatile features. Preserve
 reading and reference downloads without JavaScript, keyboard operation, and the
 pilot's 63,477-gzip-byte budget through the first successful stage change.
 
-The Astro site requires Node 22.23.4+. `pnpm check` runs strict TypeScript and Astro
+The Astro site requires Node 22.23.4+ within 22.x. `pnpm check` runs strict TypeScript and Astro
 template diagnostics, unit/component tests, and the Astro build. `pnpm test:e2e`
 checks the retained browser behaviour; `pnpm test:site` checks search, fragments,
 accessibility, and island boundaries in Chromium/WebKit. `pnpm check:routes`
