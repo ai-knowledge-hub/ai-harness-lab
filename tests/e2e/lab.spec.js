@@ -1,8 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { visualState } from "../support/visual-state";
 
 // Independent #42 inventory, not calculated from the candidate registry.
 const { labs } = JSON.parse(readFileSync(new URL("../fixtures/labs.json", import.meta.url)));
+const { states } = JSON.parse(readFileSync(new URL("../fixtures/lab-visual-states.json", import.meta.url)));
 const labPath = "/learn/algorithms/visualizers";
 async function ready(page, title = "Binary Search") {
   await expect(page.locator("#visualizer h2")).toHaveText(title);
@@ -28,10 +31,14 @@ test("all 15 visualizers render every baseline step in both themes", async ({ pa
       await ready(page, title);
       await expect(page).toHaveURL(new RegExp(`algorithm=${id}(?:&|#|$)`));
       await expect(meter.last()).toHaveText(String(count));
+      expect(states[id]).toHaveLength(count);
       for (let step = 1; step <= count; step++) {
+        const [label, expectedState] = states[id][step - 1];
         await expect(meter.first()).toHaveText(String(step));
-        await expect(page.locator(".visualization")).not.toBeEmpty();
-        await expect(page.locator(".visual-panel .panel-title strong")).not.toBeEmpty();
+        const rendered = await page.locator(".visualization").evaluate(visualState);
+        const actualState = createHash("sha256").update(rendered).digest("hex");
+        expect.soft(actualState, `${id} step ${step}: ${label} diagram state`).toBe(expectedState);
+        await expect(page.locator(".visual-panel .panel-title strong")).toHaveText(label);
         await expect(page.locator(".code-line.active")).toHaveCount(1);
         if (step < count) await page.getByRole("button", { name: "Next", exact: true }).click();
       }

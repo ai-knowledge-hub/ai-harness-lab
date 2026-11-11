@@ -18,7 +18,7 @@ The four existing lab cases were moved from the general smoke file into `tests/e
 
 | Surface | Checked outcome |
 | --- | --- |
-| All 15 labs, every step | Both desktop and mobile, dark and light; fixed baseline step counts, nonempty visualization and step explanation label, active reference-code line, Next/Back boundaries, Context/Run and Reset |
+| All 15 labs, every step | Both desktop and mobile, dark and light; fixed baseline step counts, independent diagram-state fingerprints and exact step labels, active reference-code line, Next/Back boundaries, Context/Run and Reset |
 | Shared playback controls | Speed range endpoints via keyboard, Play, Pause and automatic stop at the last step |
 | All 15 query links | Direct load and refresh select the intended lab and reveal `#visualizer`, retaining an unrelated query parameter |
 | Operation filters and history | Exact baseline membership for every operation group; Back/Forward restore selection, reset the step and stop playback |
@@ -26,7 +26,7 @@ The four existing lab cases were moved from the general smoke file into `tests/e
 | Compatibility addresses | `/algorithms` and `/patterns` preserve query and fragment on direct entry and refresh |
 | Island boundary | Every baseline reading route avoids the lab entry; a delayed nondefault lab query hydrates without replacing the scrolling target |
 
-The Astro lab matrix exercises all **88/88 steps in four viewport/theme combinations** (352 step states), plus 176 states in the retained desktop renderer's two themes. This is integration coverage, not a claim of mathematical verification of each algorithm or full browser/platform coverage.
+The Astro lab matrix exercises all **88/88 steps in four viewport/theme combinations** (352 step states), plus 176 states in the retained desktop renderer's two themes. This is DOM/SVG state and integration coverage, not pixel-level or mathematical verification of each algorithm or full browser/platform coverage.
 
 The complete CI portfolio becomes 28 normal browser cases (14 site cases and seven lab cases at two widths), 11 walkthrough/navigation cases, eight targeted site/Chromium-WebKit cases, and 21 retained-renderer desktop cases: **68 total**. The additional work is confined to the #46 lab requirements. The preinstalled Playwright image, single workflow, frozen dependencies and 15-minute bound from #53 remain unchanged. No test runner or fixture is emitted into the website bundle.
 
@@ -64,3 +64,11 @@ The lab transfers **30,203 fewer gzip bytes (23.8%)** through its first successf
 On 11 November 2026, the authenticated in-app browser inspected [PR #54's preview](https://ai-harness-lab-git-codex-astro-react-lab-dessigs-projects.vercel.app), built from `644e62c`. All 15 catalogue selections and Next-to-step-2 transitions worked at the desktop size and at 390 × 844. The phone checks also verified home → Algorithms track → Heap, saved light theme, one React island, canonical metadata, Back to BFS and Forward to Dijkstra, and unchanged URLs when reselecting the missing/invalid-query Binary Search fallback. The `/algorithms?source=lab-audit&algorithm=leaseQueue#visualizer` and `/patterns?source=lab-audit#offline-mock-lab` entries and refreshes preserved their complete destination query and fragment. The browser error log was empty.
 
 Strict Astro/TypeScript checks, 32 unit/component tests, the independent route/download comparison, both builds and all 68 browser cases passed locally. The implementation also passed the complete container-based [Linux PR workflow](https://github.com/ai-knowledge-hub/ai-harness-lab/actions/runs/43068850032) and Vercel. Evidence-only follow-up changes leave the measured application hashes unchanged and strengthen the redirect assertion to exact URL equality. Production remains on the retained renderer pending #47.
+
+## Review follow-up: verify each rendered frame
+
+The first audit advanced the counter and required a nonempty diagram, which allowed an always-step-zero renderer to pass on both viewports and themes. `tests/fixtures/lab-visual-states.json` now freezes 88 reference diagram fingerprints and their labels from the independent #42 data and renderer at `cc921b2`; source-file SHA-256 hashes are included. CI reads the frozen expectations and never regenerates them from the candidate renderer.
+
+`tests/support/visual-state.js` preserves the visualization subtree's element structure, geometry, fill/stroke attributes, classes and text. It normalises attribute/class order and insignificant whitespace, and excludes role/ARIA metadata. The selected-step counter, code highlight and panel title are outside that subtree. Thus an advancing label or accessible name cannot substitute for a changing diagram. Every step compares its diagram fingerprint with the independently captured state and its panel label with the reference label. Soft diagram assertions report failures across all labs instead of stopping at the first frozen algorithm.
+
+The compact fixture adds no image snapshots, browser matrix, runtime dependency or application-code changes. The review verification first reproduced the old false pass, then checked two temporary renderer mutations: all frames frozen while SVG labels still advance, and rendering the next frame instead of the intended one. The frozen-with-advancing-labels mutation was rejected for all 15 labs on desktop and mobile in both themes; the wrong-next-frame mutation was rejected for all 15 on desktop. The restored normal renderer passed every reference frame. Existing responsive/theme and interaction checks remain in place. This checks rendered HTML/SVG state rather than screenshots or external CSS paint correctness.
