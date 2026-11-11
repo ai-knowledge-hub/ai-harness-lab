@@ -2,10 +2,16 @@
   "buildCommand": "pnpm build:deployment",
   "outputDirectory": "dist",
   "cleanUrls": true,
-  "rewrites": [
+  "framework": "astro",
+  "headers": [
     {
-      "source": "/(.*)",
-      "destination": "/"
+      "source": "/_astro/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ]
 }

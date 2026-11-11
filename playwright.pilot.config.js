@@ -10,7 +10,7 @@ export default defineConfig({
     { name: "desktop", testMatch: "architecture.spec.js", use: { viewport: { width: 1440, height: 1000 } } },
   ],
   webServer: {
-    command: "pnpm preview:astro-pilot --host 127.0.0.1 --port 4175",
+    command: "pnpm preview:astro-pilot --ignore-lock --host 127.0.0.1 --port 4175",
     port: 4175,
     reuseExistingServer: false,
   },

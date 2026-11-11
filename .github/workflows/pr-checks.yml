@@ -60,6 +60,3 @@ jobs:
 
       - name: Verify search, accessibility and island boundaries
         run: pnpm exec playwright test --config playwright.site.config.js
-
-      - name: Verify retained production renderer
-        run: pnpm build:legacy && pnpm exec playwright test --config playwright.legacy.config.js

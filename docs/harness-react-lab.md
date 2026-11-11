@@ -1,5 +1,8 @@
 # React lab integration with Astro
 
+> #47 update: the [cutover runbook](harness-astro-cutover.md) supersedes the retained-renderer commands and release boundary below. The old renderer and its duplicate browser run are removed; use Node 22.23.4+ and the current README commands. Earlier measurements and verification remain historical evidence.
+
+
 Implementation and audit for [#46](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/46), based on merged #53 at `9f904d0`. #45 is closed. Production cutover and removal of the compatibility renderer remain in #47.
 
 ## Integration boundary
