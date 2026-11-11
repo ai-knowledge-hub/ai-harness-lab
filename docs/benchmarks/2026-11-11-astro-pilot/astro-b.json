@@ -1,0 +1,70 @@
+{
+  "chromium": "147.0.7727.15",
+  "node": "v25.8.2",
+  "profile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "deviceScaleFactor": 3,
+    "isMobile": true,
+    "hasTouch": true
+  },
+  "cpuRate": 4,
+  "network": {
+    "offline": false,
+    "latency": 150,
+    "downloadThroughput": 200000,
+    "uploadThroughput": 93750
+  },
+  "paintWindowMs": 5000,
+  "scriptWindowMs": 1000,
+  "sampleCount": 5,
+  "results": [
+    {
+      "route": "/learn/system-design/chatgpt-ads",
+      "sample": 1,
+      "fcpMs": 620,
+      "lcpMs": 620,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1515,
+      "jsGzipBytesThroughNext": 1515
+    },
+    {
+      "route": "/learn/system-design/chatgpt-ads",
+      "sample": 2,
+      "fcpMs": 464,
+      "lcpMs": 464,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1515,
+      "jsGzipBytesThroughNext": 1515
+    },
+    {
+      "route": "/learn/system-design/chatgpt-ads",
+      "sample": 3,
+      "fcpMs": 524,
+      "lcpMs": 524,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1515,
+      "jsGzipBytesThroughNext": 1515
+    },
+    {
+      "route": "/learn/system-design/chatgpt-ads",
+      "sample": 4,
+      "fcpMs": 448,
+      "lcpMs": 448,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1515,
+      "jsGzipBytesThroughNext": 1515
+    },
+    {
+      "route": "/learn/system-design/chatgpt-ads",
+      "sample": 5,
+      "fcpMs": 472,
+      "lcpMs": 472,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1515,
+      "jsGzipBytesThroughNext": 1515
+    }
+  ]
+}

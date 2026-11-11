@@ -63,9 +63,15 @@ test("walkthrough preserves stage, outcome and keyboard behaviour", async ({ pag
     }
   }
   await expect(next).toBeDisabled();
-  await previous.click();
-  await expect(status).toHaveText("Stage 4 of 5");
+  for (let stage = 4; stage > 0; stage--) {
+    await previous.click();
+    await expect(status).toHaveText(`Stage ${stage} of 5`);
+    await expect(diagram.locator(".ads-node:visible")).toHaveCount(nodeCounts[stage - 1]);
+    await expect(diagram.getByRole("heading", { level: 3, name: `${stage}. ${stageTitles[stage - 1]}`, exact: true })).toBeVisible();
+  }
+  await expect(previous).toBeDisabled();
   await diagram.getByRole("button", { name: /^Stage 3:/ }).click();
+  await expect(status).toHaveText("Stage 3 of 5");
   const select = diagram.getByLabel("Example ad outcome", { exact: true });
   const outcome = diagram.locator(".ads-delivery-example [role=status]");
   for (const [value, text] of [
