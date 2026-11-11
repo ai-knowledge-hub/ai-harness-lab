@@ -52,9 +52,17 @@ try {
   const draftTrack = new JSDOM(await html("learn/software-production/index.html")).window.document;
   assert.match(draftTrack.querySelector(`a[href="${path}"]`).closest("li").textContent, /Preview/);
 
+  guide.id = "index";
+  guide.path = "/learn/software-production/index";
+  guide.publicationStatus = "published";
+  await writeGuide();
+  assert.throws(build, (error) => /guide ID index is reserved/.test(String(error.stdout) + String(error.stderr)));
+  guide.id = "migration-authoring-check";
+  guide.path = path;
+
   guide.prerequisiteConceptIds = ["missing-migration-concept"]; await writeGuide();
   assert.throws(build, (error) => /unknown concepts reference missing-migration-concept/.test(String(error.stdout) + String(error.stderr)));
-  console.log("One authored record created its route, anchor, metadata, primary-track discovery and sitemap entry; repeated diagram blocks, draft eligibility and invalid references were enforced.");
+  console.log("One authored record created its route, anchor, metadata, primary-track discovery and sitemap entry; repeated diagram blocks, draft eligibility, reserved index routes and invalid references were enforced.");
 } finally {
   if (created) { await unlink(source); build(); }
 }

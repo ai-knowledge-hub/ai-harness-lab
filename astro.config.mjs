@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
 import { copyFile, readdir } from "node:fs/promises";
+import { constants } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,8 +11,16 @@ async function mirrorHtml(directory, root = directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) await mirrorHtml(path, root);
-    else if (entry.name === "index.html" && directory !== root)
-      await copyFile(path, join(root, `${relative(root, directory)}.html`));
+    else if (entry.name === "index.html" && directory !== root) {
+      const alias = `${relative(root, directory)}.html`;
+      try {
+        await copyFile(path, join(root, alias), constants.COPYFILE_EXCL);
+      } catch (error) {
+        if (error.code === "EEXIST")
+          throw new Error(`Flat HTML alias ${alias} conflicts with an existing document`, { cause: error });
+        throw error;
+      }
+    }
   }
 }
 

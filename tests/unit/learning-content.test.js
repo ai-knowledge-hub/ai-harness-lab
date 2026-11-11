@@ -76,6 +76,18 @@ describe("Learning content integrity", () => {
       ),
     ).toThrow("sections required");
   });
+  it("reserves index guide IDs so neither drafts nor published guides overwrite a track", () => {
+    for (const publicationStatus of ["draft", "published"]) {
+      const content = changed((draft) => draft.lessons.push({
+        ...draft.lessons[0],
+        id: "index",
+        trackId: "software-production",
+        path: "/learn/software-production/index",
+        publicationStatus,
+      }));
+      expect(() => validateLearningContent(content)).toThrow("guide ID index is reserved");
+    }
+  });
   it("rejects duplicate anchors that make a contents link ambiguous", () => {
     expect(() =>
       validateLearningContent(
