@@ -43,7 +43,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Build Astro pilot
+      - name: Build combined Astro pilot
         run: pnpm build:astro-pilot
 
       - name: Install pilot test browser
@@ -51,3 +51,6 @@ jobs:
 
       - name: Verify Astro pilot behaviour
         run: pnpm exec playwright test --config playwright.pilot.config.js
+
+      - name: Run existing browser suite against combined preview
+        run: pnpm exec playwright test --config playwright.staged.config.js

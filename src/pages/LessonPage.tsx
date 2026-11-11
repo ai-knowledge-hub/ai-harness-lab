@@ -59,13 +59,13 @@ function ReferenceContext({ lessonId, label }: { lessonId: string; label: string
       <ol>
         {referenceContext.map((item) => (
           <li key={item.guideId}>
-            <Link
-              to={requireGuide(item.guideId).path}
+            <SiteLink
+              href={requireGuide(item.guideId).path}
               aria-current={item.guideId === lessonId ? "page" : undefined}
             >
               <strong>{item.label}</strong>
               <span>{item.purpose}</span>
-            </Link>
+            </SiteLink>
           </li>
         ))}
       </ol>

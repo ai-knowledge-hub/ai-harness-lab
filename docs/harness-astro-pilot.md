@@ -12,10 +12,19 @@ Astro 6 requires Node 22.12 or later. The pilot CI build uses Node 22. The exist
 pnpm install --frozen-lockfile
 pnpm build:astro-pilot
 pnpm preview:astro-pilot --host 127.0.0.1 --port 4174
-pnpm test:astro-pilot
 ```
 
-The Vercel build overlays the Astro page and its assets on the Vite build only for the `codex/astro-chatgpt-ads-pilot` preview. Both forms of the guide URL use the Astro HTML in that deployment. Links and reference downloads continue to use the rest of the site on the same host. The Astro page carries `noindex, follow` and the production canonical URL. [Vercel system environment variables](https://vercel.com/docs/environment-variables/system-environment-variables)
+`build:astro-pilot` builds the combined site into `dist/`, and `preview:astro-pilot` serves that directory. The home page, tracks, linked guides, and downloads are available on the same origin. `build:astro-page` generates the isolated Astro files in `pilot/dist/` for the staging step and authoring trial; use the combined preview for browsing the site.
+
+The combined builder sets `VITE_ASTRO_PILOT=true` for the Vite build. Incoming track, related-guide, and reference-context links use React Router's `reloadDocument` option for the pilot route, including query strings and fragments. They request the staged Astro document and its `noindex, follow` metadata. The production deployment builder explicitly disables that flag. [React Router document navigation](https://reactrouter.com/api/components/Link#reloaddocument)
+
+The Vercel build selects the combined output only for the `codex/astro-chatgpt-ads-pilot` preview. Both forms of the guide URL use the Astro HTML in that deployment. The Astro page carries the production canonical URL. [Vercel system environment variables](https://vercel.com/docs/environment-variables/system-environment-variables)
+
+To rebuild and run the pilot checks and the existing browser suite against the combined output:
+
+```sh
+pnpm test:astro-pilot
+```
 
 ## Authoring trial
 
@@ -28,8 +37,8 @@ The pilot route uses Astro's `getStaticPaths` and generates its title, descripti
 To reproduce the comparison, serve the baseline build from port 4173. On the pilot branch, stage the preview with Node 22 and serve the combined output from port 4174.
 
 ```sh
-VERCEL_ENV=preview VERCEL_GIT_COMMIT_REF=codex/astro-chatgpt-ads-pilot pnpm build:deployment
-pnpm preview --host 127.0.0.1 --port 4174
+pnpm build:astro-pilot
+pnpm preview:astro-pilot --host 127.0.0.1 --port 4174
 ```
 
 Both builds used the unchanged baseline mobile profile and measurement script. The baseline was the Vite application recorded for #42 at `cc921b2`, preserved in the baseline checkout at `5c8d173` (the intervening commits only added the benchmark and its documentation). The optimised application is at `bb21aad`. On 11 November 2026, we served both outputs with Vite preview 7.3.2 on the same Apple M2 and ran two batches of five cold samples per build in baseline/Astro/baseline/Astro order. Node 25.8.2 and Chromium 147.0.7727.15 were used for measurement; the artifacts were built with Node 22.22.0. Paint used an untouched navigation, separately from the stage-1-to-2 interaction navigation. All 20 samples were conclusive. [Measurement protocol](harness-migration-baseline.md#mobile-measurement) · [Raw samples and artifact identities](benchmarks/2026-11-11-astro-pilot/README.md)
@@ -50,6 +59,10 @@ The optimised pilot reduced JavaScript through Next by **98.8%**, leaving **61,9
 
 The frozen install, type check, and both deployment build modes ran on Node 22.22.0. The preview rehearsal served identical Astro HTML at both URL forms and preserved the Vite home page. All 30 unit/component tests and 18 existing Playwright tests passed. All 31 normal Vite HTML files matched the baseline after normalising the JavaScript filename; sitemap, robots, and downloads matched byte for byte.
 
-`pnpm test:astro-pilot` adds six browser checks (three cases at mobile and desktop widths) and runs in PR CI. They cover the full reference without JavaScript or with a failed module download, all five stages, all eight adjacent forward/back transitions, stage selection, complete-view return, both disabled boundaries, all three outcomes and edge emphasis, diagram height, theme persistence, keyboard flow, mobile navigation, and overflow. A temporary no-op Next handler made the suite fail at the expected stage-2 assertion; restoring the handler passed. These tests cover this walkthrough's finite interaction model, rather than validating React-heavy algorithm labs.
+`pnpm test:astro-pilot` now runs 16 pilot checks (eight cases at mobile and desktop widths), followed by all 18 existing browser checks against the combined build. Both suites run in PR CI. The pilot checks cover the full reference without JavaScript or with a failed module download, all five stages, all eight adjacent forward/back transitions, stage selection, complete-view return, both disabled boundaries, all three outcomes and edge emphasis, diagram height, theme persistence, keyboard flow, mobile navigation, and overflow. A temporary no-op Next handler made the suite fail at the expected stage-2 assertion; restoring the handler passed.
+
+The preview integration regressions were reproduced before fixing them: a hydrated track link made no document request, and the isolated Astro preview returned 404 after following its home link. The added checks require an actual Astro document response from hydrated track, related-guide, and reference-context links; verify metadata, saved theme, stage controls, reload and browser Back; and follow six internal destinations with JavaScript enabled and disabled. The existing browser suite asserts reader-visible diagram state for either renderer and explicitly expects preview-only noindex metadata. All 18 existing tests also pass on the normal build.
+
+The integration fixes preserve the measured Astro HTML byte for byte (SHA-256 `53665ab64cd561ad1f78350f42191f2166e85b6ab5705255c9b4b44507f9cd3a`) and its browser module, so the recorded 1,515-byte JavaScript result is unchanged. The paired timing results above remain the dated measurements from `bb21aad`.
 
 **Go for the content-page Astro migration in #45 with static rendering and TypeScript controls.** This pilot passes the byte and paint gates, preserves the tested reader behaviour, and demonstrates native routing from one authored record. #45 must complete track discovery, sitemap eligibility, analytics, and navigation parity before production cutover. React-heavy algorithm labs retain their separate integration and performance decision in #46. The original no-go applies to the earlier React-hydrated walkthrough, which remains documented above.
