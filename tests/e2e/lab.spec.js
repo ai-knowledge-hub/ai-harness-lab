@@ -106,11 +106,11 @@ test("legacy document redirects preserve query and fragment through refresh", as
     ["/patterns?source=lab-audit#offline-mock-lab", "/learn/ai-engineering/control-plane?source=lab-audit#offline-mock-lab", "Agent Control Plane"],
   ]) {
     await page.goto(from);
-    await expect(page).toHaveURL(new RegExp(to.replace("?", "\\?")));
+    await expect(page).toHaveURL(new URL(to, page.url()).href);
     if (heading === "Token Bucket") await ready(page, heading);
     else await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
     await page.reload();
-    await expect(page).toHaveURL(new RegExp(to.replace("?", "\\?")));
+    await expect(page).toHaveURL(new URL(to, page.url()).href);
     await expect(page.locator(heading === "Token Bucket" ? "#visualizer h2" : "#offline-mock-lab")).toBeInViewport();
   }
 });

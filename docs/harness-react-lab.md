@@ -47,3 +47,20 @@ pnpm exec playwright test --config playwright.legacy.config.js
 ```
 
 The existing independent comparison still protects all 16 baseline routes, metadata, anchors, links, 14 sitemap entries and five download hashes. The lab's JavaScript/performance measurements and hosted preview verification are recorded with the PR evidence. #47 retains the final production-candidate measurements, hosting/header/dependency checks, rollback plan and renderer retirement.
+
+## Mobile comparison
+
+The unchanged reviewed #42 benchmark measured the independent artifact and application `644e62c` in baseline/Astro/baseline/Astro order, with five cold samples per batch. All **20 samples were conclusive**, using separate uninterrupted paint and stage-1-to-2 interaction navigations. Both artifacts used the same Vite preview transport on Apple M2; Node 25.8.2 and Chromium 147.0.7727.15 ran the unchanged 390 × 844/DPR 3, fourfold CPU, 150 ms/1.6 Mb/s profile. Artifacts were built with Node 22.22.0. [Raw samples, reproduction and artifact hashes](benchmarks/2026-11-11-react-lab/README.md).
+
+| Build | FCP ms, median (range) | LCP ms, median (range) | Initial gzip bytes | Gzip bytes through Next |
+| --- | ---: | ---: | ---: | ---: |
+| Independent Vite baseline | 508 (496–724) | 508 (496–724) | 126,954 | 126,954 |
+| Audited Astro React lab | 430 (416–540) | 470 (452–584) | 96,751 | 96,751 |
+
+The lab transfers **30,203 fewer gzip bytes (23.8%)** through its first successful Next. Its byte count matches the #45 lab measurement; the reselection fix introduces no added runtime dependency. Both paint medians are below the refreshed paired allowance of 608 ms (508 + 100), with more than the protocol's 40 ms repeat margin. The 63,477-byte budget belongs to reading pages; this interactive lab is measured separately. Local script counts include the analytics SDK but exclude the platform-only script absent on loopback. #47 must still measure the exact final production candidate.
+
+## Hosted verification
+
+On 11 November 2026, the authenticated in-app browser inspected [PR #54's preview](https://ai-harness-lab-git-codex-astro-react-lab-dessigs-projects.vercel.app), built from `644e62c`. All 15 catalogue selections and Next-to-step-2 transitions worked at the desktop size and at 390 × 844. The phone checks also verified home → Algorithms track → Heap, saved light theme, one React island, canonical metadata, Back to BFS and Forward to Dijkstra, and unchanged URLs when reselecting the missing/invalid-query Binary Search fallback. The `/algorithms?source=lab-audit&algorithm=leaseQueue#visualizer` and `/patterns?source=lab-audit#offline-mock-lab` entries and refreshes preserved their complete destination query and fragment. The browser error log was empty.
+
+Strict Astro/TypeScript checks, 32 unit/component tests, the independent route/download comparison, both builds and all 68 browser cases passed locally. The implementation also passed the complete container-based [Linux PR workflow](https://github.com/ai-knowledge-hub/ai-harness-lab/actions/runs/43068850032) and Vercel. Evidence-only follow-up changes leave the measured application hashes unchanged and strengthen the redirect assertion to exact URL equality. Production remains on the retained renderer pending #47.
