@@ -50,6 +50,8 @@ The [local adapter guide](docs/chatgpt-ads-reporting-adapters.md) shows how to r
 
 A direct visualizer link uses `?algorithm=<id>#visualizer`, for example `/learn/algorithms/visualizers?algorithm=tokenBucket#visualizer`. Browser history restores the selected algorithm. The anchor targets the working area, including on phones.
 
+The [React lab integration audit](docs/harness-react-lab.md) records the 15-visualizer baseline and desktop/mobile URL, history, playback and hydration checks. `pnpm exec playwright test tests/e2e/lab.spec.js` runs that focused matrix; the mobile project repeats only lab cases.
+
 ## Brand and content
 
 - `src/content/site.js` owns the working identity, family URLs, five tracks, and curated resources.

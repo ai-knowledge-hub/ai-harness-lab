@@ -118,7 +118,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
   function setAlgorithm(id: Algorithm["id"]) {
     // Reselecting the active entry resets playback without creating a new
     // navigation key, which would be treated as an intentional anchor revisit.
-    if (requestedId !== id) {
+    if (currentId !== id) {
       const next = new URLSearchParams(searchParams);
       next.set("algorithm", id);
       navigate(
