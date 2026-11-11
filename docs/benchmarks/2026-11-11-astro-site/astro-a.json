@@ -1,0 +1,205 @@
+{
+  "chromium": "147.0.7727.15",
+  "node": "v25.8.2",
+  "profile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "deviceScaleFactor": 3,
+    "isMobile": true,
+    "hasTouch": true
+  },
+  "cpuRate": 4,
+  "network": {
+    "offline": false,
+    "latency": 150,
+    "downloadThroughput": 200000,
+    "uploadThroughput": 93750
+  },
+  "paintWindowMs": 5000,
+  "scriptWindowMs": 1000,
+  "sampleCount": 5,
+  "results": [
+    {
+      "route": "/",
+      "sample": 1,
+      "fcpMs": 632,
+      "lcpMs": 916,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1500,
+      "jsGzipBytesThroughNext": null
+    },
+    {
+      "route": "/learn/system-design/api-design",
+      "sample": 1,
+      "fcpMs": 464,
+      "lcpMs": 464,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1500,
+      "jsGzipBytesThroughNext": null
+    },
+    {
+      "route": "/learn/system-design/chatgpt-ads",
+      "sample": 1,
+      "fcpMs": 496,
+      "lcpMs": 496,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 2726,
+      "jsGzipBytesThroughNext": 2726
+    },
+    {
+      "route": "/learn/algorithms/visualizers",
+      "sample": 1,
+      "fcpMs": 448,
+      "lcpMs": 536,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 96751,
+      "jsGzipBytesThroughNext": 96751
+    },
+    {
+      "route": "/",
+      "sample": 2,
+      "fcpMs": 512,
+      "lcpMs": 876,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1500,
+      "jsGzipBytesThroughNext": null
+    },
+    {
+      "route": "/learn/system-design/api-design",
+      "sample": 2,
+      "fcpMs": 448,
+      "lcpMs": 448,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1500,
+      "jsGzipBytesThroughNext": null
+    },
+    {
+      "route": "/learn/system-design/chatgpt-ads",
+      "sample": 2,
+      "fcpMs": 484,
+      "lcpMs": 484,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 2726,
+      "jsGzipBytesThroughNext": 2726
+    },
+    {
+      "route": "/learn/algorithms/visualizers",
+      "sample": 2,
+      "fcpMs": 436,
+      "lcpMs": 484,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 96751,
+      "jsGzipBytesThroughNext": 96751
+    },
+    {
+      "route": "/",
+      "sample": 3,
+      "fcpMs": 500,
+      "lcpMs": 868,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1500,
+      "jsGzipBytesThroughNext": null
+    },
+    {
+      "route": "/learn/system-design/api-design",
+      "sample": 3,
+      "fcpMs": 452,
+      "lcpMs": 452,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1500,
+      "jsGzipBytesThroughNext": null
+    },
+    {
+      "route": "/learn/system-design/chatgpt-ads",
+      "sample": 3,
+      "fcpMs": 472,
+      "lcpMs": 472,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 2726,
+      "jsGzipBytesThroughNext": 2726
+    },
+    {
+      "route": "/learn/algorithms/visualizers",
+      "sample": 3,
+      "fcpMs": 428,
+      "lcpMs": 472,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 96751,
+      "jsGzipBytesThroughNext": 96751
+    },
+    {
+      "route": "/",
+      "sample": 4,
+      "fcpMs": 500,
+      "lcpMs": 872,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1500,
+      "jsGzipBytesThroughNext": null
+    },
+    {
+      "route": "/learn/system-design/api-design",
+      "sample": 4,
+      "fcpMs": 456,
+      "lcpMs": 456,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1500,
+      "jsGzipBytesThroughNext": null
+    },
+    {
+      "route": "/learn/system-design/chatgpt-ads",
+      "sample": 4,
+      "fcpMs": 484,
+      "lcpMs": 484,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 2726,
+      "jsGzipBytesThroughNext": 2726
+    },
+    {
+      "route": "/learn/algorithms/visualizers",
+      "sample": 4,
+      "fcpMs": 424,
+      "lcpMs": 464,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 96751,
+      "jsGzipBytesThroughNext": 96751
+    },
+    {
+      "route": "/",
+      "sample": 5,
+      "fcpMs": 512,
+      "lcpMs": 868,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1500,
+      "jsGzipBytesThroughNext": null
+    },
+    {
+      "route": "/learn/system-design/api-design",
+      "sample": 5,
+      "fcpMs": 456,
+      "lcpMs": 456,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 1500,
+      "jsGzipBytesThroughNext": null
+    },
+    {
+      "route": "/learn/system-design/chatgpt-ads",
+      "sample": 5,
+      "fcpMs": 492,
+      "lcpMs": 492,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 2726,
+      "jsGzipBytesThroughNext": 2726
+    },
+    {
+      "route": "/learn/algorithms/visualizers",
+      "sample": 5,
+      "fcpMs": 420,
+      "lcpMs": 484,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 96751,
+      "jsGzipBytesThroughNext": 96751
+    }
+  ]
+}

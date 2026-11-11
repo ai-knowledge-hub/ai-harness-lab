@@ -42,7 +42,20 @@ Local verification on Node 22.22.0 passed strict TypeScript and Astro diagnostic
 
 The unchanged reviewed #42 script measures home, API design, ChatGPT Ads and the lab against the independent artifact. Paint uses a separate five-second untouched navigation; outstanding rendering assets make a sample inconclusive. Script measurement verifies stage 1 before a successful Next to stage 2. Two alternating batches of five cold samples per build use identical local Vite 7.3.2 transport, Chromium 147.0.7727.15, Node 25.8.2, Apple M2, a 390 × 844 viewport at DPR 3, fourfold CPU throttling, 150 ms latency, 1.6 Mb/s download and 0.75 Mb/s upload. Artifacts were built with Node 22.22.0.
 
-See [raw measurements and artifact identities](benchmarks/2026-11-11-astro-site/README.md) for final results. The reading-page gate remains 63,477 gzip bytes through the first successful stage change. The lab is measured separately and retains its dedicated #46 audit.
+All 80 route samples were conclusive. Each row below aggregates ten samples per build and retains the full valid range. Byte counts were identical in every sample of that route/build. See [raw measurements and artifact identities](benchmarks/2026-11-11-astro-site/README.md), including machine-readable aggregates.
+
+| Route / build | FCP ms, median (range) | LCP ms, median (range) | Initial gzip bytes | Gzip bytes through Next |
+| --- | ---: | ---: | ---: | ---: |
+| Home · Vite baseline | 540 (520–700) | 1,288 (1,268–1,356) | 126,954 | — |
+| Home · Astro | 506 (496–632) | 872 (856–916) | 1,500 | — |
+| API design · Vite baseline | 482 (476–504) | 482 (476–504) | 126,954 | — |
+| API design · Astro | 456 (440–480) | 456 (440–480) | 1,500 | — |
+| ChatGPT Ads · Vite baseline | 502 (480–540) | 502 (480–540) | 126,954 | 126,954 |
+| ChatGPT Ads · Astro | 484 (472–504) | 484 (472–504) | 2,726 | 2,726 |
+| Lab · Vite baseline | 514 (500–520) | 514 (500–520) | 126,954 | 126,954 |
+| Lab · Astro React island | 428 (420–448) | 482 (464–536) | 96,751 | 96,751 |
+
+The Ads guide reduces JavaScript through Next by **97.9%**, leaving **60,751 bytes** below the **63,477-byte** reading limit. Home and API design also meet that limit. The Ads FCP/LCP median is 484 ms, below both the original 618 ms gate and the refreshed paired-baseline gate of 602 ms (502 + 100 ms). Every route meets its paired baseline allowance of the greater of 100 ms or 10%; none is within the 40 ms repeat band. The lab's 96,751-byte island is reported separately: the reading budget does not apply to the lab, whose dedicated integration/performance decision remains #46.
 
 The reading count includes the analytics SDK and executable inline theme script. Loopback previews suppress the Vercel-only analytics request, as they do not have its hosting endpoint. Hosted verification must separately check the platform analytics script; local synthetic timings are not real-user production measurements.
 
@@ -51,3 +64,7 @@ The reading count includes the analytics SDK and executable inline theme script.
 Vercel previews build the full Astro site. Shared TypeScript controls preserve saved-theme selection, dark default, native mobile disclosure and Escape/focus behaviour. The official analytics SDK is injected once per hosted document with the Astro framework tag and optional public observability configuration. Published guides use their existing `index, follow` metadata through both direct and site navigation. The reporting draft and planned examples page remain directly accessible with `noindex, follow` and no sitemap entry.
 
 Production deliberately retains the compatibility renderer through `pnpm build:legacy`. `pnpm build:deployment` copies that output to `dist` only when `VERCEL_ENV=production`; other builds use Astro. This PR does not authorise production cutover or retire the old entry point. #46 owns the dedicated lab integration/performance audit; #47 owns production cutover, renderer retirement and the hosting-header inventory. The dependency reachability review and remaining version matches are recorded [separately](reviews/2026-11-11-astro-site-dependencies.md).
+
+Hosted verification on 11 November 2026 used the authenticated in-app browser and [PR #53's preview](https://ai-harness-lab-git-codex-astro-shell-tr-ca7ec3-dessigs-projects.vercel.app). Home → System design → ChatGPT Ads → Advertiser APIs reached native Astro documents, with zero reading-page islands and the existing published canonical/robots metadata. Next advanced stage 1 to stage 2. Choosing light mode persisted across guide navigation. The versioned `capabilities.json` URL displayed the expected reference, rather than a fallback page. The reporting draft and `/examples` loaded directly with `noindex, follow`; the hosted sitemap contained the expected 14 canonical URLs and excluded both. Each inspected reading document injected one analytics script with `data-sdkn="@vercel/analytics/astro"`, using the hosting-provided observability path. The guide inspection recorded no warning/error console entries. This verifies SDK integration, not analytics-dashboard ingestion or production traffic.
+
+The frozen install, types, unit tests, Astro build, independent baseline, authoring trial, all browser suites and retained renderer also passed in [Linux PR CI](https://github.com/ai-knowledge-hub/ai-harness-lab/actions/runs/43015225000).
