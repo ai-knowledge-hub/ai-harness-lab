@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   architectureNodes,
   architectureSources,
@@ -52,7 +51,7 @@ const connections = [
   connection("worker", "evidence", { start: "left", end: "right", reference: true }),
 ];
 
-function StageControls({ diagramId, stage, complete, selectStage, setComplete }) {
+function StageControls({ diagramId }) {
   return (
         <div className="ads-controls">
           <ol className="ads-stage-picker" aria-label="Architecture stages">
@@ -62,9 +61,8 @@ function StageControls({ diagramId, stage, complete, selectStage, setComplete })
                   type="button"
                   data-stage={index}
                   aria-label={`Stage ${index + 1}: ${item.short} — ${item.title}`}
-                  aria-current={!complete && stage === index ? "step" : undefined}
+                  aria-current={index === 0 ? "step" : undefined}
                   aria-controls={`${diagramId}-map ${diagramId}-explanations`}
-                  onClick={() => selectStage(index)}
                 >
                   <span aria-hidden="true">0{index + 1}</span>{item.short}
                 </button>
@@ -72,62 +70,47 @@ function StageControls({ diagramId, stage, complete, selectStage, setComplete })
             ))}
           </ol>
           <div className="ads-step-actions">
-            <button type="button" data-previous="" disabled={complete || stage === 0} onClick={() => selectStage(stage - 1)}>Previous</button>
-            <p role="status">{complete ? "Complete diagram" : `Stage ${stage + 1} of ${architectureStages.length}`}</p>
-            <button type="button" data-next="" disabled={complete || stage === architectureStages.length - 1} onClick={() => selectStage(stage + 1)}>Next</button>
+            <button type="button" data-previous="" disabled>Previous</button>
+            <p role="status">Stage 1 of {architectureStages.length}</p>
+            <button type="button" data-next="">Next</button>
           </div>
-          <button className="ads-complete-toggle" type="button" aria-pressed={complete} onClick={() => setComplete((value) => !value)}>
-            {complete ? "Return to staged view" : "Show complete diagram"}
+          <button className="ads-complete-toggle" type="button" aria-pressed="false">
+            Show complete diagram
           </button>
         </div>
   );
 }
 
-function DeliveryControls({ diagramId, example, onChange }) {
+function DeliveryControls({ diagramId }) {
   return (
             <>
               <label htmlFor={`${diagramId}-example`}>Example ad outcome</label>
-              <select id={`${diagramId}-example`} value={example} onChange={onChange}>
+              <select id={`${diagramId}-example`} defaultValue="timely">
                 {Object.entries(deliveryExamples).map(([value, item]) => (
                   <option key={value} value={value}>{item.label}</option>
                 ))}
               </select>
-              <p role="status">{deliveryExamples[example].outcome}</p>
+              <p role="status">{deliveryExamples.timely.outcome}</p>
             </>
   );
 }
 
-/** @param {{ id: string, GuideLink?: "a" | typeof import("./SiteLink").SiteLink, staticEnhancement?: boolean }} props */
-export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a", staticEnhancement = false }) {
-  const [enhanced, setEnhanced] = useState(false);
-  const [stage, setStage] = useState(0);
-  const [complete, setComplete] = useState(false);
-  const [example, setExample] = useState("timely");
-  useEffect(() => setEnhanced(true), []);
-
-  // Server HTML remains a complete reference when JavaScript is unavailable.
-  const showAll = !enhanced || complete;
-  const visibleNodes = nodes.filter((node) => showAll || node.stage <= stage);
-  const visibleIds = new Set(visibleNodes.map((node) => node.id));
-  const mapHeight = Math.max(...visibleNodes.map((node) => node.y)) + BOX_HEIGHT + 24;
-  const showDelivery = showAll || stage >= 2;
-  function selectStage(index) {
-    setStage(index);
-    setComplete(false);
-  }
-
+/** Build-time HTML only. The Astro/TypeScript enhancement owns all browser state.
+ * @param {{ id: string, GuideLink?: "a" | typeof import("./SiteLink").SiteLink }} props
+ */
+export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a" }) {
+  const mapHeight = Math.max(...nodes.map((node) => node.y)) + BOX_HEIGHT + 24;
   return (
-    <div className="ads-deep-dive" data-ads-walkthrough={staticEnhancement ? "" : undefined}>
+    <div className="ads-deep-dive" data-ads-walkthrough="">
       <p className="ads-scope-note">
         This diagram shows how ChatGPT answers and how the ad system works alongside it.
         Solid boxes show steps OpenAI describes. Dashed boxes show how Harness
         proposes to collect and save reports. Sources reviewed 8 November 2026.
       </p>
-      {staticEnhancement && <>
-        <template data-controls=""><StageControls diagramId={diagramId} stage={0} complete={false} /></template>
-        <template data-delivery-controls=""><div><DeliveryControls diagramId={diagramId} example="timely" /></div></template>
-      </>}
-      {enhanced && <StageControls diagramId={diagramId} stage={stage} complete={complete} selectStage={selectStage} setComplete={setComplete} />}
+      <>
+        <template data-controls=""><StageControls diagramId={diagramId} /></template>
+        <template data-delivery-controls=""><div><DeliveryControls diagramId={diagramId} /></div></template>
+      </>
       <figure className="ads-figure">
         <figcaption>
           <span>ChatGPT Ads · how the parts fit together</span>
@@ -142,26 +125,25 @@ export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a", staticE
                   <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
                 </marker>
               </defs>
-              {connections.filter((edge) => visibleIds.has(edge.from) && visibleIds.has(edge.to)).map((edge) => (
+              {connections.map((edge) => (
                 <path
                   key={`${edge.from}-${edge.to}`}
                   d={edge.path}
                   data-from={edge.from}
                   data-to={edge.to}
-                  data-outcomes={staticEnhancement ? edge.outcomes?.join(" ") : undefined}
+                  data-outcomes={edge.outcomes?.join(" ")}
                   className={`ads-connection${edge.reference ? " ads-reference-connection" : ""}`}
-                  data-muted={enhanced && edge.outcomes && !edge.outcomes.includes(example) ? "true" : undefined}
                   markerEnd={`url(#${diagramId}-arrow)`}
                   markerStart={edge.both ? `url(#${diagramId}-arrow)` : undefined}
                 />
               ))}
             </svg>
             <ul className="ads-nodes" aria-label="Diagram components">
-              {visibleNodes.map((node) => (
+              {nodes.map((node) => (
                 <li
                   key={node.id}
                   data-node={node.id}
-                  data-stage={staticEnhancement ? node.stage : undefined}
+                  data-stage={node.stage}
                   data-origin={node.origin}
                   className="ads-node"
                   style={{ left: node.x, top: node.y, width: BOX_WIDTH, height: BOX_HEIGHT }}
@@ -175,24 +157,16 @@ export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a", staticE
         </div>
         <p className="ads-map-note">Arrows that point both ways show a request and its reply, or a tool the system can use again. The final check can stop an ad before it is sent. An ad that arrives late has already been sent and misses its chance to appear.</p>
       </figure>
-      {showDelivery && (
         <div className="ads-delivery-example">
-          {enhanced ? (
-            <DeliveryControls diagramId={diagramId} example={example} onChange={(event) => setExample(event.target.value)} />
-          ) : (
-            <>
-              <p>Example ad outcomes</p>
-              <ul>{Object.entries(deliveryExamples).map(([value, item]) => (
-                <li key={item.label} data-example={staticEnhancement ? value : undefined}><strong>{item.label}.</strong> {item.outcome}</li>
-              ))}</ul>
-            </>
-          )}
+          <p>Example ad outcomes</p>
+          <ul>{Object.entries(deliveryExamples).map(([value, item]) => (
+            <li key={item.label} data-example={value}><strong>{item.label}.</strong> {item.outcome}</li>
+          ))}</ul>
           <p className="ads-example-note">These examples use imagined situations to show how an ad can be chosen and still go unseen.</p>
         </div>
-      )}
       <div className="ads-explanations" id={`${diagramId}-explanations`}>
-        {architectureStages.map((item, index) => (showAll || index === stage) && (
-          <section className="ads-stage-copy" key={item.short} data-stage={staticEnhancement ? index : undefined} aria-labelledby={`${diagramId}-stage-${index}`}>
+        {architectureStages.map((item, index) => (
+          <section className="ads-stage-copy" key={item.short} data-stage={index} aria-labelledby={`${diagramId}-stage-${index}`}>
             <p className="eyebrow">{item.proposal ? "Harness proposal · Planned" : "OpenAI documented · Simplified"}</p>
             <h3 id={`${diagramId}-stage-${index}`}>{index + 1}. {item.title}</h3>
             <p>{item.documented ?? item.proposal}</p>

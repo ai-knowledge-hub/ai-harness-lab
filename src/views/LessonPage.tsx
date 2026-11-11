@@ -72,7 +72,7 @@ function ReferenceContext({ lessonId, label }: { lessonId: string; label: string
   );
 }
 
-export function LessonPage({ lesson, staticArchitecture = false }: { lesson: Guide; staticArchitecture?: boolean }) {
+export function LessonPage({ lesson }: { lesson: Guide }) {
   const track = tracks.find((item) => item.slug === lesson.trackId);
   if (!track) throw new Error(`Unknown guide track: ${lesson.trackId}`);
   const prerequisites = relatedContent(learningContent.concepts, lesson.prerequisiteConceptIds);
@@ -201,7 +201,6 @@ export function LessonPage({ lesson, staticArchitecture = false }: { lesson: Gui
                       key={index}
                       block={block}
                       blockId={blockId}
-                      staticArchitecture={staticArchitecture}
                     />
                   );
                 })}

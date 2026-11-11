@@ -1,5 +1,8 @@
 # Astro shell, tracks and guides
 
+> #47 update: the [cutover runbook](harness-astro-cutover.md) supersedes the retained-renderer commands and release boundary below. The old renderer and its duplicate browser run are removed; use Node 22.23.4+ within 22.x and the current README commands. Earlier measurements and verification remain historical evidence.
+
+
 Implementation for [#45](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/45), following the successful [#44 pilot](harness-astro-pilot.md). Main was updated through [PR #52](https://github.com/ai-knowledge-hub/ai-harness-lab/pull/52) at `a90b4ca` before this branch was created.
 
 ## Rendering and authoring
@@ -16,7 +19,7 @@ The only hydrated React island is the existing 15-visualizer lab. It hydrates th
 
 ## Run and verify
 
-Use Node 22.12 or later and the frozen pnpm lockfile:
+Use Node 22.23.4 or later within 22.x and the frozen pnpm lockfile:
 
 ```sh
 pnpm install --frozen-lockfile
@@ -27,8 +30,6 @@ pnpm exec playwright install chromium webkit
 pnpm exec playwright test --config playwright.pilot.config.js
 pnpm test:e2e
 pnpm test:site
-pnpm build:legacy
-pnpm exec playwright test --config playwright.legacy.config.js
 pnpm preview --host 127.0.0.1 --port 4174
 ```
 

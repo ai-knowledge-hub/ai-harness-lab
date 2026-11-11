@@ -16,7 +16,7 @@ pnpm test:e2e
 pnpm test:site
 ```
 
-Use Node 22.12 or later. `pnpm check` runs strict TypeScript and Astro template checks, the unit/component suite, and the static Astro build. Browser tests use the built output, so run it before the browser commands. Playwright starts its own previews; install the required engines locally with `pnpm exec playwright install chromium webkit`. CI uses the version-matched official Playwright image with engines and OS libraries preinstalled; see the [CI coverage rationale](docs/harness-astro-site.md#ci-scope-and-cost).
+Use Node 22.23.4 or later in the 22.x series. `pnpm check` runs strict TypeScript and Astro template checks, the unit/component suite, and the static Astro build. Browser tests use the built output, so run it before the browser commands. Playwright starts its own previews; install the required engines locally with `pnpm exec playwright install chromium webkit`. CI uses the version-matched official Playwright image with engines and OS libraries preinstalled; see the [CI coverage rationale](docs/harness-astro-site.md#ci-scope-and-cost).
 
 `pnpm build` and `pnpm preview` serve the full Astro site. The earlier `build:astro-pilot` and `preview:astro-pilot` commands remain aliases. `pnpm test:astro-pilot` rebuilds and runs the retained guide checks and browser suite. `pnpm check:routes` verifies the independent route/download baseline; `pnpm check:authoring` checks the single-record authoring workflow. See the [site migration report](docs/harness-astro-site.md) and the [original pilot report](docs/harness-astro-pilot.md).
 
@@ -73,4 +73,6 @@ See [the content model and authoring guide](docs/learning-content.md) and [the f
 
 ## Deployment
 
-Vercel previews use the Astro build. Production retains the existing Vite static renderer through `pnpm build:legacy` until the release/cutover work in #47. The deployment builder selects the appropriate output and `vercel.json` preserves the existing filesystem-first fallback. Local builds do not deploy. #46 retains the dedicated lab audit and #47 retires the compatibility renderer after cutover.
+Vercel preview and production builds both use `pnpm build:deployment` → `pnpm build`, with the explicit Astro preset and `dist` output. Existing documents resolve from the filesystem; unknown routes return 404. Only fingerprinted `/_astro/` assets receive a one-year immutable browser cache. HTML and public reference downloads retain normal revalidation. Local builds do not deploy.
+
+See the [cutover and rollback runbook](docs/harness-astro-cutover.md) for the verified candidate, production deployment to retain, release checks and rollback triggers. The former whole-site React/Vite entry, custom prerender builder and production selector have been retired. React remains the lab island and the build-time renderer for shared reading components.

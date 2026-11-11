@@ -20,7 +20,7 @@ export function StaticPage({ path, page }: {
     <StaticRouter location={path}>
       {page.kind === "home" && <HomePage />}
       {page.kind === "track" && <TrackPage track={page.track} />}
-      {page.kind === "guide" && <LessonPage lesson={page.guide} staticArchitecture />}
+      {page.kind === "guide" && <LessonPage lesson={page.guide} />}
       {page.kind === "control" && <PatternsPage />}
       {page.kind === "examples" && <ExamplesPage />}
     </StaticRouter>

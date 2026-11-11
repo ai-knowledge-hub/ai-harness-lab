@@ -1,5 +1,8 @@
 # React lab integration with Astro
 
+> #47 update: the [cutover runbook](harness-astro-cutover.md) supersedes the retained-renderer commands and release boundary below. The old renderer and its duplicate browser run are removed; use Node 22.23.4+ within 22.x and the current README commands. Earlier measurements and verification remain historical evidence.
+
+
 Implementation and audit for [#46](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/46), based on merged #53 at `9f904d0`. #45 is closed. Production cutover and removal of the compatibility renderer remain in #47.
 
 ## Integration boundary
@@ -32,7 +35,7 @@ The complete CI portfolio becomes 28 normal browser cases (14 site cases and sev
 
 ## Reproduce
 
-Use Node 22.12+ and the frozen lockfile:
+Use Node 22.23.4+ within 22.x and the frozen lockfile:
 
 ```sh
 pnpm install --frozen-lockfile
@@ -42,8 +45,6 @@ pnpm exec playwright test tests/e2e/lab.spec.js
 pnpm test:e2e
 pnpm test:site
 pnpm exec playwright test --config playwright.pilot.config.js
-pnpm build:legacy
-pnpm exec playwright test --config playwright.legacy.config.js
 ```
 
 The existing independent comparison still protects all 16 baseline routes, metadata, anchors, links, 14 sitemap entries and five download hashes. The lab's JavaScript/performance measurements and hosted preview verification are recorded with the PR evidence. #47 retains the final production-candidate measurements, hosting/header/dependency checks, rollback plan and renderer retirement.

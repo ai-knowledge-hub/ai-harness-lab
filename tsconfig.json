@@ -12,7 +12,6 @@
   ],
   "exclude": [
     "dist",
-    "legacy-dist",
     "node_modules"
   ]
 }

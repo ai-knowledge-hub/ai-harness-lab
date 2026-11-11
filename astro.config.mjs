@@ -27,6 +27,8 @@ async function mirrorHtml(directory, root = directory) {
 export default defineConfig({
   site: "https://harness.ai-knowledge-hub.org",
   output: "static",
+  // Preserve the established inline spacing across the Astro 7 compiler change.
+  compressHTML: true,
   trailingSlash: "never",
   build: { format: "directory" },
   devToolbar: { enabled: false },

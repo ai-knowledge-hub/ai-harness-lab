@@ -1,0 +1,85 @@
+{
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 1,
+      "moderate": 1,
+      "high": 2,
+      "critical": 0
+    },
+    "dependencies": 535,
+    "devDependencies": 0,
+    "optionalDependencies": 0,
+    "totalDependencies": 535
+  },
+  "advisories": [
+    {
+      "id": "1119108",
+      "module_name": "ws",
+      "severity": "moderate",
+      "title": "ws: Uninitialized memory disclosure",
+      "url": "https://github.com/advisories/GHSA-58qx-3vcg-4xpx",
+      "vulnerable_versions": ">=8.0.0 <8.20.1",
+      "patched_versions": ">=8.20.1",
+      "findings": [
+        {
+          "version": "8.20.0",
+          "paths": [
+            ".>jsdom>ws"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1120680",
+      "module_name": "esbuild",
+      "severity": "low",
+      "title": "esbuild allows arbitrary file read when running the development server on Windows",
+      "url": "https://github.com/advisories/GHSA-g7r4-m6w7-qqqr",
+      "vulnerable_versions": ">=0.27.3 <0.28.1",
+      "patched_versions": ">=0.28.1",
+      "findings": [
+        {
+          "version": "0.27.7",
+          "paths": [
+            ".>vite>esbuild"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1123259",
+      "module_name": "ws",
+      "severity": "high",
+      "title": "ws: Memory exhaustion DoS from tiny fragments and data chunks",
+      "url": "https://github.com/advisories/GHSA-96hv-2xvq-fx4p",
+      "vulnerable_versions": ">=8.0.0 <8.21.0",
+      "patched_versions": ">=8.21.0",
+      "findings": [
+        {
+          "version": "8.20.0",
+          "paths": [
+            ".>jsdom>ws"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1241209",
+      "module_name": "source-map-js",
+      "severity": "high",
+      "title": "source-map-js allows event-loop denial of service through indexed source-map section offsets",
+      "url": "https://github.com/advisories/GHSA-68fv-2mgg-jv7q",
+      "vulnerable_versions": ">=1.0.0 <1.2.2",
+      "patched_versions": ">=1.2.2",
+      "findings": [
+        {
+          "version": "1.2.1",
+          "paths": [
+            ".>@vitest/coverage-v8>magicast>source-map-js"
+          ]
+        }
+      ]
+    }
+  ]
+}

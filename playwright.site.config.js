@@ -6,5 +6,5 @@ export default defineConfig({
     { name: "chromium", use: { browserName: "chromium" } },
     { name: "webkit", testMatch: "search-accessibility.spec.js", use: { browserName: "webkit" } },
   ],
-  webServer: { command: "pnpm preview --host 127.0.0.1 --port 4176", port: 4176, reuseExistingServer: false },
+  webServer: { command: "pnpm preview --ignore-lock --host 127.0.0.1 --port 4176", port: 4176, reuseExistingServer: false },
 });
