@@ -224,7 +224,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
           </div>
         </aside>
 
-        <section className="stage" id="visualizer" aria-live="polite">
+        <section className="stage" id="visualizer">
           <div className="stage-head">
             <div>
               <p className="eyebrow">{currentAlgorithm.operation}</p>
@@ -301,6 +301,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                     min="500"
                     max="1800"
                     value={speed}
+                    aria-valuetext={`${speed} milliseconds between steps`}
                     onChange={(event) => setSpeed(Number(event.target.value))}
                   />
                 </label>
@@ -341,7 +342,12 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                   <div className="panel-title">
                     <span>Current step</span>
                   </div>
-                  <p>{currentStep.note}</p>
+                  <p
+                    role="status"
+                    aria-live={playing ? "off" : "polite"}
+                    aria-atomic="true"
+                    aria-label={`${currentAlgorithm.title}: step ${stepIndex + 1} of ${currentAlgorithm.steps.length}, ${currentStep.label}`}
+                  >{currentStep.note}</p>
                 </article>
                 <article className="panel">
                   <div className="panel-title">
