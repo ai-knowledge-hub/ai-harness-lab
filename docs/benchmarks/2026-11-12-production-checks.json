@@ -1,0 +1,292 @@
+{
+  "date": "2026-11-12",
+  "commit": "bddae7b878004f78830f58f4c594a43e41967a6e",
+  "origin": "https://harness.ai-knowledge-hub.org",
+  "routes": [
+    {
+      "path": "/examples",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/ai-engineering",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/algorithms",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/measurement-ml",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/software-production",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/system-design",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/system-design/advertising-platforms",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/system-design/api-design",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/system-design/chatgpt-ads-apis",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/system-design/chatgpt-ads-reporting",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/system-design/chatgpt-ads",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/measurement-ml/attribution-and-lift",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/algorithms/visualizers",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/ai-engineering/control-plane",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "path": "/learn/ai-engineering/verify-small-code-change",
+      "status": 200,
+      "cacheControl": "public, max-age=0, must-revalidate"
+    }
+  ],
+  "downloads": [
+    {
+      "path": "references/chatgpt-ads/v1/README.md",
+      "status": 200,
+      "bytes": 2406,
+      "sha256": "b484bfb564d16dead1c6fc0decdfb2280f567982d2569e1683b1b755ab49bd03",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/markdown; charset=utf-8",
+        "etag": "W/\"1daa48f0b1a835e1c9ae0a872d9a3a2f\"",
+        "x-vercel-cache": "MISS",
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "references/chatgpt-ads/v1/architecture-contracts.schema.json",
+      "status": 200,
+      "bytes": 24966,
+      "sha256": "97c05e83caa12a1439ccaef6ffbef742c1a6bd2c2a5174576c424ad7d7ad1aea",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"2c7857154dd269fa942f405f6b68b5c5\"",
+        "x-vercel-cache": "MISS",
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "references/chatgpt-ads/v1/architecture-examples.json",
+      "status": 200,
+      "bytes": 4397,
+      "sha256": "9fe3eea63738865e28523564e68ddad4afd9d1333c3c1176d9729efb5d86e2d0",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"e69aa2717c574135fc75990fba258676\"",
+        "x-vercel-cache": "MISS",
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "references/chatgpt-ads/v1/capabilities.json",
+      "status": 200,
+      "bytes": 3741,
+      "sha256": "609629c101e2205bf7ede4280577623c9f6d6c09f6c095f694dc6440e9330d5f",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"ed78142529f72b3e7106b96fa1425f92\"",
+        "x-vercel-cache": "MISS",
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "references/chatgpt-ads/v1/reporting-examples.json",
+      "status": 200,
+      "bytes": 1798,
+      "sha256": "f6f20fc7ff873857b45491ab2bf56fe2d2b9b497a0d3264543eb69f7f6957896",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"29e2ed8751a078b0064e14166ca19ef8\"",
+        "x-vercel-cache": "MISS",
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      }
+    }
+  ],
+  "assets": [
+    {
+      "path": "/_astro/SiteLayout.Blg0S5rS.css",
+      "first": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "text/css; charset=utf-8",
+        "etag": "W/\"c68c443e8e3b1756e27f481c2e5add9f\"",
+        "x-vercel-cache": "MISS",
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      },
+      "repeat": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "text/css; charset=utf-8",
+        "etag": "W/\"c68c443e8e3b1756e27f481c2e5add9f\"",
+        "x-vercel-cache": "HIT",
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/_astro/SiteLayout.astro_astro_type_script_index_0_lang.JE_k35j2.js",
+      "first": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "application/javascript; charset=utf-8",
+        "etag": "W/\"042093b85ea7133b9f2d1d02cc71b5be\"",
+        "x-vercel-cache": "MISS",
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      },
+      "repeat": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "application/javascript; charset=utf-8",
+        "etag": "W/\"042093b85ea7133b9f2d1d02cc71b5be\"",
+        "x-vercel-cache": "HIT",
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/_astro/Architecture.astro_astro_type_script_index_0_lang.TbDc4LOY.js",
+      "first": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "application/javascript; charset=utf-8",
+        "etag": "W/\"3261edd48727c83ac3d21f94e248ede4\"",
+        "x-vercel-cache": "MISS",
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      },
+      "repeat": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "application/javascript; charset=utf-8",
+        "etag": "W/\"3261edd48727c83ac3d21f94e248ede4\"",
+        "x-vercel-cache": "HIT",
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "path": "/release-check-missing-532e0dd",
+      "status": 404,
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/plain; charset=utf-8",
+        "etag": null,
+        "x-vercel-cache": null,
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/_astro/release-check-missing-532e0dd.js",
+      "status": 404,
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "text/plain; charset=utf-8",
+        "etag": null,
+        "x-vercel-cache": null,
+        "x-robots-tag": null,
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/learn/system-design/chatgpt-ads.html?release_check=532e0dd",
+      "status": 308,
+      "location": "/learn/system-design/chatgpt-ads?release_check=532e0dd"
+    }
+  ],
+  "sitemap": {
+    "status": 200,
+    "urls": [
+      "https://harness.ai-knowledge-hub.org/",
+      "https://harness.ai-knowledge-hub.org/learn/ai-engineering",
+      "https://harness.ai-knowledge-hub.org/learn/ai-engineering/control-plane",
+      "https://harness.ai-knowledge-hub.org/learn/ai-engineering/verify-small-code-change",
+      "https://harness.ai-knowledge-hub.org/learn/algorithms",
+      "https://harness.ai-knowledge-hub.org/learn/algorithms/visualizers",
+      "https://harness.ai-knowledge-hub.org/learn/measurement-ml",
+      "https://harness.ai-knowledge-hub.org/learn/measurement-ml/attribution-and-lift",
+      "https://harness.ai-knowledge-hub.org/learn/software-production",
+      "https://harness.ai-knowledge-hub.org/learn/system-design",
+      "https://harness.ai-knowledge-hub.org/learn/system-design/advertising-platforms",
+      "https://harness.ai-knowledge-hub.org/learn/system-design/api-design",
+      "https://harness.ai-knowledge-hub.org/learn/system-design/chatgpt-ads",
+      "https://harness.ai-knowledge-hub.org/learn/system-design/chatgpt-ads-apis"
+    ]
+  },
+  "robots": {
+    "status": 200,
+    "text": "User-agent: *\nAllow: /\nSitemap: https://harness.ai-knowledge-hub.org/sitemap.xml\n"
+  },
+  "analytics": {
+    "status": 200,
+    "headers": {
+      "cache-control": "public, max-age=2678400",
+      "content-type": "application/javascript; charset=utf-8",
+      "etag": "W/\"5672cc1c1ca37ca2b61e89aa7295517d\"",
+      "x-vercel-cache": "HIT",
+      "x-robots-tag": null,
+      "strict-transport-security": "max-age=63072000; includeSubDomains; preload"
+    },
+    "bytes": 4522
+  },
+  "unresolvedRecoveryRisk": {
+    "status": "open-in-recorded-production-deployment",
+    "finding": "Missing /_astro/ responses receive a one-year immutable policy and can remain cached as 404 after rollback restores the asset. Fingerprints do not prevent missing URLs from becoming available.",
+    "candidatePolicy": "public, max-age=0, must-revalidate",
+    "deploymentVerification": "Pending deployment and live-header verification of PR #68; observed headers above remain the original evidence.",
+    "regression": "tests/site/asset-cache.spec.js uses default Chromium HTTP caching and the configured header to require recovery from 404 to the restored 200 bytes.",
+    "existingCachedFailures": "Changing server headers does not evict previously cached fresh 404s; affected clients can still need a cache-bypassing reload or cache clear."
+  }
+}

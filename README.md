@@ -73,6 +73,6 @@ See [the content model and authoring guide](docs/learning-content.md) and [the f
 
 ## Deployment
 
-Vercel preview and production builds both use `pnpm build:deployment` → `pnpm build`, with the explicit Astro preset and `dist` output. Existing documents resolve from the filesystem; unknown routes return 404. Only fingerprinted `/_astro/` assets receive a one-year immutable browser cache. HTML and public reference downloads retain normal revalidation. Local builds do not deploy.
+Vercel preview and production builds both use `pnpm build:deployment` → `pnpm build`, with the explicit Astro preset and `dist` output. Existing documents resolve from the filesystem; unknown routes return 404. Astro asset responses, HTML and public reference downloads revalidate before reuse. This includes missing `/_astro/` assets, so a cached 404 can recover when a deployment or rollback restores the file. Successful assets may use ETag validation on repeat loads. Local builds do not deploy.
 
 See the [cutover and rollback runbook](docs/harness-astro-cutover.md) for the verified candidate, production deployment to retain, release checks and rollback triggers. The former whole-site React/Vite entry, custom prerender builder and production selector have been retired. React remains the lab island and the build-time renderer for shared reading components.

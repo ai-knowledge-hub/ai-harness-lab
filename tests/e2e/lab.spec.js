@@ -116,9 +116,12 @@ test("legacy document redirects preserve query and fragment through refresh", as
     await expect(page).toHaveURL(new URL(to, page.url()).href);
     if (heading === "Token Bucket") await ready(page, heading);
     else await expect(page.getByRole("heading", { level: 1 })).toHaveText(heading);
+    const target = page.locator(heading === "Token Bucket" ? "#visualizer h2" : "#offline-mock-lab");
+    // Finish the initial fragment navigation before testing refresh restoration.
+    await expect(target).toBeInViewport();
     await page.reload();
     await expect(page).toHaveURL(new URL(to, page.url()).href);
-    await expect(page.locator(heading === "Token Bucket" ? "#visualizer h2" : "#offline-mock-lab")).toBeInViewport();
+    await expect(target).toBeInViewport();
   }
 });
 
