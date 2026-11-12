@@ -10,6 +10,15 @@ function changed(mutator) {
 }
 
 describe("Learning content integrity", () => {
+  it("allows no companions but requires a reason for each listed resource", () => {
+    const emptyGuide = learningContent.lessons.find((guide) => guide.id === "attribution-and-lift");
+    expect([emptyGuide.publicationIds, emptyGuide.capabilityIds, emptyGuide.videoIds]).toEqual([[], [], []]);
+    expect(validateLearningContent()).toBe(true);
+    for (const collection of ["publications", "capabilities"]) {
+      const content = changed((draft) => { draft[collection][0].relationship = " "; });
+      expect(() => validateLearningContent(content)).toThrow("explain why this optional resource helps");
+    }
+  });
   it("rejects a cross-track case link to a missing section", () => {
     const content = changed((draft) => {
       const link = draft.discovery.caseTracks["chatgpt-ads-reporting"]["software-production"];

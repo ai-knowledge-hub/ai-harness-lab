@@ -38,6 +38,31 @@ Supported lifecycle rules:
 
 To add a standard guide, create one `.ts` file in `src/content/lessons/` and default-export the record with `satisfies Guide` from `src/content/guide-types.ts`. Run `pnpm check`. Its route, primary-track listing, metadata and eligible sitemap entry are automatic. New principles enter Reusable guides, cases enter Worked examples, and platform/reference kinds enter References. Existing curated starting paths, custom actions and cross-track case relationships remain in `discovery.js`; they continue to resolve metadata from the same records. Do not add a navigation entry pointing to a nonexistent guide. Use `pnpm check:authoring` to exercise published, draft and invalid-reference records end to end.
 
+## Optional companion selection and upkeep
+
+A guide is complete with zero `publicationIds`, `capabilityIds` and `videoIds`. Use empty arrays when no companion helps the local task. Do not add placeholders, empty sections, missing-content messages, required article/package pairs or reciprocal-link gates. The existing attribution/lift guide exercises this empty case; its own explanation and decision rule remain usable, while shared family navigation remains available independently.
+
+For a retained Publication or Skills resource, write a nonempty `relationship` explaining why it helps this task; build validation rejects a missing reason. Use the existing stable collection ID and one canonical destination. Name the action for what opening the destination supplies: reading an explanation or inspecting package/setup details. A catalogue visit is not execution. Optional companion labels must not suggest that installing or reading them is necessary to use the guide.
+
+Publication owns its article, canonical URL and section anchors. Skills owns package versions, setup, runtime discovery and current operational evidence. Keep those claims with their owner; a local plan/mock, successful file installation or published API reference does not establish connected operation or account access. Concrete versioned samples can retain their pinned release and instructions, with their limits. Check selected external URLs/canonical metadata, fragments and relevant readiness text when changing links, then record the date and result. Builds check structure and provenance; they do not crawl other sites or certify their operations.
+
+### Selected companion check · 12 November 2026, 08:08 UTC
+
+This bounded audit inspected the public HTML and the relevant article/requirements text, not just HTTP status. All six targets returned 200 without redirects to a different page. No URL needed changing. The three Publication pages declare matching canonical URLs, and the Playbook fragment exists. The three Skills responses contain no canonical-link element in their returned HTML; their existing catalogue paths were retained, with no alternative URL inferred.
+
+| Retained companion | Why it helps / what the owning page establishes |
+| --- | --- |
+| [Playbook · validation versus evaluation](https://ai-knowledge-hub.org/library/agent-maintenance-security-harness/#separate-validation-of-a-change-from-evaluation-of-the-maintainer) | The coding-change guide's existing section anchor opens the discussion of one-change evidence versus evaluating an agent across tasks. Article context is not a completed repair or release. |
+| [Code Maintenance Plugin](https://skills.ai-knowledge-hub.org/plugins/engineering/code-maintenance-plugin) | Catalogue shows 0.2.0, bundled skills/hooks, a Node 22 first-use helper and explicit Not verified operational status. The helper produces a bounded plan and does not authorize merge. The track action now says inspect the package. |
+| [Harness Governance Plugin](https://skills.ai-knowledge-hub.org/plugins/agentops/harness-governance-plugin) | Catalogue shows 0.2.0, a Node 22 first-use helper and Not verified operational status. It describes a governed proposal decision and human adoption gates. The track action now says inspect the package. |
+| [Ad-platform authentication review](https://skills.ai-knowledge-hub.org/skills/security/ad-platform-agent-auth-review) | The reporting companion supplies analysis-only agent instructions (0.1.0) for credential scope and read/write separation. The page explicitly distinguishes instructions from executable capabilities and permission to operate. |
+| [Christmas Ads pilot](https://ai-knowledge-hub.org/library/chatgpt-ads-christmas-pilot/) | Optional case context for a bounded seasonal decision and credited versus additional sales. It does not change the evergreen guide body or verify live reporting access. |
+| [The Deterministic Core](https://ai-knowledge-hub.org/library/deterministic-core-algorithms-data-structures-marketing-agents/) | The lab's existing essay explains operations, assumptions and limits. Its presence is not validation of a particular lab implementation or a deployed agent. |
+
+These checks did not install/run the packages, verify runtime discovery or authenticate an account. Existing pinned sample evidence remains in its dated records. No sibling implementation/editorial change was required, and no new companion was commissioned.
+
+The #42 reading fixture remains unchanged. The route comparison asserts #60's six specific approved label/action substitutions before normalizing those nodes to their historical wording for original-body parity; it does not skip companion sections or URLs. Browser assertions check current optional labels/actions and both populated and empty companion cases. Unrelated prose, anchors, destinations, metadata and download hashes retain their original checks.
+
 ## Validation
 
 TypeScript checks guide and block shapes during authoring. `validateLearningContent` checks IDs, paths, track membership, relationship targets, metadata, objectives, sections, anchors, block shapes and lifecycle consistency. The production build invokes it and fails on invalid content. Failure cases have unit coverage.
@@ -52,7 +77,7 @@ Current validation is structural. It does not establish the accuracy of an exter
 
 Reading links use normal document navigation. A React island on the lab route hydrates the static default lab in place, then reads the actual query; this retains scrolling targets while avoiding a query/HTML hydration mismatch. Existing algorithm selection, playback and history behaviour remain supported. Metadata comes from the shared catalogue at build time.
 
-The site remains static. Vercel previews use Astro and production keeps the compatibility renderer until #47. `cleanUrls: true`, canonical metadata and mirrored HTML addresses preserve the existing route forms. The `/algorithms` and `/patterns` aliases retain query strings and fragments.
+The site remains static. Vercel preview and production use the same Astro build; see the [cutover runbook](harness-astro-cutover.md) for release and rollback. `cleanUrls: true`, canonical metadata and mirrored HTML addresses preserve the existing route forms. The `/algorithms` and `/patterns` aliases retain query strings and fragments.
 
 ## Platform references and supporting cases
 

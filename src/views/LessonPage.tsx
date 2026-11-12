@@ -228,7 +228,7 @@ export function LessonPage({ lesson }: { lesson: Guide }) {
           )}
           {caseStudies.map((publication) => (
             <aside className="guide-case-study" aria-label="Supporting case study" key={publication.id}>
-              <p className="eyebrow">Supporting case study · Publication</p>
+              <p className="eyebrow">Optional case study · Publication</p>
               <h2><a href={publication.href}>{publication.title}</a></h2>
               <p>{publication.relationship}</p>
             </aside>
@@ -252,8 +252,8 @@ export function LessonPage({ lesson }: { lesson: Guide }) {
               id="related-reading"
               aria-labelledby="related-reading-title"
             >
-              <p className="eyebrow">The wider context</p>
-              <h2 id="related-reading-title">Related reading</h2>
+              <p className="eyebrow">Optional companions</p>
+              <h2 id="related-reading-title">Related reading and resources</h2>
               {relatedReading.map((publication) => (
                 <article key={publication.id}>
                   <h3>
@@ -265,7 +265,7 @@ export function LessonPage({ lesson }: { lesson: Guide }) {
               {capabilities.map((capability) => (
                 <article key={capability.id}>
                   <span className="resource-kind">
-                    Related guide · Skills
+                    Resource · Skills
                   </span>
                   <h3>
                     <a href={capability.href}>{capability.title}</a>
