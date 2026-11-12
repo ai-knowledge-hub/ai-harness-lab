@@ -313,6 +313,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                     <strong>{currentStep.label}</strong>
                   </div>
                   <div
+                    key={currentAlgorithm.id}
                     className="visualization"
                     tabIndex={0}
                     role="region"

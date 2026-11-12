@@ -51,7 +51,9 @@ At 320px in both themes it checks native Tab focus, visible outline and actual
 ArrowRight scrolling for the lab diagram, reference code and grant example. The
 existing 15-lab audit additionally checks SVG text transforms before comparing every
 rendered frame to the retained independent oracle. No new browser test cases or
-snapshot inventory were added.
+snapshot inventory were added. The short grant may fit with Linux fallback fonts; its
+scroll assertion runs only when it actually overflows, while label and focus checks
+remain unconditional. The longer Dijkstra code and diagram must overflow in this check.
 
 Validation: `pnpm check` (32 unit tests, type check and build), `pnpm check:authoring`,
 `pnpm check:routes`, 28 existing e2e cases, nine site cases and 11 pilot cases passed.
@@ -65,3 +67,12 @@ page zoom and CSS viewport reflow are the evidence here. Screen-reader announcem
 remaining interaction semantics and reader task research belong to #62/#63. Existing
 label truncation inside authored graph nodes was not redesigned. No production release,
 deployment protection change or claim of complete WCAG conformance is included.
+
+## Local review follow-up
+
+The first review found that a reused diagram scroller retained its horizontal offset
+when selecting another lab. The new regression reproduced 224px on desktop and 414px
+on mobile after selection, instead of zero. The diagram container is now keyed by
+algorithm ID so selection and Back/Forward start at the left edge. Step changes keep
+the same container and retain the reader’s chosen horizontal position. The existing
+query-position test checks all three transitions.

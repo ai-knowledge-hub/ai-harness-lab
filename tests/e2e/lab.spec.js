@@ -139,6 +139,22 @@ test("algorithm query changes preserve the working position", async ({ page }) =
   await target.click();
   await ready(page, "BFS");
   expect(Math.abs(await page.evaluate(() => window.scrollY) - before)).toBeLessThanOrEqual(1);
+  const animation = page.getByRole("region", { name: "Animation", exact: true });
+  await animation.evaluate(element => { element.scrollLeft = element.scrollWidth; });
+  expect(await animation.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+  await page.locator(".algorithm-list").getByText("Dijkstra", { exact: true }).click();
+  await ready(page, "Dijkstra");
+  await expect.poll(() => animation.evaluate(element => element.scrollLeft)).toBe(0);
+  await animation.evaluate(element => { element.scrollLeft = element.scrollWidth; });
+  const horizontal = await animation.evaluate(element => element.scrollLeft);
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.locator(".step-meter span").first()).toHaveText("2");
+  expect(await animation.evaluate(element => element.scrollLeft)).toBe(horizontal);
+  await page.goBack(); await ready(page, "BFS");
+  await expect.poll(() => animation.evaluate(element => element.scrollLeft)).toBe(0);
+  await animation.evaluate(element => { element.scrollLeft = element.scrollWidth; });
+  await page.goForward(); await ready(page, "Dijkstra");
+  await expect.poll(() => animation.evaluate(element => element.scrollLeft)).toBe(0);
 });
 
 for (const hash of ["", "#visualizer"]) {
