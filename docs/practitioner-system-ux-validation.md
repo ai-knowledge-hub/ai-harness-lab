@@ -101,7 +101,8 @@ causal-improvement, adoption or statistical success claims.
 
 ## Commands and readiness
 
-Run on the supported Node 22 engine, in order (authoring runs before browser checks):
+Run these verification commands on the supported Node 22 engine, in order
+(authoring runs before browser checks):
 
 ```sh
 pnpm check
@@ -110,9 +111,22 @@ pnpm check:routes
 pnpm test:e2e
 pnpm test:site
 pnpm exec playwright test --config playwright.pilot.config.js
+```
+
+For the expert paths and budget measurement, start the preview in **terminal A**
+and leave it running until the checks finish:
+
+```sh
 pnpm preview --ignore-lock --host 127.0.0.1 --port 4180
+```
+
+After the preview reports ready, run the benchmark in **terminal B**:
+
+```sh
 node scripts/measure-migration-baseline.mjs http://127.0.0.1:4180 --route /learn/system-design/chatgpt-ads
 ```
+
+Stop the preview with Ctrl+C in terminal A after the walkthrough/benchmark finishes.
 
 `check` passed with **32 unit tests**, zero Astro/TypeScript errors and the 18-page
 production build. The remaining gates/results are recorded above. Temporary expert
