@@ -112,3 +112,5 @@ export const verifySmallCodeChangeGuide = {
     },
   ],
 } satisfies Guide;
+
+export default verifySmallCodeChangeGuide;

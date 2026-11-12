@@ -1,0 +1,30 @@
+---
+import { site } from "../content/site";
+import TrackNavigation from "./TrackNavigation.astro";
+interface Props { pathname: string }
+const { pathname } = Astro.props;
+---
+<header class="site-header">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="masthead-row">
+    <a class="site-brand" href="/" aria-label="AI Knowledge Hub Harness home">
+      <span>{site.family}</span><span class="product-label">{site.name}</span>
+    </a>
+    <div class="header-actions">
+      <nav class="family-navigation" aria-label="AI Knowledge Hub">
+        <a href={site.publication}>Publication</a><a href={site.skills}>Skills</a>
+      </nav>
+      <button type="button" class="theme-toggle" aria-label="Switch to light mode">Light mode</button>
+      <details class="mobile-navigation">
+        <summary>Tracks</summary>
+        <div class="mobile-menu">
+          <TrackNavigation pathname={pathname} />
+          <nav aria-label="Companion sites">
+            <a href={site.publication}>Publication</a><a href={site.skills}>Skills</a>
+          </nav>
+        </div>
+      </details>
+    </div>
+  </div>
+  <div class="desktop-navigation"><TrackNavigation pathname={pathname} /></div>
+</header>

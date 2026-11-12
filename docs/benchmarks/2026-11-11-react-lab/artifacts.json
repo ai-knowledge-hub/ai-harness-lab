@@ -1,0 +1,19 @@
+{
+  "baselineApplication": "cc921b22699796c92fd30c9d33dcc7cce981f08f",
+  "baselineCheckout": "5c8d173",
+  "astroImplementation": "644e62c",
+  "sha256": {
+    "baseline": {
+      "learn/algorithms/visualizers/index.html": "527c285e0b904e95474d3eb49133309c3eb697a93b04985b6f6e0a29bce83d84",
+      "assets/index-DUeuyHZH.js": "0be1717d2d5a9b3d15bc1c440ba170fc2505efebebed76b16f93969a9eef58af"
+    },
+    "astro": {
+      "learn/algorithms/visualizers/index.html": "5372d5313fca8251e8d3611fa1971a5da60088adf69b0a4ad9c3567fe735c42a",
+      "_astro/AlgorithmLabIsland.DYUlseXI.js": "ddaf6bc755f0f4b51a166a84d29e497a15cbe31d0ba1d44c8826dec6197df330",
+      "_astro/Architecture.astro_astro_type_script_index_0_lang.C1ZitqRM.js": "0dac80ce19f126cfd85dc0624da394f2446e3f9f57180c30b9815b50c8faa865",
+      "_astro/SiteLayout.astro_astro_type_script_index_0_lang.Cl4CDVRx.js": "5fe129a3efea2e8ed28e2a2ef0140d378e6992d70e4945fd174e7dd92c800841",
+      "_astro/client.DlsTceMF.js": "dff5047181507fa67b32cc60bd4fdb1ba81e8bdb59da2dfbe7c053868fa5c404",
+      "_astro/index.D9mrT8mP.js": "3a80d6783f9b3f67451843fe415cbc4ac10c5ae82cf727d7f4b4559d81a9fc1b"
+    }
+  }
+}

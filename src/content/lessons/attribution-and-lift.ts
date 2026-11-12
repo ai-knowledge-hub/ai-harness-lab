@@ -58,3 +58,5 @@ export const attributionAndLiftGuide = {
     },
   ],
 } satisfies Guide;
+
+export default attributionAndLiftGuide;

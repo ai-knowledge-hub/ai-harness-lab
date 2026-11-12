@@ -1,0 +1,46 @@
+{
+  "baseline": {
+    "fcpMs": {
+      "median": 508.0,
+      "min": 496,
+      "max": 724
+    },
+    "lcpMs": {
+      "median": 508.0,
+      "min": 496,
+      "max": 724
+    },
+    "initialJsGzipBytes": {
+      "median": 126954.0,
+      "min": 126954,
+      "max": 126954
+    },
+    "jsGzipBytesThroughNext": {
+      "median": 126954.0,
+      "min": 126954,
+      "max": 126954
+    }
+  },
+  "astro": {
+    "fcpMs": {
+      "median": 430.0,
+      "min": 416,
+      "max": 540
+    },
+    "lcpMs": {
+      "median": 470.0,
+      "min": 452,
+      "max": 584
+    },
+    "initialJsGzipBytes": {
+      "median": 96751.0,
+      "min": 96751,
+      "max": 96751
+    },
+    "jsGzipBytesThroughNext": {
+      "median": 96751.0,
+      "min": 96751,
+      "max": 96751
+    }
+  }
+}

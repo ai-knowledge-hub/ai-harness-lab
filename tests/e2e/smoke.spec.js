@@ -94,54 +94,6 @@ test("five tracks connect to the existing labs and preserve deep links", async (
   ).toBeVisible();
 });
 
-test("all visualizers retain step controls and practical context in both themes", async ({
-  page,
-}) => {
-  await page.goto("/learn/algorithms/visualizers#visualizer");
-  const names = [
-    "Binary Search",
-    "BFS",
-    "DFS",
-    "Rabin-Karp",
-    "Heap",
-    "Topological Sort",
-    "Bloom Filter",
-    "Circular Buffer",
-    "Dijkstra",
-    "Union-Find",
-    "Approval State Machine",
-    "Token Bucket",
-    "Lease-Locked Queue",
-    "RBAC / ABAC Permission Graph",
-    "Audit Hash Chain",
-  ];
-  for (const theme of ["dark", "light"]) {
-    if (theme === "light")
-      await page.getByRole("button", { name: "Switch to light mode" }).click();
-    for (const name of names) {
-      await page
-        .locator(".algorithm-list")
-        .getByText(name, { exact: true })
-        .click();
-      await expect(
-        page.getByRole("heading", { name, exact: true }),
-      ).toBeVisible();
-      await page.getByRole("button", { name: "Next", exact: true }).click();
-      await expect(page.locator(".step-meter span").first()).toHaveText("2");
-      await page.getByRole("button", { name: "Context", exact: true }).click();
-      await expect(
-        page.getByText("Why it exists", { exact: true }),
-      ).toBeVisible();
-      await page.getByRole("button", { name: "Run", exact: true }).click();
-      await page.getByRole("button", { name: "Reset", exact: true }).click();
-      await expect(page.locator(".step-meter span").first()).toHaveText("1");
-    }
-  }
-  await page.getByRole("button", { name: "Play", exact: true }).click();
-  await expect(page.locator(".step-meter span").first()).toHaveText("2");
-  await page.getByRole("button", { name: "Pause", exact: true }).click();
-});
-
 test("mobile navigation, theme persistence, keyboard escape and responsive reflow", async ({
   page,
 }) => {
@@ -269,60 +221,6 @@ test("repeated navigation returns to the same tracks anchor", async ({
   await expect(tracksHeading).toBeInViewport();
 });
 
-test("algorithm query changes preserve the working area position", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/learn/algorithms/visualizers");
-  const introduction = page.getByRole("heading", { level: 1 });
-  await page.locator("#visualizer").scrollIntoViewIfNeeded();
-  await expect(introduction).not.toBeInViewport();
-  await page
-    .getByRole("button", { name: "BFS Site crawler by depth", exact: true })
-    .click();
-  await expect(page).toHaveURL(/algorithm=bfs$/);
-  await expect(
-    page.getByRole("heading", { name: "BFS", exact: true }),
-  ).toBeInViewport();
-  await expect(introduction).not.toBeInViewport();
-});
-
-for (const hash of ["", "#visualizer"]) {
-  test(`reselecting the active visualizer preserves scroll and history ${hash || "without an anchor"}`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1440, height: 1000 });
-    await page.goto(`/learn/algorithms/visualizers?algorithm=bfs${hash}`);
-    const active = page.getByRole("button", {
-      name: "BFS Site crawler by depth",
-      exact: true,
-    });
-    await page.getByRole("button", { name: "Next", exact: true }).click();
-    await expect(page.locator(".step-meter span").first()).toHaveText("2");
-    await active.scrollIntoViewIfNeeded();
-    await page.evaluate(() =>
-      window.scrollBy({ top: 80, behavior: "instant" }),
-    );
-    await active.scrollIntoViewIfNeeded();
-    const before = await page.evaluate(() => ({
-      scroll: window.scrollY,
-      history: window.history.length,
-      url: window.location.href,
-    }));
-    expect(before.scroll).toBeGreaterThan(100);
-    await active.click();
-    await expect(page.locator(".step-meter span").first()).toHaveText("1");
-    const after = await page.evaluate(() => ({
-      scroll: window.scrollY,
-      history: window.history.length,
-      url: window.location.href,
-    }));
-    expect(after.url).toBe(before.url);
-    expect(after.history).toBe(before.history);
-    expect(Math.abs(after.scroll - before.scroll)).toBeLessThanOrEqual(1);
-  });
-}
-
 test("the guide is readable as static HTML without JavaScript", async ({
   browser,
   request,
@@ -386,8 +284,7 @@ test("the guide is readable as static HTML without JavaScript", async ({
     ]) {
       await page.goto(`http://127.0.0.1:4173/learn/system-design/${slug}`);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
-      const robots = testInfo.config.metadata.astroPilot && slug === "chatgpt-ads"
-        ? "noindex, follow" : "index, follow";
+      const robots = "index, follow";
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", robots);
       await expect(page.locator(".source-citation").first()).toBeVisible();
       await expect(page.locator("#try-the-collector")).toHaveCount(0);

@@ -1,0 +1,29 @@
+{
+  "baselineApplication": "cc921b22699796c92fd30c9d33dcc7cce981f08f",
+  "baselineCheckout": "5c8d173",
+  "astroImplementation": "f024377",
+  "sha256": {
+    "baseline": {
+      "index.html": "15d4b4f6e938586938a15589b94d602eaf625abe911974e47bc3a6be0853976d",
+      "learn/system-design/api-design/index.html": "ef8df326df733f0b813c577cad6d97942149cc598ab6eb368efa474f0fab7611",
+      "learn/system-design/chatgpt-ads/index.html": "8b3e1931332336b6c46f237fe7eef733ab05d895120f56ee473a5338711d8b85",
+      "learn/algorithms/visualizers/index.html": "527c285e0b904e95474d3eb49133309c3eb697a93b04985b6f6e0a29bce83d84",
+      "sitemap.xml": "a26885f9f483be2f83403c4303101ced38f7a8f40c7e1ef50086f5903ab25a43",
+      "robots.txt": "b575f32f23cb5accb2ca7dffb87a0b49b63b94bba540036059e1723f77d76e99",
+      "assets/index-DUeuyHZH.js": "0be1717d2d5a9b3d15bc1c440ba170fc2505efebebed76b16f93969a9eef58af"
+    },
+    "astro": {
+      "index.html": "3b79f872a418c6a03aef3cfc1f805fd71b4c29f55799e7aafa696519f4791460",
+      "learn/system-design/api-design/index.html": "9ab33125a4489bfb8037153ca496591aae6ad109b0836bde5d18713953982ac1",
+      "learn/system-design/chatgpt-ads/index.html": "ea27ac52293ddd96be453a0467e469d1cae95a53ed2d78a2676063f1c50aee41",
+      "learn/algorithms/visualizers/index.html": "783f2d6501941d2bd6373ed81dccd4a10584761437c87bc3cfb6fa489249aeac",
+      "sitemap.xml": "e48206f7f95b3ee0e0159cd7602fcc374a4b3fbc6a379f8ab59b43b638547bf6",
+      "robots.txt": "b575f32f23cb5accb2ca7dffb87a0b49b63b94bba540036059e1723f77d76e99",
+      "_astro/AlgorithmLabIsland.DdSYE_GL.js": "b70588c131538329224648cb9999c64f34848871831d2980288bfaff2f8f56a6",
+      "_astro/Architecture.astro_astro_type_script_index_0_lang.C1ZitqRM.js": "0dac80ce19f126cfd85dc0624da394f2446e3f9f57180c30b9815b50c8faa865",
+      "_astro/SiteLayout.astro_astro_type_script_index_0_lang.Cl4CDVRx.js": "5fe129a3efea2e8ed28e2a2ef0140d378e6992d70e4945fd174e7dd92c800841",
+      "_astro/client.DlsTceMF.js": "dff5047181507fa67b32cc60bd4fdb1ba81e8bdb59da2dfbe7c053868fa5c404",
+      "_astro/index.D9mrT8mP.js": "3a80d6783f9b3f67451843fe415cbc4ac10c5ae82cf727d7f4b4559d81a9fc1b"
+    }
+  }
+}

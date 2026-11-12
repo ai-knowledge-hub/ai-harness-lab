@@ -13,7 +13,7 @@ function navigationTo(page, path) {
 async function expectPilot(page) {
   await expect(page.locator("[data-ads-walkthrough]")).toHaveCount(1);
   await expect(page.locator('script[src^="/assets/"]')).toHaveCount(0);
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "index, follow");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://harness.ai-knowledge-hub.org" + pilotPath);
 }
 
@@ -22,10 +22,9 @@ for (const [source, route, link] of [
   ["related guide", "/learn/system-design/advertising-platforms", (page) => page.getByRole("link", { name: "How ChatGPT Ads works", exact: true })],
   ["reference context", "/learn/system-design/api-design", (page) => page.getByRole("navigation", { name: "Reference context" }).getByRole("link", { name: /How ads work/ })],
 ]) {
-  test(`${source} requests the Astro document after Vite hydration`, async ({ page }) => {
+  test(`${source} requests its Astro document`, async ({ page }) => {
     await page.goto(route);
-    // Exercise a working client handler before clicking, so an unhydrated
-    // server-rendered anchor cannot disguise a React Router bypass.
+    // Exercise the shell before testing native document navigation.
     await page.getByRole("button", { name: "Switch to light mode" }).click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     const [response] = await Promise.all([navigationTo(page, pilotPath), link(page).click()]);

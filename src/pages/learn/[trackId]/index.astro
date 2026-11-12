@@ -1,0 +1,11 @@
+---
+import SiteLayout from "../../../layouts/SiteLayout.astro";
+import { StaticPage } from "../../../components/StaticPage";
+import { tracks, trackPath } from "../../../content/site";
+export function getStaticPaths() {
+  return tracks.map((track) => ({ params: { trackId: track.slug }, props: { track } }));
+}
+const { track } = Astro.props;
+const path = trackPath(track);
+---
+<SiteLayout path={path}><StaticPage path={path} page={{ kind: "track", track }} /></SiteLayout>

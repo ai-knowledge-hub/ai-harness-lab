@@ -1,0 +1,70 @@
+{
+  "chromium": "147.0.7727.15",
+  "node": "v25.8.2",
+  "profile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "deviceScaleFactor": 3,
+    "isMobile": true,
+    "hasTouch": true
+  },
+  "cpuRate": 4,
+  "network": {
+    "offline": false,
+    "latency": 150,
+    "downloadThroughput": 200000,
+    "uploadThroughput": 93750
+  },
+  "paintWindowMs": 5000,
+  "scriptWindowMs": 1000,
+  "sampleCount": 5,
+  "results": [
+    {
+      "route": "/learn/algorithms/visualizers",
+      "sample": 1,
+      "fcpMs": 660,
+      "lcpMs": 660,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 126954,
+      "jsGzipBytesThroughNext": 126954
+    },
+    {
+      "route": "/learn/algorithms/visualizers",
+      "sample": 2,
+      "fcpMs": 508,
+      "lcpMs": 508,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 126954,
+      "jsGzipBytesThroughNext": 126954
+    },
+    {
+      "route": "/learn/algorithms/visualizers",
+      "sample": 3,
+      "fcpMs": 524,
+      "lcpMs": 524,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 126954,
+      "jsGzipBytesThroughNext": 126954
+    },
+    {
+      "route": "/learn/algorithms/visualizers",
+      "sample": 4,
+      "fcpMs": 508,
+      "lcpMs": 508,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 126954,
+      "jsGzipBytesThroughNext": 126954
+    },
+    {
+      "route": "/learn/algorithms/visualizers",
+      "sample": 5,
+      "fcpMs": 508,
+      "lcpMs": 508,
+      "paintInconclusive": [],
+      "initialJsGzipBytes": 126954,
+      "jsGzipBytesThroughNext": 126954
+    }
+  ]
+}

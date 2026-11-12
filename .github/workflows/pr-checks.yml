@@ -5,11 +5,21 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verify:
-    # Playwright 1.59 supports Ubuntu 24.04; ubuntu-latest also selects 26.04.
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    container:
+      # Keep this version aligned with @playwright/test in package.json.
+      # Browsers and OS libraries are already installed; no per-run apt mirror.
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
+      options: --ipc=host
 
     steps:
       - name: Checkout
@@ -23,7 +33,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
@@ -35,22 +45,18 @@ jobs:
       - name: Run unit tests
         run: pnpm test:run
 
-      - name: Build app
-        run: pnpm build
+      # This also restores the normal production build after the temporary guide.
+      - name: Verify guide authoring and build app
+        run: node scripts/check-astro-authoring.mjs
 
-      - name: Setup Node for the Astro pilot
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Build combined Astro pilot
-        run: pnpm build:astro-pilot
-
-      - name: Install pilot test browser
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Compare independent route and download baseline
+        run: node scripts/check-astro-output.mjs
 
       - name: Verify Astro pilot behaviour
         run: pnpm exec playwright test --config playwright.pilot.config.js
 
-      - name: Run existing browser suite against combined preview
-        run: pnpm exec playwright test --config playwright.staged.config.js
+      - name: Verify retained browser behaviour
+        run: pnpm test:e2e
+
+      - name: Verify search, accessibility and island boundaries
+        run: pnpm exec playwright test --config playwright.site.config.js

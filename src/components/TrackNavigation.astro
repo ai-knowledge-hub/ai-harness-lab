@@ -1,0 +1,12 @@
+---
+import { tracks, trackPath } from "../content/site";
+interface Props { pathname: string }
+const { pathname } = Astro.props;
+---
+<nav class="track-navigation" aria-label="Engineering tracks">
+  {tracks.map((track) => (
+    <a href={trackPath(track)} aria-current={pathname === trackPath(track) || pathname.startsWith(`${trackPath(track)}/`) ? "page" : undefined}>
+      {track.nav}
+    </a>
+  ))}
+</nav>

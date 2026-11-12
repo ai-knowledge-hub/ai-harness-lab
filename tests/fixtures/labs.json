@@ -1,0 +1,20 @@
+{
+  "source": "Independent #42 baseline cc921b2, preserved at 5c8d173",
+  "labs": [
+    ["binary", "Binary Search", "Find", 7],
+    ["bfs", "BFS", "Explore", 6],
+    ["dfs", "DFS", "Explore", 6],
+    ["rabin", "Rabin-Karp", "Security", 6],
+    ["heap", "Heap", "Order", 6],
+    ["topo", "Topological Sort", "Route", 6],
+    ["bloom", "Bloom Filter", "Deduplicate", 5],
+    ["buffer", "Circular Buffer", "Memory", 6],
+    ["dijkstra", "Dijkstra", "Route", 5],
+    ["union", "Union-Find", "Deduplicate", 5],
+    ["approval", "Approval State Machine", "Control", 6],
+    ["tokenBucket", "Token Bucket", "Control", 6],
+    ["leaseQueue", "Lease-Locked Queue", "Control", 6],
+    ["permissionGraph", "RBAC / ABAC Permission Graph", "Control", 6],
+    ["hashChain", "Audit Hash Chain", "Control", 6]
+  ]
+}

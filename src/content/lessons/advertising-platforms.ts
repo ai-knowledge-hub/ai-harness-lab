@@ -88,3 +88,5 @@ export const advertisingPlatformsGuide = {
     },
   ],
 } satisfies Guide;
+
+export default advertisingPlatformsGuide;

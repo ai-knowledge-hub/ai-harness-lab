@@ -13,11 +13,12 @@ pnpm install
 pnpm dev
 pnpm check
 pnpm test:e2e
+pnpm test:site
 ```
 
-`pnpm check` runs TypeScript checks, the unit/component suite, and the production build. Browser tests use the production output, so run it before `pnpm test:e2e`. Playwright starts its own preview on port 4173; install its Chromium browser when needed with `pnpm exec playwright install chromium`.
+Use Node 22.23.4 or later in the 22.x series. `pnpm check` runs strict TypeScript and Astro template checks, the unit/component suite, and the static Astro build. Browser tests use the built output, so run it before the browser commands. Playwright starts its own previews; install the required engines locally with `pnpm exec playwright install chromium webkit`. CI uses the version-matched official Playwright image with engines and OS libraries preinstalled; see the [CI coverage rationale](docs/harness-astro-site.md#ci-scope-and-cost).
 
-For the [Astro pilot](docs/harness-astro-pilot.md), run `pnpm build:astro-pilot` and then `pnpm preview:astro-pilot`. This serves the combined site, including the Astro ChatGPT Ads guide and the linked Vite pages. `pnpm test:astro-pilot` rebuilds that output and runs both the pilot integration checks and the existing browser suite against it. The pilot requires Node 22.12 or later.
+`pnpm build` and `pnpm preview` serve the full Astro site. The earlier `build:astro-pilot` and `preview:astro-pilot` commands remain aliases. `pnpm test:astro-pilot` rebuilds and runs the retained guide checks and browser suite. `pnpm check:routes` verifies the independent route/download baseline; `pnpm check:authoring` checks the single-record authoring workflow. See the [site migration report](docs/harness-astro-site.md) and the [original pilot report](docs/harness-astro-pilot.md).
 
 Use `.ts` for new or migrated typed modules and `.tsx` for React components that use JSX. `pnpm typecheck` checks these files while they coexist with the rest of the JavaScript app.
 
@@ -49,10 +50,13 @@ The [local adapter guide](docs/chatgpt-ads-reporting-adapters.md) shows how to r
 
 A direct visualizer link uses `?algorithm=<id>#visualizer`, for example `/learn/algorithms/visualizers?algorithm=tokenBucket#visualizer`. Browser history restores the selected algorithm. The anchor targets the working area, including on phones.
 
+The [React lab integration audit](docs/harness-react-lab.md) records the 15-visualizer baseline and desktop/mobile URL, history, playback and hydration checks. `pnpm exec playwright test tests/e2e/lab.spec.js` runs that focused matrix; the mobile project repeats only lab cases.
+
 ## Brand and content
 
 - `src/content/site.js` owns the working identity, family URLs, five tracks, and curated resources.
-- `src/pages/TrackPage.jsx` renders each track from that catalogue.
+- `src/layouts/SiteLayout.astro` and `src/components/{Header,Footer,TrackNavigation}.astro` own the shared shell.
+- `src/views/TrackPage.jsx` renders each track at build time from that catalogue.
 - `styles.css` owns the shared tokens, site shell, homepage, and track layouts. `src/styles/labs.css` retains the existing visualizer and reference-surface rules.
 - `src/visualizers/algorithms-data.ts` retains the existing algorithms, code examples, steps, and practical context.
 - `public/brand/provenance.json` records the exact copied optical artwork and its source hashes. No sibling checkout is imported at build or runtime.
@@ -65,8 +69,10 @@ The reading theme defaults to dark. An explicit choice is stored under `harness-
 
 See [the content model and authoring guide](docs/learning-content.md) and [the foundation implementation record](docs/learning-foundation-2026-11-07.md). The system-design track separates platform references, reusable API-design principles and implementation cases. A shared context navigation connects the ChatGPT Ads system, public capability map, principles and reporting case. The Christmas article is a supporting case study; the main reference is evergreen. ChatGPT Ads includes a five-stage HTML/SVG architecture walkthrough with documented/reference-design labels, illustrative delivery outcomes, and a complete no-JavaScript fallback. Six native disclosures explain orchestrator responsibilities and distinguish source-backed behaviour from our interpretations. Clearly labelled downloads separate OpenAI’s external OpenAPI specification from Harness mock contracts and synthetic fixtures. The reporting case is a preview. The local collector runs with sample data, and live integration is planned.
 
-`pnpm build` validates content and synthetic architecture fixtures, then generates route-specific HTML, metadata, a sitemap and robots file. Guides can be read without JavaScript. Draft guides remain noindex and are excluded from the sitemap. The existing React application hydrates matching pages and retains interactive visualizers.
+`pnpm build` validates content and synthetic architecture fixtures, then uses Astro to generate route-specific HTML, metadata, a sitemap and robots file. Guides can be read without JavaScript. Draft guides remain noindex and are excluded from the sitemap. Only the lab route hydrates a React island; reading pages use the small typed shell and walkthrough scripts.
 
 ## Deployment
 
-This is a Vite/React static site with a client navigation fallback. `vercel.json` preserves direct route access; generated static files take precedence. Build with `pnpm build`. No deployment is performed by the local build.
+Vercel preview and production builds both use `pnpm build:deployment` → `pnpm build`, with the explicit Astro preset and `dist` output. Existing documents resolve from the filesystem; unknown routes return 404. Only fingerprinted `/_astro/` assets receive a one-year immutable browser cache. HTML and public reference downloads retain normal revalidation. Local builds do not deploy.
+
+See the [cutover and rollback runbook](docs/harness-astro-cutover.md) for the verified candidate, production deployment to retain, release checks and rollback triggers. The former whole-site React/Vite entry, custom prerender builder and production selector have been retired. React remains the lab island and the build-time renderer for shared reading components.

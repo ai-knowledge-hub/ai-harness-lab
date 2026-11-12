@@ -1,0 +1,8 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+import { StaticPage } from "../components/StaticPage";
+import { controlPath } from "../content/site";
+---
+<SiteLayout path={controlPath} redirectTo={controlPath} noindex>
+  <StaticPage path={controlPath} page={{ kind: "control" }} />
+</SiteLayout>

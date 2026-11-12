@@ -5,3 +5,5 @@ test-results
 .playwright-mcp/
 output/playwright/
 .astro/
+
+legacy-dist/

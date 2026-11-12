@@ -1,0 +1,128 @@
+{
+  "source": {
+    "commit": "cc921b22699796c92fd30c9d33dcc7cce981f08f",
+    "dataSha256": "beb901c41c95bcc0306557023e0c0e0d2a8111763f1f8c49a4a149c26afac25a",
+    "renderersSha256": "bc643ad9e558c5dd9f88e55b50bf6d91c66f75845e42fde604cddf3cecbcb216",
+    "normalization": "tests/support/visual-state.js; diagram DOM only; excludes ARIA, role and insignificant whitespace"
+  },
+  "states": {
+    "binary": [
+      ["Initial bounds","50a24765a0538f83439b0fc1a63acbcd4bedd5aa86108b4476ca91b9515aa791"],
+      ["Check middle","b7d748ef3e81538bf1660306fd1fa4690767b34aa7888387e9455f01b4bd45ec"],
+      ["Move right","073bb77e1bed6101e420604508fe06bf3c6a9296aceeb593a96ee70c6a02b3a3"],
+      ["Check middle","5e4d75537f05a138b383874b1f39f95c1d24089a6824dc2360cb9ab5bc4a152c"],
+      ["Tighten left","8ec6795c8e264fc5939c457a22ec3a685109be91ad44f70dba614ee9f8d9db26"],
+      ["Earliest breach","68100c9f62f6b63af0c9cd69c87a9e93a786237d0b9f8df16a9553ffcde36f9a"],
+      ["Return","a4150c6323bb8df73c3c2b385592d359061639f4af4ea363da7e330383011a7c"]
+    ],
+    "bfs": [
+      ["Seed queue","b28667daf4681359924b40b79e5cab364d0af16c6777157cf9dcc03fa80477c7"],
+      ["Visit home","b5307eea2b8183cba53e60d5291bfe777f1ac1e795b0e15f760e3297f37e1915"],
+      ["Visit products","f8c97537ea5de89844e84694e5bce75df58d6dfb7da6272691bfa7b905cc3a3c"],
+      ["Visit blog","4e3b754d821de047647e96ef1dc20eda0dd929541a312121868e60873c1e838b"],
+      ["Visit about","d40ffa8a6b97b4bed2f19a0d402b3a4ee5287631314d574742fa22b9d4c0ebb8"],
+      ["Continue breadth first","c02ec5a29fbb4dfb95081b1964940f669b28db91b96b276f5fd7ce3918ce4c50"]
+    ],
+    "dfs": [
+      ["Seed stack","ecc4dab7df3292fc4af35f230604c6aab0b75294f859c4d60099fa3f4bd035c7"],
+      ["Pop repo","4ab92ae22add7733cdf1c570b35957eb041949c997b9f9d856b2c52602bde492"],
+      ["Enter skills","9e60e4cee6fe40650a15af38a2c401ce83979f424d5b799fda762b40a63ffc0e"],
+      ["Find SKILL.md","502927aaefc6b14fda0a50223d0d29c52770de3cd254f4ff0072fe31154ca5a0"],
+      ["Backtrack","aaad31194fd17dfce06d34b2e6a5afa00c4b6e42fe123f72908e3e22c0c4d9ae"],
+      ["Find package.json","073ba90077695419b6cd8e76d6e3dc3bca8133630ef7ec9a8ce6e623ba1f2067"]
+    ],
+    "rabin": [
+      ["Group patterns","09551dc214502d47f7c30bfa57ca7144bcc170ccc9a41d72e94b901817c87c2e"],
+      ["Hash first window","b15dd00ed547f4c2de9120a3c7cb3adad7304707363c865a5d94e9c84af23f38"],
+      ["Rolling scan","2d45a4693c564811fce38475cca339276dbc234106c62b7307420d774f2a944d"],
+      ["Hash match","0acf92698dcbb3f659a2014984038bd62f4e47943bb7590949c6b9c6c705a5fb"],
+      ["Record finding","0acf92698dcbb3f659a2014984038bd62f4e47943bb7590949c6b9c6c705a5fb"],
+      ["Compliance match","77903375dfe7ebaf3129de0b1236a7c5705d2f30ceef77d0d67f7f016011de64"]
+    ],
+    "heap": [
+      ["Empty heap","87905d04a407026ad65c65cd88f0049ab4433dbcab92f33210aecc11f3878faa"],
+      ["Push","c325cc53b7973cf30b1f1c245cec1326b49cbb5760d1cf35224f2788ee782195"],
+      ["Push","6ce236902f8ccf7837b486edf9d1568f0635cdc2ad292f6802531485768fc71d"],
+      ["Fill K","fb49bbd93cf42e0c389f3e09af38f25b926b88b815f560cae073d833d4ed725c"],
+      ["Replace minimum","e4dbf556ffb5c6878ca99ff9b5d0118a85276f6e2fce946b31bfa7abe2505084"],
+      ["Replace again","2ec9aab57df6804a6a50fbfaffad62bb24cbe867d10eb99522fcfba604049f59"]
+    ],
+    "topo": [
+      ["Ready tasks","5ae434873c29ac6a2034b11404a04c823269621d5d933e3350df2707106e3eb5"],
+      ["Wave 1","a5f0393d9ad0ee6b6d6650485c49d140ef88c42f2ddc7d3f24b6e9857f058f7f"],
+      ["Unlock transform","70795e1e1801bb9b91268f56175a36754301e98caca2cf5c2d05069584a712a8"],
+      ["Unlock metrics","644891eaac79591d06578c3a8addb7042e9d3899f63aa0be83f00aa0329598bd"],
+      ["Unlock narrative","20cee9f0b5e58fcbd28a7c0c258ae3cf29622d8c930b9afa303eb081f33c7bd9"],
+      ["Report ready","ca5f4b74313b695966701022a6d5edd7ed42b52d40f5dbf9cd5261bc4a29f41b"]
+    ],
+    "bloom": [
+      ["First URL","d910303af2c33e6915b9640cbc861514138d97521aa97454e56d2572024fb18d"],
+      ["Add bits","d910303af2c33e6915b9640cbc861514138d97521aa97454e56d2572024fb18d"],
+      ["Second URL","23d7ed778280594a79d16b453c6cd13c782cb864d340bd061a958d2edb93bf32"],
+      ["Duplicate check","637d0c0c7075d7df7071993dec2cf3e8ec2075908f46137447808c50a335b49c"],
+      ["New URL","6a2c8b168dfc90da5c0bf09f71d9b8a56d35b4f12061df07a059c43b45b583d9"]
+    ],
+    "buffer": [
+      ["Append Mar 31","d432955e80167fdd8e8fbafc8c4ad8c307e778a8f048191c49846f0b6937c401"],
+      ["Append Apr 01","cfebe84be2275a188f9a8108ff1487242bbc9f463860fe165eec14517f6c1f1f"],
+      ["Append Apr 02","7a728ecdb2c7f76b99be05c8cde1ffd702ab6e7954c7c4fbb64c92e115f40479"],
+      ["Fill buffer","e3092fcc4521d0b0c1e30f6dd63b64182a48e6759dc1eab7d3aa70c0dccf1293"],
+      ["Overwrite oldest","8c1ac38b7c2d24ca0e36d3efc0a97eafce0712321fdbcec56e5f627197e9c63f"],
+      ["Latest three","ce9b4f7e4eb71d42b111732c77c0f4bad592cce788c7218be16ca36a9c16d2de"]
+    ],
+    "dijkstra": [
+      ["Start","12ab1d74f00a3315ff29d42e8a9eb8273d59f7af3a819ce04ad39f39bc8cd01f"],
+      ["Explore data routes","1d0e84e126d210e009011eaef67c6d70039064cdc83884438c9ec41b69c6c48c"],
+      ["Set transformed cost","300791ac5a8117ebfbe5328f2fc757002ae9890e36545e196559fdaefc16b103"],
+      ["Analyse","41aa64546ee0e466fc9a365a89ce3632a9e62ddc2eff4453e04c50644e08827e"],
+      ["End reached","53a71dc8fad5bcc5dd4b46626722f68bfaed3669b78f32f4f4ab695b3d16d25e"]
+    ],
+    "union": [
+      ["Initial sets","dd5fb7d04232eec7e4fa22423dbed729d1fe27af95d36316fc36857f0b5a7942"],
+      ["Shared audience","35b4dbfce0cee36df4415ca6fb896c05e9a0b0365c3375394dfedb726f16aefc"],
+      ["Merge third campaign","2491c4fc1eb74cd9bcc59e973f1932c17c56146a040a2e336e1a2063a4974b41"],
+      ["Broken landing page","5c0d6720bba58f669eeae50ee54e27d15d0649d8b09fbdc7f403f2b21d12a07b"],
+      ["Compressed result","5c0d6720bba58f669eeae50ee54e27d15d0649d8b09fbdc7f403f2b21d12a07b"]
+    ],
+    "approval": [
+      ["Proposed","147e906a3e6227d2d4acb5dc31037d0416152b7d7de8d3b291dc493c03dd9c13"],
+      ["Approval required","a17258ff8a0817f681050f0c8bbebb4dab21949ecec701b413a0c70504f1cc2a"],
+      ["Human review","66d7ebdd22e0a0eefd71149b9e7b16bcdb7c4639dd61444843e8ecc12f20e9bd"],
+      ["Executing","04cbdfb7d4de871c2ed61421f58297908d823cbb0b39f04f53f43fc775d6a378"],
+      ["Executed","a8cf2d0c668122d0d69c72261679648f189d527a2334a806bf1b303ae0150cbb"],
+      ["Rejected path","bcd4a34dd968acb60ab8b662566a17fa064387d1625834b875f08f1dbe06d790"]
+    ],
+    "tokenBucket": [
+      ["Full bucket","f687d95c97b541dacea170bc894398b411c9ea836f3f6ba73e73cfc017eee29a"],
+      ["Allow first call","04bed4f5e5a3b0a96fe2cfc1a6181626f591f334d94b41f802f90ce25ea63f46"],
+      ["Burst traffic","c05e4d8e6f61d9cc2dad37a7b8fcfc00901219ef279bbc8ae74a0b987dd7fab4"],
+      ["Throttle","feb25de6d37ac394b8dc301dc070c80bafbd382704d2eb4a0b5304ec999ea83e"],
+      ["Refill","45d5b9d4d7d738a620edf5b0f98bbb53d43e28a2d12a47a45ce7ef0fdcf04ac2"],
+      ["Allow delayed call","864e0ca7759b71f35d5e467bbd0ce33fa9ce41ef95d3bae8b02de64a3e02b02a"]
+    ],
+    "leaseQueue": [
+      ["Approved queue","d33d52983e2579cbb4c54cb069e27d8e454c7413e8a3b0a350bf8f2949cb8771"],
+      ["Worker claims A1","e13dcad31fd460f8e3701d145a4cfce4b0e9f6f3bd797b54af3511bf67886d51"],
+      ["Worker B skips locked A1","8eca9957e04e3c005185737a6c274d00d93cf41a301807d306536a89c434e397"],
+      ["Heartbeat","8714e8a7c1e7d3983a46dee3e52f76371d7d355daa02e98677885d033d4afc28"],
+      ["Release","e32795be98f734fe36a914e144bc538aa7239058bdd55ab70561c75ba3a7e2f4"],
+      ["Expired recovery","9c5d6dc45c26e62bd4a0ad62231d4df17e9bc9108900164cab11adb79cb3f917"]
+    ],
+    "permissionGraph": [
+      ["Agent identity","48c2276af0e6f00cc53bca11ad6db3544beaaec9d08b0967f340f63ea4c130b9"],
+      ["Resolve role","a18606228d1ace5a16e760ea1a0906fefdd4f4cafcf5e0eff5e9f5f26176107a"],
+      ["Match resource","86c3bbc122df5a635032aeae033636bca072622c0a94fdb3c8a7c6a56742c1ba"],
+      ["Check action","cf476e313e37c62bca4f384eab85033263fc3b3392c47daf519f5a5470758e74"],
+      ["Attribute block","72e19830f57995c50bf485d9ef231861860c6678a47c1dc0df790a1fc4c9bfd6"],
+      ["Return decision","1ee7413a920988835bbfd9b0b79f7da857411bad0b4693a2ea7685da3da3df8b"]
+    ],
+    "hashChain": [
+      ["Genesis","83107947dff1be80fcb7cc54440148957faeed61d6b560fcca63b94baffa027a"],
+      ["Approval event","6719238d4cd3f0550728e4e4d5650d5acd71ad1a478cc4b9a158aa43529f299b"],
+      ["Tool call event","e41d3431112d8d15e6322ec24fe2036b0ab05f1a5f6c9c396efb44668fba2c5e"],
+      ["Result event","887091865cb7432c0669f0f464a4cf12c053e75684c0f64f3dc6d3fd3fb849cd"],
+      ["Replay verification","a3aff108a63ca14ef11d72abc44c77ae071d7ee0a2bbe6dcdd41795b34bf5255"],
+      ["Tamper detected","5e86ad98557a7de9b76539baab57ad59388643ffd62116606ea8b133d1ad3e3b"]
+    ]
+  }
+}
