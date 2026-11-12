@@ -71,8 +71,10 @@ function enhance(root: HTMLElement) {
       if (!complete && stage === index) button.setAttribute("aria-current", "step");
       else button.removeAttribute("aria-current");
     });
-    previous.disabled = complete || stage === 0;
-    next.disabled = complete || stage === buttons.length - 1;
+    // Keep boundary controls in keyboard order and retain focus after the last
+    // step. Activation is guarded below because aria-disabled is semantic only.
+    previous.setAttribute("aria-disabled", String(complete || stage === 0));
+    next.setAttribute("aria-disabled", String(complete || stage === buttons.length - 1));
     status.textContent = complete ? "Complete diagram" : `Stage ${stage + 1} of ${buttons.length}`;
     completeToggle.textContent = complete ? "Return to staged view" : "Show complete diagram";
     completeToggle.setAttribute("aria-pressed", String(complete));
@@ -86,8 +88,12 @@ function enhance(root: HTMLElement) {
     render();
   }
   buttons.forEach((button, index) => button.addEventListener("click", () => selectStage(index)));
-  previous.addEventListener("click", () => selectStage(stage - 1));
-  next.addEventListener("click", () => selectStage(stage + 1));
+  previous.addEventListener("click", () => {
+    if (!complete && stage > 0) selectStage(stage - 1);
+  });
+  next.addEventListener("click", () => {
+    if (!complete && stage < buttons.length - 1) selectStage(stage + 1);
+  });
   completeToggle.addEventListener("click", () => { complete = !complete; render(); });
   select.addEventListener("change", render);
   explanations.forEach((section) => section.addEventListener("beforematch", () => {
