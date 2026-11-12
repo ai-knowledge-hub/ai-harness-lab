@@ -1,8 +1,50 @@
 import { test, expect } from "@playwright/test";
 import { expectShellOrientation } from "../support/shell-orientation";
 
+const readingRequirements = "Read in your browser. No installation, account or API key is needed.";
+const labRequirements = "Step through a prepared example in your browser. JavaScript is needed; no installation, account or API key is required.";
+
+async function expectReadingSetup(page) {
+  const requirements = page.locator('[data-task-requirements="guide"]');
+  await expect(requirements).toBeVisible();
+  await expect(requirements).toHaveText("No installation is needed to read this guide.");
+}
+
+async function expectLabSetup(page) {
+  const requirements = page.locator('[data-task-requirements="lab"]');
+  await expect(requirements).toBeVisible();
+  await expect(requirements).toContainText("JavaScript is needed to select a visualizer and use playback.");
+  await expect(requirements).toContainText("No installation, account or API key is needed.");
+  await expect(requirements).toContainText("Without JavaScript, you can read the default Binary Search example below");
+  await expect(requirements.getByRole("link", { name: "pattern summaries in Algorithms & Data" }))
+    .toHaveAttribute("href", "/learn/algorithms");
+}
+
 test("a reader can start with a principle or go directly to the featured case", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
+  for (const [slug, action, mode] of [
+    ["system-design", "Read API design principles", "guide"],
+    ["algorithms", "Try the top-three campaign lab", "lab"],
+    ["software-production", "Explore the lease queue lab", "lab"],
+    ["measurement-ml", "Compare credited conversions and lift", "guide"],
+    ["ai-engineering", "Verify a small code change with an agent", "guide"],
+  ]) {
+    await page.goto("/");
+    await page.getByRole("region", { name: "Engineering tracks" }).locator(`a[href="/learn/${slug}"]`).click();
+    const start = page.getByRole("region", { name: "Start here" });
+    const next = start.getByRole("link", { name: action, exact: true });
+    await expect(next).toHaveAttribute("aria-describedby", "start-requirements");
+    await expect(start.locator("#start-requirements")).toBeVisible();
+    await expect(start.locator("#start-requirements")).toContainText(mode === "guide" ? readingRequirements : labRequirements);
+    await expect(next).toHaveAccessibleDescription(mode === "guide" ? /No installation, account or API key is needed/ : /JavaScript is needed/);
+    if (slug === "system-design") {
+      await expect(start.locator(".task-prerequisite")).toContainText("HTTP, the rules software follows to send a request over the web and receive a reply.");
+      await expect(next).toHaveAccessibleDescription(/HTTP, the rules software follows/);
+    }
+    await next.click();
+    if (mode === "guide") await expectReadingSetup(page);
+    else await expectLabSetup(page);
+  }
   await page.goto("/");
   await page.getByRole("link", { name: "Explore the tracks", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Engineering tracks", exact: true })).toBeInViewport();
@@ -44,6 +86,8 @@ test.describe("production discovery on a phone without JavaScript", () => {
       for (const route of ["/", "/learn/software-production", "/learn/system-design/api-design", "/learn/system-design/chatgpt-ads-reporting", "/learn/algorithms/visualizers"]) {
         await page.goto(route);
         await expectShellOrientation(page);
+        if (route.includes("/system-design/")) await expectReadingSetup(page);
+        if (route.endsWith("/visualizers")) await expectLabSetup(page);
       }
     }
     await page.setViewportSize({ width: 390, height: 844 });
@@ -51,6 +95,7 @@ test.describe("production discovery on a phone without JavaScript", () => {
     const start = page.getByRole("region", { name: "Start here" });
     await expect(start.getByRole("heading", { name: "Design for an interrupted run" })).toBeVisible();
     const lab = start.getByRole("link", { name: "Explore the lease queue lab" });
+    await expect(start.locator("#start-requirements")).toHaveText(labRequirements);
     await expect(lab).toHaveAttribute("href", "/learn/algorithms/visualizers?algorithm=leaseQueue#visualizer");
     await page.getByRole("navigation", { name: "On this track" })
       .getByRole("link", { name: "Worked examples" }).click();
@@ -88,6 +133,10 @@ test("the new starting paths lead to working references on a phone", async ({ pa
   await expect(start.getByText("Design a system for an agent to operate.", { exact: true })).toBeVisible();
   await start.getByRole("link", { name: "Verify a small code change with an agent" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Verify a small code change with an agent" })).toBeVisible();
+  await expectReadingSetup(page);
+  await expect(page.locator("#run-the-skills-example")).toContainText("Node.js 22");
+  await expect(page.locator("#run-the-skills-example")).toContainText("The helper prints a plan.");
+  await expect(page.locator("#run-the-skills-example")).toContainText("merge_authorized to false");
   await expect(page.getByRole("link", { name: /The Code Agent’s Playbook/ }))
     .toHaveAttribute("href", "https://ai-knowledge-hub.org/library/agent-maintenance-security-harness/#separate-validation-of-a-change-from-evaluation-of-the-maintainer");
   await expect(page.getByRole("link", { name: "Download Code Maintenance Plugin 0.2.0 from Skills" }))

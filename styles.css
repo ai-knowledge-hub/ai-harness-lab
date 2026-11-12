@@ -1445,8 +1445,8 @@ html:has(.pilot-track-page) {
   font-size: clamp(25px, 3vw, 39px);
 }
 .track-start {
-  grid-template-areas: "label method" "next method";
-  grid-template-rows: auto 1fr;
+  grid-template-areas: "label method" "next method" "requirements method";
+  grid-template-rows: auto auto 1fr;
   row-gap: 18px;
 }
 .track-start > h2 {
@@ -1459,6 +1459,30 @@ html:has(.pilot-track-page) {
   grid-area: next;
   align-self: start;
   justify-self: start;
+}
+.track-start > .task-requirements {
+  grid-area: requirements;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 40ch;
+}
+.task-prerequisite {
+  display: block;
+  margin-top: 8px;
+}
+.intro-copy .lab-requirements {
+  margin-top: 22px;
+}
+.intro-copy .lab-requirements p {
+  font-size: 15px;
+  line-height: 1.6;
+}
+.lab-requirements p + p {
+  margin-top: 8px;
+}
+.lab-requirements a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .track-start h3 {
   font-size: clamp(24px, 3vw, 38px);
@@ -1549,7 +1573,7 @@ html:has(.pilot-track-page) {
     grid-template-columns: minmax(0, 1fr);
   }
   .track-start {
-    grid-template-areas: "label" "method" "next";
+    grid-template-areas: "label" "method" "next" "requirements";
     grid-template-rows: auto;
   }
   .track-method {
