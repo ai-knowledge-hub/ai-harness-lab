@@ -1,6 +1,7 @@
 ---
 import { site } from "../content/site";
 import TrackNavigation from "./TrackNavigation.astro";
+import FamilyLinks from "./FamilyLinks.astro";
 interface Props { pathname: string }
 const { pathname } = Astro.props;
 ---
@@ -12,15 +13,15 @@ const { pathname } = Astro.props;
     </a>
     <div class="header-actions">
       <nav class="family-navigation" aria-label="AI Knowledge Hub">
-        <a href={site.publication}>Publication</a><a href={site.skills}>Skills</a>
+        <FamilyLinks />
       </nav>
       <button type="button" class="theme-toggle" aria-label="Switch to light mode">Light mode</button>
       <details class="mobile-navigation">
         <summary>Tracks</summary>
         <div class="mobile-menu">
           <TrackNavigation pathname={pathname} />
-          <nav aria-label="Companion sites">
-            <a href={site.publication}>Publication</a><a href={site.skills}>Skills</a>
+          <nav class="companion-navigation" aria-label="Companion sites">
+            <FamilyLinks />
           </nav>
         </div>
       </details>

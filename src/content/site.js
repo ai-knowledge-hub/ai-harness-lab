@@ -2,11 +2,31 @@ export const site = {
   origin: "https://harness.ai-knowledge-hub.org",
   name: "Harness",
   family: "AI Knowledge Hub",
+  descriptor: "Engineering guides, labs and worked examples for AI systems.",
   description:
     "Practical engineering for building, operating, and evaluating AI products. Explore five tracks, reusable guides, and worked examples.",
   publication: "https://ai-knowledge-hub.org",
   skills: "https://skills.ai-knowledge-hub.org",
 };
+
+// Shared orientation uses the existing canonical destinations. Homepage detail
+// and concise shell copy describe the same roles without a second URL list.
+export const familySites = [
+  {
+    name: "Publication",
+    href: site.publication,
+    purpose: "Research to inform decisions.",
+    title: "Read the research and context",
+    description: "Explore the evidence behind decisions in growth, marketing, and how AI products reach people.",
+  },
+  {
+    name: "Skills",
+    href: site.skills,
+    purpose: "Reusable resources to adapt.",
+    title: "Find something to run or adapt",
+    description: "Explore reusable skills, agents, plugins, and tools, with setup and availability for each.",
+  },
+];
 export const labPath = "/learn/algorithms/visualizers";
 export const controlPath = "/learn/ai-engineering/control-plane";
 export const articleUrl = (slug) => `${site.publication}/library/${slug}/`;

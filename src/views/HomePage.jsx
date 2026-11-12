@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { algorithms } from "../visualizers/algorithms-data";
 import { resolveDiscoveryLink } from "../content/discovery";
 import { learningContent } from "../content/learning";
-import { site, tracks, trackPath } from "../content/site";
+import { familySites, tracks, trackPath } from "../content/site";
 
 export function HomePage() {
   const featuredCase = resolveDiscoveryLink(learningContent, learningContent.discovery.featuredCase);
@@ -71,16 +71,13 @@ export function HomePage() {
         <section className="family-section" aria-labelledby="family-title">
           <h2 id="family-title">Explore AI Knowledge Hub</h2>
           <div className="family-grid">
-            <a href={site.publication}>
-              <p className="resource-kind">Publication</p>
-              <h3>Read the research and context</h3>
-              <p>Explore the evidence behind decisions in growth, marketing, and how AI products reach people.</p>
-            </a>
-            <a href={site.skills}>
-              <p className="resource-kind">Skills</p>
-              <h3>Find something to run or adapt</h3>
-              <p>Explore reusable skills, agents, plugins, and tools, with setup and availability for each.</p>
-            </a>
+            {familySites.map((companion) => (
+              <a href={companion.href} key={companion.name}>
+                <p className="resource-kind">{companion.name}</p>
+                <h3>{companion.title}</h3>
+                <p>{companion.description}</p>
+              </a>
+            ))}
           </div>
         </section>
       </div>

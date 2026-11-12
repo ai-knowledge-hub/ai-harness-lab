@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { expectShellOrientation } from "../support/shell-orientation";
 
 test("a reader can start with a principle or go directly to the featured case", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -38,6 +39,14 @@ test.describe("production discovery on a phone without JavaScript", () => {
   test.use({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
 
   test("the lab, local sample, and reporting case have usable links", async ({ page }) => {
+    for (const width of [320, 390, 1440]) {
+      await page.setViewportSize({ width, height: 844 });
+      for (const route of ["/", "/learn/software-production", "/learn/system-design/api-design", "/learn/system-design/chatgpt-ads-reporting", "/learn/algorithms/visualizers"]) {
+        await page.goto(route);
+        await expectShellOrientation(page);
+      }
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/learn/software-production");
     const start = page.getByRole("region", { name: "Start here" });
     await expect(start.getByRole("heading", { name: "Design for an interrupted run" })).toBeVisible();
