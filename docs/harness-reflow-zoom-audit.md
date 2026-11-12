@@ -8,7 +8,7 @@ This is a local implementation audit, not a reader study or accessibility certif
 | State and element | Before | After |
 | --- | --- | --- |
 | Home, 300 CSS px, both themes, menu closed/open; `body` minimum width | Document client/scroll widths 300/320; body 320px | 300/300; body 300px after removing the evidenced minimum width |
-| API guide, 300×164 CSS px, open menu, keyboard focus on Skills; wrapped header | With the former menu height rule on the reflowed shell, the final link extended below the viewport | Menu now subtracts the actual containing header height; full link and purpose fit, Escape returns focus to Tracks |
+| API guide, 300×164 CSS px, open menu, keyboard focus on Skills; wrapped header | With the former menu height rule on the reflowed shell, header 100px; focused link bottom 184.59px, below the 164px viewport | Link bottom 157.59px; menu subtracts the actual header height, and Escape returns focus to Tracks |
 | Lab at 320px, changed steps; SVG label transforms | BFS authored 10px labels rendered at about 7.10px; Approval about 6.47px; Dijkstra scale about 0.603 | Existing local diagram scroller preserves at least the authored SVG text size with a 46rem minimum width (largest current viewBox: 730 units) |
 | Lab reference code and scoped grant example at 320px | Local overflow: 288/278 and 341/280 scroll/client widths, respectively; no explicit keyboard focus or name | Named regions use existing visible labels, native sequential focus, ArrowRight scrolling and visible focus outlines |
 
@@ -26,7 +26,9 @@ overflow. The additional 300px width reproduced 300/320 document geometry across
 13 routes. After repair, all 156 route/width/theme/menu samples had document scroll
 width no larger than client width. The final pass expanded native main-content
 disclosures, advanced the architecture stage and showed its complete diagram, and
-advanced the lab before measuring.
+advanced the lab before measuring. A separate all-15-lab audit measured the first and
+last frames at 320px and 390px in both themes: 120 samples, zero document overflow,
+and a minimum nonempty SVG-text transform scale of 1.008 (no authored text shrank).
 
 Native macOS Chrome controls independently showed **200%** and **400%** zoom in browser
 chrome. The 1200-point-wide desktop window at 400% exposed approximately 300 CSS pixels;
