@@ -58,5 +58,5 @@ jobs:
       - name: Verify retained browser behaviour
         run: pnpm test:e2e
 
-      - name: Verify search, accessibility and island boundaries
+      - name: Verify accessibility, island boundaries and cache recovery
         run: pnpm exec playwright test --config playwright.site.config.js

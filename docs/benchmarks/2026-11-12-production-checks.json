@@ -280,5 +280,13 @@
       "strict-transport-security": "max-age=63072000; includeSubDomains; preload"
     },
     "bytes": 4522
+  },
+  "unresolvedRecoveryRisk": {
+    "status": "open-in-recorded-production-deployment",
+    "finding": "Missing /_astro/ responses receive a one-year immutable policy and can remain cached as 404 after rollback restores the asset. Fingerprints do not prevent missing URLs from becoming available.",
+    "candidatePolicy": "public, max-age=0, must-revalidate",
+    "deploymentVerification": "Pending deployment and live-header verification of PR #68; observed headers above remain the original evidence.",
+    "regression": "tests/site/asset-cache.spec.js uses default Chromium HTTP caching and the configured header to require recovery from 404 to the restored 200 bytes.",
+    "existingCachedFailures": "Changing server headers does not evict previously cached fresh 404s; affected clients can still need a cache-bypassing reload or cache clear."
   }
 }
