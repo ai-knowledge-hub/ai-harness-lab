@@ -1,0 +1,9 @@
+---
+import { familySites } from "../content/site";
+---
+{familySites.map((companion) => (
+  <a class="family-link" href={companion.href}>
+    <span>{companion.name}</span>
+    <span class="family-link-purpose">{companion.purpose}</span>
+  </a>
+))}

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { expectShellOrientation } from "../support/shell-orientation";
 
 test("homepage and algorithms route load", async ({ page }) => {
   await page.goto("/");
@@ -129,6 +130,8 @@ test("mobile navigation, theme persistence, keyboard escape and responsive reflo
       "/examples",
     ]) {
       await page.goto(route);
+      if ([320, 390, 1440].includes(width) && ["/", "/learn/software-production", "/learn/algorithms/visualizers"].includes(route))
+        await expectShellOrientation(page);
       const sizes = await page.evaluate(() => ({
         width: document.documentElement.clientWidth,
         scroll: document.documentElement.scrollWidth,
@@ -138,6 +141,20 @@ test("mobile navigation, theme persistence, keyboard escape and responsive reflo
       );
     }
   }
+  await page.setViewportSize({ width: 640, height: 320 });
+  await page.goto("/learn/system-design/api-design");
+  const summary = page.locator(".mobile-navigation > summary");
+  await summary.press("Enter");
+  // Five track links, then Publication and Skills, in native Tab order.
+  for (let index = 0; index < 7; index++) await page.keyboard.press("Tab");
+  const skills = page.locator(".companion-navigation").getByRole("link", { name: /^Skills/ });
+  await expect(skills).toBeFocused();
+  const bounds = await skills.boundingBox();
+  expect(bounds.y).toBeGreaterThanOrEqual(0);
+  expect(bounds.y + bounds.height).toBeLessThanOrEqual(320);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".mobile-navigation")).not.toHaveAttribute("open");
+  await expect(summary).toBeFocused();
 });
 
 for (const width of [390, 1440]) {
@@ -466,6 +483,8 @@ test("guide content reflows in both themes with usable mobile contents", async (
       await page.goto(route);
     for (const width of [320, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
+      if ([320, 390, 1440].includes(width) && ["/learn/system-design/api-design", "/learn/system-design/chatgpt-ads-reporting"].includes(route))
+        await expectShellOrientation(page);
       const sizes = await page.evaluate(() => ({
         width: document.documentElement.clientWidth,
         scroll: document.documentElement.scrollWidth,

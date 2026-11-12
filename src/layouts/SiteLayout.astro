@@ -2,6 +2,7 @@
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { getPageMetadata } from "../content/page-metadata";
+import { site } from "../content/site";
 import "../../styles.css";
 interface Props { path: string; redirectTo?: string; noindex?: boolean }
 const { path, redirectTo, noindex } = Astro.props;
@@ -33,6 +34,7 @@ const metadata = getPageMetadata(path);
   </head>
   <body>
     <Header pathname={path} />
+    <aside class="site-descriptor" aria-label="About Harness"><p>{site.descriptor}</p></aside>
     <slot />
     <Footer />
     <script>import "../scripts/shell";</script>
