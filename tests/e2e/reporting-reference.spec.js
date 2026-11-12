@@ -6,6 +6,15 @@ test("readers can inspect the five prepared reporting outcomes on a phone", asyn
   const response = await page.goto("/learn/system-design/chatgpt-ads-reporting#report-outcomes");
   expect(response.ok()).toBe(true);
 
+  const companions = page.getByRole("region", { name: "Related reading and resources" });
+  await expect(companions.getByText("Optional companions", { exact: true })).toBeVisible();
+  await expect(companions.getByText("Resource · Skills", { exact: true })).toBeVisible();
+  await expect(companions.getByRole("link", { name: "Ad-platform authentication review", exact: true }))
+    .toHaveAttribute("href", "https://skills.ai-knowledge-hub.org/skills/security/ad-platform-agent-auth-review");
+  await expect(page.locator(".guide-case-study .eyebrow")).toHaveText("Optional case study · Publication");
+  await expect(page.locator(".lesson-video-note a")).toHaveCount(0);
+  await expect(page.locator(".lesson-project").filter({ hasText: "Connect to a live account" }).getByRole("link")).toHaveCount(0);
+
   const reference = page.getByRole("region", { name: "Can you use this report?" });
   await expect(reference.getByText("Prepared examples · Fictional data")).toBeVisible();
   await expect(reference.getByText(/fictional UK ad account on 1 and 2 November/)).toBeVisible();

@@ -40,6 +40,8 @@ export function validateLearningContent(content = learningContent) {
       if (!text(item.title)) fail(`${name}/${item.id}: title is required`);
       if (["publications", "capabilities"].includes(name) && !https(item.href))
         fail(`${name}/${item.id}: HTTPS destination required`);
+      if (["publications", "capabilities"].includes(name) && !text(item.relationship))
+        fail(`${name}/${item.id}: explain why this optional resource helps`);
     }
   }
   for (const link of referenceContext)
