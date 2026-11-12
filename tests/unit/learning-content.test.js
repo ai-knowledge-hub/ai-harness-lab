@@ -1,6 +1,7 @@
 import { learningContent } from "../../src/content/learning";
 import { validateLearningContent } from "../../src/content/validate-learning";
 import { getPageMetadata } from "../../src/content/page-metadata";
+import { resolveDiscoveryLink } from "../../src/content/discovery";
 
 function changed(mutator) {
   const content = structuredClone(learningContent);
@@ -32,7 +33,12 @@ describe("Learning content integrity", () => {
     );
   });
 
-  it("rejects a prerequisite that has no source record", () => {
+  it("derives starter prerequisites from their source and rejects missing records", () => {
+    const content = changed((draft) => {
+      draft.concepts.find((concept) => concept.id === "http-basics").description = "Updated explanation of HTTP.";
+    });
+    const starter = resolveDiscoveryLink(content, content.discovery.tracks["system-design"].start.next);
+    expect(starter.prerequisites).toEqual(["Updated explanation of HTTP."]);
     expect(() =>
       validateLearningContent(
         changed((content) =>

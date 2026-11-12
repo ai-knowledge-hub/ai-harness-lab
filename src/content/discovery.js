@@ -200,6 +200,7 @@ export function resolveDiscoveryLink(content, link) {
     const guide = content.lessons.find((item) => item.id === id);
     if (!guide || (anchor !== undefined && !guide.sections?.some((section) => section.id === anchor)))
       return null;
+    const prerequisiteIds = Array.isArray(guide.prerequisiteConceptIds) ? guide.prerequisiteConceptIds : [];
     return {
       title: guide.title,
       description: description ?? guide.description,
@@ -207,6 +208,11 @@ export function resolveDiscoveryLink(content, link) {
       preview: guide.publicationStatus === "draft",
       href: guide.path + (anchor ? `#${anchor}` : ""),
       action,
+      requirements: "Read in your browser. No installation, account or API key is needed.",
+      prerequisites: prerequisiteIds.flatMap((id) => {
+        const concept = content.concepts.find((item) => item.id === id);
+        return concept ? [concept.description] : [];
+      }),
     };
   }
   if (kind === "lab") {
@@ -217,6 +223,7 @@ export function resolveDiscoveryLink(content, link) {
       label: "Interactive lab",
       href: visualizerUrl(id),
       action,
+      requirements: "Step through a prepared example in your browser. JavaScript is needed; no installation, account or API key is required.",
     } : null;
   }
   if (kind === "pattern" && id === "control-plane") {
@@ -226,6 +233,7 @@ export function resolveDiscoveryLink(content, link) {
       label: "Reference pattern",
       href: controlPath,
       action,
+      requirements: "Read the reference in your browser. The optional mock lab has separate local setup instructions.",
     };
   }
   if (kind === "project") {

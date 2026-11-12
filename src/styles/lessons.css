@@ -110,6 +110,10 @@ html:has(.lesson-page) {
   margin-top: 16px;
   font-size: 13px;
 }
+.lesson-orientation .lesson-task-requirements {
+  margin-top: 8px;
+  font-size: 13px;
+}
 .lesson-section {
   margin-top: 65px;
 }

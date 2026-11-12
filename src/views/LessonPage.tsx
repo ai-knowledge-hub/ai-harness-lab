@@ -164,6 +164,9 @@ export function LessonPage({ lesson }: { lesson: Guide }) {
               <p className="lesson-access-note">
                 No account or API key is needed for this guide.
               </p>
+              <p className="lesson-task-requirements" data-task-requirements="guide">
+                No installation is needed to read this guide.
+              </p>
             </div>
           </section>
           {caseTracks.length > 0 && (

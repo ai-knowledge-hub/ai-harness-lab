@@ -156,7 +156,17 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
             reports, tool paths, incident clusters, approvals, permission
             graphs, and audit logs.
           </p>
-          <a className="action-link" href="#catalogue">
+          <div className="lab-requirements" id="lab-requirements" data-task-requirements="lab">
+            <p>
+              Prepared examples in your browser. JavaScript is needed to select a visualizer and use playback.
+              No installation, account or API key is needed.
+            </p>
+            <p>
+              Without JavaScript, you can read the default Binary Search example below or the{" "}
+              <a href={trackPath(tracks[1])}>pattern summaries in Algorithms &amp; Data</a>.
+            </p>
+          </div>
+          <a className="action-link" href="#catalogue" aria-describedby="lab-requirements">
             Choose a visualizer
           </a>
         </div>
