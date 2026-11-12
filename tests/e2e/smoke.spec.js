@@ -116,7 +116,8 @@ test("mobile navigation, theme persistence, keyboard escape and responsive reflo
     page.getByRole("heading", { level: 1, name: "AI Engineering & Harnesses" }),
   ).toBeVisible();
   await expect(page.locator(".mobile-navigation")).not.toHaveAttribute("open");
-  for (const width of [320, 390, 640, 768, 900, 1024, 1440]) {
+  // A 1200px desktop window at native 400% zoom leaves 300 CSS pixels.
+  for (const width of [300, 320, 390, 640, 768, 900, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     for (const route of [
       "/",
@@ -141,20 +142,41 @@ test("mobile navigation, theme persistence, keyboard escape and responsive reflo
       );
     }
   }
-  await page.setViewportSize({ width: 640, height: 320 });
-  await page.goto("/learn/system-design/api-design");
-  const summary = page.locator(".mobile-navigation > summary");
-  await summary.press("Enter");
-  // Five track links, then Publication and Skills, in native Tab order.
-  for (let index = 0; index < 7; index++) await page.keyboard.press("Tab");
-  const skills = page.locator(".companion-navigation").getByRole("link", { name: /^Skills/ });
-  await expect(skills).toBeFocused();
-  const bounds = await skills.boundingBox();
-  expect(bounds.y).toBeGreaterThanOrEqual(0);
-  expect(bounds.y + bounds.height).toBeLessThanOrEqual(320);
-  await page.keyboard.press("Escape");
-  await expect(page.locator(".mobile-navigation")).not.toHaveAttribute("open");
-  await expect(summary).toBeFocused();
+  for (const { width, height } of [{ width: 640, height: 320 }, { width: 300, height: 164 }]) {
+    await page.setViewportSize({ width, height });
+    await page.goto("/learn/system-design/api-design");
+    const summary = page.locator(".mobile-navigation > summary");
+    await summary.press("Enter");
+    // Five track links, then Publication and Skills, in native Tab order.
+    for (let index = 0; index < 7; index++) await page.keyboard.press("Tab");
+    const skills = page.locator(".companion-navigation").getByRole("link", { name: /^Skills/ });
+    await expect(skills).toBeFocused();
+    const bounds = await skills.boundingBox();
+    expect(bounds.y).toBeGreaterThanOrEqual(0);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(height);
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".mobile-navigation")).not.toHaveAttribute("open");
+    await expect(summary).toBeFocused();
+  }
+
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto("/learn/algorithms/visualizers");
+  for (const theme of ["light", "dark"]) {
+    if (await page.locator("html").getAttribute("data-theme") !== theme)
+      await page.locator(".theme-toggle").click();
+    for (const name of ["Animation", "Reference code", "One action, one advertiser, one expiry window"]) {
+      const region = page.getByRole("region", { name, exact: true });
+      await expect(region).toHaveAttribute("tabindex", "0");
+      await region.focus();
+      await page.keyboard.press("Shift+Tab");
+      await page.keyboard.press("Tab");
+      await expect(region).toBeFocused();
+      await expect(region).toHaveCSS("outline-style", "solid");
+      await region.evaluate(element => { element.scrollLeft = 0; });
+      await page.keyboard.press("ArrowRight");
+      await expect.poll(() => region.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+    }
+  }
 });
 
 for (const width of [390, 1440]) {
@@ -481,7 +503,7 @@ test("guide content reflows in both themes with usable mobile contents", async (
       await page.getByRole("button", { name: "Switch to light mode" }).click();
     for (const route of routes) {
       await page.goto(route);
-    for (const width of [320, 390, 768, 1024, 1440]) {
+    for (const width of [300, 320, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       if ([320, 390, 1440].includes(width) && ["/learn/system-design/api-design", "/learn/system-design/chatgpt-ads-reporting"].includes(route))
         await expectShellOrientation(page);
