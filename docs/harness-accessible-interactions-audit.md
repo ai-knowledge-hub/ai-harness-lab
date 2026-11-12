@@ -8,7 +8,7 @@ This is an expert implementation audit, not a reader study or accessibility cert
 | Surface | Before | Repair and evidence |
 | --- | --- | --- |
 | Architecture Previous/Next boundaries | Keyboard Enter on the final Next disabled the focused native button and moved activeElement to BODY in all six viewport/theme probes | `aria-disabled` preserves the button in keyboard order and retains focus. Explicit activation guards prevent both boundary and complete-view actions. Native Chrome and browser checks retain focus on Next/Previous, and repeated Enter/Space does nothing |
-| Lab live-region scope | The whole stage was `aria-live=polite`; mutations covered the diagram, active code line, controls and explanation (roughly 733–803 characters in the Token Bucket probe) | Only the existing current-step paragraph is a status, with an atomic algorithm/step/label name. The first Token Bucket explanation is 56 characters. Playback turns its live updates off; manual/paused reading remains available. This is verified DOM/AX behavior; actual speech delivery remains pending below |
+| Lab live-region scope | The whole stage was `aria-live=polite`; mutations covered the diagram, active code line, controls and explanation (roughly 733–803 characters in the Token Bucket probe) | Only the existing current-step paragraph is a status, with an atomic algorithm/step/label name. The first Token Bucket explanation is 56 characters. Automatic ticks turn its live updates off; manual actions stop playback first. Pausing and automatic completion add explicit status text, so returning to polite also changes the content. This is verified DOM/AX behavior; actual speech delivery remains pending below |
 | Lab Speed slider | Accessible value was a bare number such as 1050, although a larger number means a longer delay | `aria-valuetext` exposes “1050 milliseconds between steps”; native Chrome's accessibility tree reports the units and keyboard Home changes it to 500 milliseconds |
 
 Boundary controls remain semantically unavailable and visibly subdued. They do not
@@ -78,3 +78,14 @@ this is not a new paired paint comparison with the independent #42 artifact.
 Shared shell, React and client runtime asset bytes are unchanged; only architecture
 and lab interaction modules changed. Raw local measurements remain in the task’s
 `benchmark.json`, `audit-base.json`, `audit-after.json` and `history-probe.log`.
+
+## Local review follow-up
+
+Review at `4761db6` found that manual Next/Back/Reset remained muted if used during
+autoplay. The new regression failed on that head with `aria-live=off` after Next.
+Manual step controls now enter a paused playback phase before updating the frame.
+Explicit Pause and automatic completion add visible “Paused.” / “Playback complete.”
+text to the existing status, rather than changing only its live attribute. Initial
+static reading is unchanged. Existing desktop/mobile cases cover all three manual
+controls during playback, Pause and the automatic end state. This follow-up has
+automated evidence; it does not resolve the pending speech walkthrough above.

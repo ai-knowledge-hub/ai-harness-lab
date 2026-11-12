@@ -79,10 +79,12 @@ test("all 15 visualizers render every baseline step in both themes", async ({ pa
   await expect(meter.first()).toHaveText("2");
   await page.getByRole("button", { name: "Pause", exact: true }).click();
   await expect(status).toHaveAttribute("aria-live", "polite");
+  await expect(status).toContainText("Paused.");
   await page.getByRole("button", { name: "Reset", exact: true }).click();
   await page.getByRole("button", { name: "Play", exact: true }).click();
   await expect(meter.first()).toHaveText(String(labs.at(-1)[3]));
   await expect(page.getByRole("button", { name: "Play", exact: true })).toBeVisible();
+  await expect(status).toContainText("Playback complete.");
   expect(errors).toEqual([]);
 });
 
@@ -122,6 +124,19 @@ test("filters and Back/Forward restore selection and reset playback", async ({ p
   await expect(page.locator(".step-meter span").first()).toHaveText("1");
   expect(new URL(page.url()).searchParams.get("source")).toBe("lab-audit");
   expect(new URL(page.url()).hash).toBe("#visualizer");
+  const status = page.locator("#visualizer").getByRole("status");
+  await page.getByLabel("Speed", { exact: true }).press("End");
+  for (const [action, expectedStep] of [["Next", "3"], ["Back", "1"], ["Reset", "1"]]) {
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page.getByRole("button", { name: "Play", exact: true }).click();
+    await expect(status).toHaveAttribute("aria-live", "off");
+    await page.getByRole("button", { name: action, exact: true }).click();
+    await expect(status).toHaveAttribute("aria-live", "polite");
+    await expect(status).toContainText("Paused.");
+    await expect(page.getByRole("button", { name: "Play", exact: true })).toBeVisible();
+    await expect(page.locator(".step-meter span").first()).toHaveText(expectedStep);
+  }
 });
 
 test("legacy document redirects preserve query and fragment through refresh", async ({ page }) => {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type SetStateAction } from "react";
 import { algorithms, operations, type Algorithm } from "../visualizers/algorithms-data";
 import { renderVisualization } from "../visualizers/render-visualization";
 import {
@@ -78,7 +78,8 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
     ? requestedId
     : "binary";
   const [stepIndex, setStepIndex] = useState(0);
-  const [playing, setPlaying] = useState(false);
+  const [playback, setPlayback] = useState<"ready" | "playing" | "paused" | "complete">("ready");
+  const playing = playback === "playing";
   const [speed, setSpeed] = useState(1050);
   const [viewMode, setViewMode] = useState("run");
 
@@ -92,7 +93,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
 
   useEffect(() => {
     setStepIndex(0);
-    setPlaying(false);
+    setPlayback("ready");
   }, [currentId]);
 
   useEffect(() => {
@@ -100,7 +101,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
     const timer = window.setInterval(() => {
       setStepIndex((previous) => {
         if (previous >= currentAlgorithm.steps.length - 1) {
-          setPlaying(false);
+          setPlayback("complete");
           return previous;
         }
         return previous + 1;
@@ -131,7 +132,12 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
       );
     }
     setStepIndex(0);
-    setPlaying(false);
+    setPlayback("ready");
+  }
+
+  function setManualStep(update: SetStateAction<number>) {
+    setPlayback("paused");
+    setStepIndex(update);
   }
 
   return (
@@ -241,7 +247,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                     aria-pressed={viewMode === mode}
                     onClick={() => {
                       setViewMode(mode);
-                      if (mode === "context") setPlaying(false);
+                      if (mode === "context") setPlayback("paused");
                     }}
                   >
                     {mode === "run" ? "Run" : "Context"}
@@ -262,13 +268,13 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
             <>
               <div className="controls" aria-label="Animation controls">
                 <div className="control-group">
-                  <button type="button" onClick={() => setStepIndex(0)}>
+                  <button type="button" onClick={() => setManualStep(0)}>
                     Reset
                   </button>
                   <button
                     type="button"
                     onClick={() =>
-                      setStepIndex((previous) => Math.max(0, previous - 1))
+                      setManualStep((previous) => Math.max(0, previous - 1))
                     }
                   >
                     Back
@@ -276,14 +282,14 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                   <button
                     type="button"
                     className="primary"
-                    onClick={() => setPlaying((previous) => !previous)}
+                    onClick={() => setPlayback((previous) => previous === "playing" ? "paused" : "playing")}
                   >
                     {playing ? "Pause" : "Play"}
                   </button>
                   <button
                     type="button"
                     onClick={() =>
-                      setStepIndex((previous) =>
+                      setManualStep((previous) =>
                         Math.min(
                           currentAlgorithm.steps.length - 1,
                           previous + 1,
@@ -347,7 +353,10 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                     aria-live={playing ? "off" : "polite"}
                     aria-atomic="true"
                     aria-label={`${currentAlgorithm.title}: step ${stepIndex + 1} of ${currentAlgorithm.steps.length}, ${currentStep.label}`}
-                  >{currentStep.note}</p>
+                  >
+                    {playback === "paused" ? "Paused. " : playback === "complete" ? "Playback complete. " : ""}
+                    {currentStep.note}
+                  </p>
                 </article>
                 <article className="panel">
                   <div className="panel-title">
