@@ -6,6 +6,8 @@ The homepage offers five tracks and one featured worked case. System design and 
 
 It complements the [publication](https://ai-knowledge-hub.org/) for research and explanations and [Skills](https://skills.ai-knowledge-hub.org/) for reusable capabilities, tools, agents, and plugins.
 
+The [practitioner UX baseline and reader-task protocol](docs/practitioner-system-ux-baseline.md) records the post-migration target, existing task paths, confirmed gaps and evidence needed for the next UX changes.
+
 ## Develop and verify
 
 ```sh
