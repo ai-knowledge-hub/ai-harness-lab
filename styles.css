@@ -53,7 +53,6 @@ html {
 }
 body {
   margin: 0;
-  min-width: 320px;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-ui);
@@ -95,6 +94,8 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 summary:focus-visible,
+pre[tabindex="0"]:focus-visible,
+.visualization:focus-visible,
 [tabindex="-1"]:focus-visible {
   outline: 2px solid var(--text);
   outline-offset: 5px;
@@ -751,7 +752,9 @@ pre {
   overflow-x: auto;
 }
 .visualization svg {
-  min-width: 440px;
+  /* The largest lab viewBox is 730 units wide. Preserve authored label sizes
+     in a local scroll region instead of shrinking 10px text below 7px. */
+  min-width: 46rem;
   display: block;
 }
 .visualization svg text {
@@ -1019,7 +1022,9 @@ pre {
     background: var(--bg);
     border-bottom: 1px solid var(--line-strong);
     box-shadow: 0 16px 28px #0002;
-    max-block-size: calc(100dvh - var(--header-height));
+    /* Absolute positioning resolves 100% against the actual header height,
+       including extra lines when browser zoom makes the brand wrap. */
+    max-block-size: calc(100dvh - 100%);
     overflow-y: auto;
   }
   .mobile-menu .track-navigation {

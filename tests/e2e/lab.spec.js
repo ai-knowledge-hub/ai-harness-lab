@@ -29,6 +29,11 @@ test("all 15 visualizers render every baseline step in both themes", async ({ pa
     for (const [id, title, , count] of labs) {
       await page.locator(".algorithm-list").getByText(title, { exact: true }).click();
       await ready(page, title);
+      // Keep two-dimensional diagrams readable inside their local scroller.
+      // A document-width assertion alone passes when SVG labels shrink to 6px.
+      const scales = await page.locator(".visualization svg text").evaluateAll(elements =>
+        elements.filter(element => element.textContent.trim()).map(element => element.getScreenCTM().a));
+      for (const scale of scales) expect(scale, `${id}: authored SVG label scale`).toBeGreaterThanOrEqual(1);
       await expect(page).toHaveURL(new RegExp(`algorithm=${id}(?:&|#|$)`));
       await expect(meter.last()).toHaveText(String(count));
       expect(states[id]).toHaveLength(count);
@@ -134,6 +139,22 @@ test("algorithm query changes preserve the working position", async ({ page }) =
   await target.click();
   await ready(page, "BFS");
   expect(Math.abs(await page.evaluate(() => window.scrollY) - before)).toBeLessThanOrEqual(1);
+  const animation = page.getByRole("region", { name: "Animation", exact: true });
+  await animation.evaluate(element => { element.scrollLeft = element.scrollWidth; });
+  expect(await animation.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+  await page.locator(".algorithm-list").getByText("Dijkstra", { exact: true }).click();
+  await ready(page, "Dijkstra");
+  await expect.poll(() => animation.evaluate(element => element.scrollLeft)).toBe(0);
+  await animation.evaluate(element => { element.scrollLeft = element.scrollWidth; });
+  const horizontal = await animation.evaluate(element => element.scrollLeft);
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.locator(".step-meter span").first()).toHaveText("2");
+  expect(await animation.evaluate(element => element.scrollLeft)).toBe(horizontal);
+  await page.goBack(); await ready(page, "BFS");
+  await expect.poll(() => animation.evaluate(element => element.scrollLeft)).toBe(0);
+  await animation.evaluate(element => { element.scrollLeft = element.scrollWidth; });
+  await page.goForward(); await ready(page, "Dijkstra");
+  await expect.poll(() => animation.evaluate(element => element.scrollLeft)).toBe(0);
 });
 
 for (const hash of ["", "#visualizer"]) {
