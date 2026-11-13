@@ -44,8 +44,8 @@
   background: var(--text);
   color: var(--bg);
 }
-.ads-controls button:hover:not(:disabled) { border-color: var(--text); }
-.ads-controls button:disabled { opacity: .4; cursor: default; }
+.ads-controls button:hover:not([aria-disabled="true"]) { border-color: var(--text); }
+.ads-controls button[aria-disabled="true"] { opacity: .4; cursor: default; }
 .ads-step-actions {
   display: grid;
   grid-template-columns: 100px 1fr 100px;

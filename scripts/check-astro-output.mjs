@@ -5,6 +5,16 @@ import { JSDOM } from "jsdom";
 import { readingText } from "./reading-text.mjs";
 
 const baseline = JSON.parse(await readFile("tests/fixtures/reading-baseline.json", "utf8"));
+// Reviewed #60 copy changes are asserted before restoring their historical
+// wording for #42 parity. This is a bounded list, not a skipped content region.
+const companionCopy = [
+  ['#related-reading > .eyebrow', "Optional companions", "The wider context"],
+  ['#related-reading-title', "Related reading and resources", "Related reading"],
+  ['#related-reading .resource-kind', "Resource · Skills", "Related guide · Skills"],
+  ['.guide-case-study > .eyebrow', "Optional case study · Publication", "Supporting case study · Publication"],
+  ['#references a[href="https://skills.ai-knowledge-hub.org/plugins/engineering/code-maintenance-plugin"]', "Inspect the coding workflow package in Skills", "Run the coding workflow example in Skills"],
+  ['#references a[href="https://skills.ai-knowledge-hub.org/plugins/agentops/harness-governance-plugin"]', "Inspect the harness review package in Skills", "Run the harness review example in Skills"],
+];
 for (const [path, expected] of Object.entries(baseline.routes)) {
   const file = path === "/" ? "dist/index.html" : `dist${path}/index.html`;
   const html = await readFile(file, "utf8");
@@ -23,6 +33,29 @@ for (const [path, expected] of Object.entries(baseline.routes)) {
   assert.equal(document.querySelectorAll('script[src^="/assets/"]').length, 0, `${path}: no Vite app entry`);
   assert.equal(document.querySelectorAll("astro-island").length, path === "/learn/algorithms/visualizers" ? 1 : 0, `${path}: hydration boundary`);
   const main = document.querySelector("main");
+  for (const [selector, current, historical] of companionCopy) {
+    for (const element of main.querySelectorAll(selector)) {
+      assert.equal(readingText(element), current, `${path}: approved companion copy ${selector}`);
+      element.textContent = historical;
+    }
+  }
+  // #59 deliberately adds requirements context. Keep the independent #42
+  // fixture frozen and compare its retained body; discovery browser assertions
+  // separately check the new notes, descriptions and reading-alternative link.
+  const requirementKind = !path.startsWith("/learn/") || path === "/learn/ai-engineering/control-plane"
+    ? null : path === "/learn/algorithms/visualizers" ? "lab" : path.split("/").length === 3 ? "start" : "guide";
+  const requirements = main.querySelectorAll("[data-task-requirements]");
+  assert.equal(requirements.length, requirementKind ? 1 : 0, `${path}: requirements context count`);
+  for (const element of requirements) {
+    const selector = {
+      start: '#start-here > p#start-requirements[data-task-requirements="start"]',
+      guide: '.lesson-orientation p[data-task-requirements="guide"]',
+      lab: '.algorithm-hero .intro-copy > div#lab-requirements[data-task-requirements="lab"]',
+    }[requirementKind];
+    assert.ok(element.matches(selector), `${path}: requirements context location`);
+    assert.ok(element.textContent.trim(), `${path}: requirements context must have text`);
+    element.remove();
+  }
   main.querySelectorAll("script,style,template").forEach((element) => element.remove());
   const actualText = readingText(main);
   if (actualText !== expected.text) {
@@ -42,4 +75,4 @@ for (const [file, expected] of Object.entries(baseline.downloads)) {
   const hash = createHash("sha256").update(await readFile(`dist/${file}`)).digest("hex");
   assert.equal(hash, expected, `${file}: versioned download changed`);
 }
-console.log(`Astro preserves ${Object.keys(baseline.routes).length} independent baseline routes, their reading text, anchors, links and metadata, plus all five download hashes. Sitemap contains ${urls.length} eligible URLs.`);
+console.log(`Astro preserves ${Object.keys(baseline.routes).length} independent baseline routes, their retained reading text, anchors, links and metadata, plus all five download hashes. New requirements context is scoped separately. Sitemap contains ${urls.length} eligible URLs.`);

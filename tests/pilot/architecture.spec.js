@@ -63,13 +63,21 @@ test("walkthrough preserves stage, outcome and keyboard behaviour", async ({ pag
     }
   }
   await expect(next).toBeDisabled();
+  await expect(next).toHaveAttribute("aria-disabled", "true");
+  await expect(next).toBeFocused();
+  await next.press("Enter");
+  await expect(status).toHaveText("Stage 5 of 5");
   for (let stage = 4; stage > 0; stage--) {
-    await previous.click();
+    await previous.press("Enter");
     await expect(status).toHaveText(`Stage ${stage} of 5`);
     await expect(diagram.locator(".ads-node:visible")).toHaveCount(nodeCounts[stage - 1]);
     await expect(diagram.getByRole("heading", { level: 3, name: `${stage}. ${stageTitles[stage - 1]}`, exact: true })).toBeVisible();
   }
   await expect(previous).toBeDisabled();
+  await expect(previous).toHaveAttribute("aria-disabled", "true");
+  await expect(previous).toBeFocused();
+  await previous.press("Space");
+  await expect(status).toHaveText("Stage 1 of 5");
   await diagram.getByRole("button", { name: /^Stage 3:/ }).click();
   await expect(status).toHaveText("Stage 3 of 5");
   const select = diagram.getByLabel("Example ad outcome", { exact: true });
@@ -93,6 +101,9 @@ test("walkthrough preserves stage, outcome and keyboard behaviour", async ({ pag
   await expect(status).toHaveText("Complete diagram");
   await expect(next).toBeDisabled();
   await expect(previous).toBeDisabled();
+  await next.press("Enter");
+  await previous.press("Space");
+  await expect(status).toHaveText("Complete diagram");
   await expect(diagram.locator(".ads-node:visible")).toHaveCount(18);
   await expect(diagram.locator(".ads-stage-copy:visible")).toHaveCount(5);
   await diagram.getByRole("button", { name: "Return to staged view", exact: true }).click();

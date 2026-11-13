@@ -70,7 +70,7 @@ function StageControls({ diagramId }) {
             ))}
           </ol>
           <div className="ads-step-actions">
-            <button type="button" data-previous="" disabled>Previous</button>
+            <button type="button" data-previous="" aria-disabled="true">Previous</button>
             <p role="status">Stage 1 of {architectureStages.length}</p>
             <button type="button" data-next="">Next</button>
           </div>

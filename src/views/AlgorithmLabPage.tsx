@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type SetStateAction } from "react";
 import { algorithms, operations, type Algorithm } from "../visualizers/algorithms-data";
 import { renderVisualization } from "../visualizers/render-visualization";
 import {
@@ -20,7 +20,7 @@ const AD_PLATFORM_SECURITY_URL = articleUrl(
 
 function CodeView({ lines, activeLine }: { lines: string[]; activeLine: number }) {
   return (
-    <pre>
+    <pre tabIndex={0} role="region" aria-labelledby="reference-code-label">
       <code>
         {lines.map((line, index) => {
           const lineNumber = String(index + 1).padStart(2, " ");
@@ -78,7 +78,8 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
     ? requestedId
     : "binary";
   const [stepIndex, setStepIndex] = useState(0);
-  const [playing, setPlaying] = useState(false);
+  const [playback, setPlayback] = useState<"ready" | "playing" | "paused" | "complete">("ready");
+  const playing = playback === "playing";
   const [speed, setSpeed] = useState(1050);
   const [viewMode, setViewMode] = useState("run");
 
@@ -92,7 +93,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
 
   useEffect(() => {
     setStepIndex(0);
-    setPlaying(false);
+    setPlayback("ready");
   }, [currentId]);
 
   useEffect(() => {
@@ -100,7 +101,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
     const timer = window.setInterval(() => {
       setStepIndex((previous) => {
         if (previous >= currentAlgorithm.steps.length - 1) {
-          setPlaying(false);
+          setPlayback("complete");
           return previous;
         }
         return previous + 1;
@@ -131,7 +132,12 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
       );
     }
     setStepIndex(0);
-    setPlaying(false);
+    setPlayback("ready");
+  }
+
+  function setManualStep(update: SetStateAction<number>) {
+    setPlayback("paused");
+    setStepIndex(update);
   }
 
   return (
@@ -156,7 +162,17 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
             reports, tool paths, incident clusters, approvals, permission
             graphs, and audit logs.
           </p>
-          <a className="action-link" href="#catalogue">
+          <div className="lab-requirements" id="lab-requirements" data-task-requirements="lab">
+            <p>
+              Prepared examples in your browser. JavaScript is needed to select a visualizer and use playback.
+              No installation, account or API key is needed.
+            </p>
+            <p>
+              Without JavaScript, you can read the default Binary Search example below or the{" "}
+              <a href={trackPath(tracks[1])}>pattern summaries in Algorithms &amp; Data</a>.
+            </p>
+          </div>
+          <a className="action-link" href="#catalogue" aria-describedby="lab-requirements">
             Choose a visualizer
           </a>
         </div>
@@ -214,7 +230,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
           </div>
         </aside>
 
-        <section className="stage" id="visualizer" aria-live="polite">
+        <section className="stage" id="visualizer">
           <div className="stage-head">
             <div>
               <p className="eyebrow">{currentAlgorithm.operation}</p>
@@ -231,7 +247,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                     aria-pressed={viewMode === mode}
                     onClick={() => {
                       setViewMode(mode);
-                      if (mode === "context") setPlaying(false);
+                      if (mode === "context") setPlayback("paused");
                     }}
                   >
                     {mode === "run" ? "Run" : "Context"}
@@ -252,13 +268,13 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
             <>
               <div className="controls" aria-label="Animation controls">
                 <div className="control-group">
-                  <button type="button" onClick={() => setStepIndex(0)}>
+                  <button type="button" onClick={() => setManualStep(0)}>
                     Reset
                   </button>
                   <button
                     type="button"
                     onClick={() =>
-                      setStepIndex((previous) => Math.max(0, previous - 1))
+                      setManualStep((previous) => Math.max(0, previous - 1))
                     }
                   >
                     Back
@@ -266,14 +282,14 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                   <button
                     type="button"
                     className="primary"
-                    onClick={() => setPlaying((previous) => !previous)}
+                    onClick={() => setPlayback((previous) => previous === "playing" ? "paused" : "playing")}
                   >
                     {playing ? "Pause" : "Play"}
                   </button>
                   <button
                     type="button"
                     onClick={() =>
-                      setStepIndex((previous) =>
+                      setManualStep((previous) =>
                         Math.min(
                           currentAlgorithm.steps.length - 1,
                           previous + 1,
@@ -291,6 +307,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                     min="500"
                     max="1800"
                     value={speed}
+                    aria-valuetext={`${speed} milliseconds between steps`}
                     onChange={(event) => setSpeed(Number(event.target.value))}
                   />
                 </label>
@@ -299,11 +316,15 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
               <div className="stage-grid">
                 <article className="panel visual-panel">
                   <div className="panel-title">
-                    <span>Animation</span>
+                    <span id="animation-label">Animation</span>
                     <strong>{currentStep.label}</strong>
                   </div>
                   <div
+                    key={currentAlgorithm.id}
                     className="visualization"
+                    tabIndex={0}
+                    role="region"
+                    aria-labelledby="animation-label"
                     dangerouslySetInnerHTML={{
                       __html: renderVisualization(currentAlgorithm, stepIndex),
                     }}
@@ -312,7 +333,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
 
                 <article className="panel code-panel">
                   <div className="panel-title">
-                    <span>Reference code</span>
+                    <span id="reference-code-label">Reference code</span>
                     <strong>{currentAlgorithm.complexity}</strong>
                   </div>
                   <CodeView
@@ -327,7 +348,15 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                   <div className="panel-title">
                     <span>Current step</span>
                   </div>
-                  <p>{currentStep.note}</p>
+                  <p
+                    role="status"
+                    aria-live={playing ? "off" : "polite"}
+                    aria-atomic="true"
+                    aria-label={`${currentAlgorithm.title}: step ${stepIndex + 1} of ${currentAlgorithm.steps.length}, ${currentStep.label}`}
+                  >
+                    {playback === "paused" ? "Paused. " : playback === "complete" ? "Playback complete. " : ""}
+                    {currentStep.note}
+                  </p>
                 </article>
                 <article className="panel">
                   <div className="panel-title">
@@ -552,14 +581,14 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
         >
           <div>
             <p className="eyebrow">Scoped campaign-change grant</p>
-            <h3>One action, one advertiser, one expiry window</h3>
+            <h3 id="grant-example-title">One action, one advertiser, one expiry window</h3>
             <p>
               The campaign equivalent of a scoped payment token: enough
               authority to apply one approved change, not broad access to the
               whole ad account.
             </p>
           </div>
-          <pre>{`{
+          <pre tabIndex={0} role="region" aria-labelledby="grant-example-title">{`{
   "platform": "dv360",
   "advertiser_id": "987654",
   "entity_type": "line_item",

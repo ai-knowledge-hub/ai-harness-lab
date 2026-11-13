@@ -53,7 +53,6 @@ html {
 }
 body {
   margin: 0;
-  min-width: 320px;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-ui);
@@ -95,6 +94,8 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 summary:focus-visible,
+pre[tabindex="0"]:focus-visible,
+.visualization:focus-visible,
 [tabindex="-1"]:focus-visible {
   outline: 2px solid var(--text);
   outline-offset: 5px;
@@ -207,6 +208,14 @@ pre {
   z-index: 20;
   background: var(--bg);
 }
+.site-descriptor {
+  padding: 10px var(--gutter);
+  border-bottom: 1px solid var(--line);
+}
+.site-descriptor p {
+  font-size: 14px;
+  line-height: 1.5;
+}
 .masthead-row {
   min-height: 78px;
   padding: 16px var(--gutter);
@@ -251,6 +260,20 @@ pre {
 }
 .family-navigation a:hover {
   color: var(--text);
+}
+.family-navigation a.family-link,
+.mobile-menu > nav a.family-link,
+.site-footer nav a.family-link {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  max-inline-size: 24ch;
+}
+.family-link-purpose {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
 }
 .theme-toggle {
   border: 0;
@@ -729,7 +752,9 @@ pre {
   overflow-x: auto;
 }
 .visualization svg {
-  min-width: 440px;
+  /* The largest lab viewBox is 730 units wide. Preserve authored label sizes
+     in a local scroll region instead of shrinking 10px text below 7px. */
+  min-width: 46rem;
   display: block;
 }
 .visualization svg text {
@@ -997,6 +1022,10 @@ pre {
     background: var(--bg);
     border-bottom: 1px solid var(--line-strong);
     box-shadow: 0 16px 28px #0002;
+    /* Absolute positioning resolves 100% against the actual header height,
+       including extra lines when browser zoom makes the brand wrap. */
+    max-block-size: calc(100dvh - 100%);
+    overflow-y: auto;
   }
   .mobile-menu .track-navigation {
     display: grid;
@@ -1015,6 +1044,10 @@ pre {
     display: flex;
     gap: 24px;
     margin-top: 12px;
+  }
+  .mobile-menu .companion-navigation {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .mobile-menu > nav a {
     display: inline-flex;
@@ -1417,8 +1450,8 @@ html:has(.pilot-track-page) {
   font-size: clamp(25px, 3vw, 39px);
 }
 .track-start {
-  grid-template-areas: "label method" "next method";
-  grid-template-rows: auto 1fr;
+  grid-template-areas: "label method" "next method" "requirements method";
+  grid-template-rows: auto auto 1fr;
   row-gap: 18px;
 }
 .track-start > h2 {
@@ -1431,6 +1464,30 @@ html:has(.pilot-track-page) {
   grid-area: next;
   align-self: start;
   justify-self: start;
+}
+.track-start > .task-requirements {
+  grid-area: requirements;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 40ch;
+}
+.task-prerequisite {
+  display: block;
+  margin-top: 8px;
+}
+.intro-copy .lab-requirements {
+  margin-top: 22px;
+}
+.intro-copy .lab-requirements p {
+  font-size: 15px;
+  line-height: 1.6;
+}
+.lab-requirements p + p {
+  margin-top: 8px;
+}
+.lab-requirements a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .track-start h3 {
   font-size: clamp(24px, 3vw, 38px);
@@ -1521,7 +1578,7 @@ html:has(.pilot-track-page) {
     grid-template-columns: minmax(0, 1fr);
   }
   .track-start {
-    grid-template-areas: "label" "method" "next";
+    grid-template-areas: "label" "method" "next" "requirements";
     grid-template-rows: auto;
   }
   .track-method {

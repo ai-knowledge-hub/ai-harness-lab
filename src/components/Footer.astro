@@ -1,12 +1,12 @@
 ---
 import { site } from "../content/site";
+import FamilyLinks from "./FamilyLinks.astro";
 ---
 <footer class="site-footer">
   <a class="footer-brand" href="/">AI Knowledge Hub <span>Harness</span></a>
-  <p>Practical engineering for AI products.</p>
+  <p>{site.descriptor}</p>
   <nav aria-label="Footer">
-    <a href={site.publication}>Publication</a>
-    <a href={site.skills}>Skills</a>
+    <FamilyLinks />
     <a href="/#tracks">Engineering tracks</a>
   </nav>
 </footer>

@@ -2,13 +2,24 @@ import { test, expect } from "@playwright/test";
 const path = "/learn/system-design/chatgpt-ads";
 const id = "chatgpt-ads-visual-deep-dive-0-stage-";
 
-test("every stage control includes its visible label in its accessible name", async ({ page }) => {
+test("stage controls preserve their names and keyboard focus at boundaries", async ({ page }) => {
   await page.goto(path);
   for (const [index, label] of ["Paths", "Tools", "Delivery", "Reports", "Our build"].entries()) {
     const button = page.getByRole("button", { name: new RegExp(`^Stage ${index + 1}:`) });
     await expect(button).toContainText(label);
     await expect(button).toHaveAccessibleName(new RegExp(label));
   }
+  const next = page.locator(".ads-step-actions").getByRole("button", { name: "Next", exact: true });
+  const previous = page.locator(".ads-step-actions").getByRole("button", { name: "Previous", exact: true });
+  const status = page.locator(".ads-step-actions [role=status]");
+  for (let step = 0; step < 4; step++) await next.press("Enter");
+  await expect(next).toBeFocused();
+  await next.press("Space");
+  await expect(status).toHaveText("Stage 5 of 5");
+  for (let step = 0; step < 4; step++) await previous.press("Enter");
+  await expect(previous).toBeFocused();
+  await previous.press("Space");
+  await expect(status).toHaveText("Stage 1 of 5");
 });
 
 test("initial and changed explanation fragments reveal the matching stage", async ({ page }) => {

@@ -22,6 +22,11 @@ test("all 15 visualizers render every baseline step in both themes", async ({ pa
   });
   await page.goto(labPath + "?algorithm=binary#visualizer");
   await ready(page);
+  await expect(page.locator("#visualizer")).not.toHaveAttribute("aria-live");
+  const status = page.locator("#visualizer").getByRole("status");
+  await expect(status).toHaveAttribute("aria-atomic", "true");
+  await expect(status).toHaveAttribute("aria-live", "polite");
+  await expect(page.locator('#visualizer [aria-live="polite"]')).toHaveCount(1);
   await expect(page.locator(".algorithm-list button")).toHaveCount(15);
   const meter = page.locator(".step-meter span");
   for (const theme of ["dark", "light"]) {
@@ -29,12 +34,20 @@ test("all 15 visualizers render every baseline step in both themes", async ({ pa
     for (const [id, title, , count] of labs) {
       await page.locator(".algorithm-list").getByText(title, { exact: true }).click();
       await ready(page, title);
+      // Keep two-dimensional diagrams readable inside their local scroller.
+      // A document-width assertion alone passes when SVG labels shrink to 6px.
+      const scales = await page.locator(".visualization svg text").evaluateAll(elements =>
+        elements.filter(element => element.textContent.trim()).map(element => element.getScreenCTM().a));
+      for (const scale of scales) expect(scale, `${id}: authored SVG label scale`).toBeGreaterThanOrEqual(1);
       await expect(page).toHaveURL(new RegExp(`algorithm=${id}(?:&|#|$)`));
       await expect(meter.last()).toHaveText(String(count));
       expect(states[id]).toHaveLength(count);
       for (let step = 1; step <= count; step++) {
         const [label, expectedState] = states[id][step - 1];
         await expect(meter.first()).toHaveText(String(step));
+        await expect(status).toHaveAccessibleName(`${title}: step ${step} of ${count}, ${label}`);
+        // Only the existing concise explanation is live, not SVG or code edits.
+        expect(await status.locator("svg, pre, button").count()).toBe(0);
         const rendered = await page.locator(".visualization").evaluate(visualState);
         const actualState = createHash("sha256").update(rendered).digest("hex");
         expect.soft(actualState, `${id} step ${step}: ${label} diagram state`).toBe(expectedState);
@@ -57,15 +70,21 @@ test("all 15 visualizers render every baseline step in both themes", async ({ pa
   }
   const speed = page.getByLabel("Speed", { exact: true });
   await speed.press("Home"); await expect(speed).toHaveValue("500");
+  await expect(speed).toHaveAttribute("aria-valuetext", "500 milliseconds between steps");
   await speed.press("End"); await expect(speed).toHaveValue("1800");
+  await expect(speed).toHaveAttribute("aria-valuetext", "1800 milliseconds between steps");
   await speed.press("Home");
   await page.getByRole("button", { name: "Play", exact: true }).click();
+  await expect(status).toHaveAttribute("aria-live", "off");
   await expect(meter.first()).toHaveText("2");
   await page.getByRole("button", { name: "Pause", exact: true }).click();
+  await expect(status).toHaveAttribute("aria-live", "polite");
+  await expect(status).toContainText("Paused.");
   await page.getByRole("button", { name: "Reset", exact: true }).click();
   await page.getByRole("button", { name: "Play", exact: true }).click();
   await expect(meter.first()).toHaveText(String(labs.at(-1)[3]));
   await expect(page.getByRole("button", { name: "Play", exact: true })).toBeVisible();
+  await expect(status).toContainText("Playback complete.");
   expect(errors).toEqual([]);
 });
 
@@ -105,6 +124,19 @@ test("filters and Back/Forward restore selection and reset playback", async ({ p
   await expect(page.locator(".step-meter span").first()).toHaveText("1");
   expect(new URL(page.url()).searchParams.get("source")).toBe("lab-audit");
   expect(new URL(page.url()).hash).toBe("#visualizer");
+  const status = page.locator("#visualizer").getByRole("status");
+  await page.getByLabel("Speed", { exact: true }).press("End");
+  for (const [action, expectedStep] of [["Next", "3"], ["Back", "1"], ["Reset", "1"]]) {
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page.getByRole("button", { name: "Play", exact: true }).click();
+    await expect(status).toHaveAttribute("aria-live", "off");
+    await page.getByRole("button", { name: action, exact: true }).click();
+    await expect(status).toHaveAttribute("aria-live", "polite");
+    await expect(status).toContainText("Paused.");
+    await expect(page.getByRole("button", { name: "Play", exact: true })).toBeVisible();
+    await expect(page.locator(".step-meter span").first()).toHaveText(expectedStep);
+  }
 });
 
 test("legacy document redirects preserve query and fragment through refresh", async ({ page }) => {
@@ -134,6 +166,22 @@ test("algorithm query changes preserve the working position", async ({ page }) =
   await target.click();
   await ready(page, "BFS");
   expect(Math.abs(await page.evaluate(() => window.scrollY) - before)).toBeLessThanOrEqual(1);
+  const animation = page.getByRole("region", { name: "Animation", exact: true });
+  await animation.evaluate(element => { element.scrollLeft = element.scrollWidth; });
+  expect(await animation.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+  await page.locator(".algorithm-list").getByText("Dijkstra", { exact: true }).click();
+  await ready(page, "Dijkstra");
+  await expect.poll(() => animation.evaluate(element => element.scrollLeft)).toBe(0);
+  await animation.evaluate(element => { element.scrollLeft = element.scrollWidth; });
+  const horizontal = await animation.evaluate(element => element.scrollLeft);
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.locator(".step-meter span").first()).toHaveText("2");
+  expect(await animation.evaluate(element => element.scrollLeft)).toBe(horizontal);
+  await page.goBack(); await ready(page, "BFS");
+  await expect.poll(() => animation.evaluate(element => element.scrollLeft)).toBe(0);
+  await animation.evaluate(element => { element.scrollLeft = element.scrollWidth; });
+  await page.goForward(); await ready(page, "Dijkstra");
+  await expect.poll(() => animation.evaluate(element => element.scrollLeft)).toBe(0);
 });
 
 for (const hash of ["", "#visualizer"]) {

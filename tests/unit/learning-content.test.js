@@ -1,6 +1,7 @@
 import { learningContent } from "../../src/content/learning";
 import { validateLearningContent } from "../../src/content/validate-learning";
 import { getPageMetadata } from "../../src/content/page-metadata";
+import { resolveDiscoveryLink } from "../../src/content/discovery";
 
 function changed(mutator) {
   const content = structuredClone(learningContent);
@@ -9,6 +10,15 @@ function changed(mutator) {
 }
 
 describe("Learning content integrity", () => {
+  it("allows no companions but requires a reason for each listed resource", () => {
+    const emptyGuide = learningContent.lessons.find((guide) => guide.id === "attribution-and-lift");
+    expect([emptyGuide.publicationIds, emptyGuide.capabilityIds, emptyGuide.videoIds]).toEqual([[], [], []]);
+    expect(validateLearningContent()).toBe(true);
+    for (const collection of ["publications", "capabilities"]) {
+      const content = changed((draft) => { draft[collection][0].relationship = " "; });
+      expect(() => validateLearningContent(content)).toThrow("explain why this optional resource helps");
+    }
+  });
   it("rejects a cross-track case link to a missing section", () => {
     const content = changed((draft) => {
       const link = draft.discovery.caseTracks["chatgpt-ads-reporting"]["software-production"];
@@ -32,7 +42,12 @@ describe("Learning content integrity", () => {
     );
   });
 
-  it("rejects a prerequisite that has no source record", () => {
+  it("derives starter prerequisites from their source and rejects missing records", () => {
+    const content = changed((draft) => {
+      draft.concepts.find((concept) => concept.id === "http-basics").description = "Updated explanation of HTTP.";
+    });
+    const starter = resolveDiscoveryLink(content, content.discovery.tracks["system-design"].start.next);
+    expect(starter.prerequisites).toEqual(["Updated explanation of HTTP."]);
     expect(() =>
       validateLearningContent(
         changed((content) =>

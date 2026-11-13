@@ -39,3 +39,21 @@ Run `pnpm dev` and open the tracks from the homepage. Each starts with a decisio
 The first example lives at `/learn/system-design/chatgpt-ads-reporting`. The planned `/examples` route remains available by direct link. It can enter the sitemap and navigation when it offers an index readers can use.
 
 Review at desktop and phone widths.
+
+## Action requirements · 12 November 2026
+
+[#59](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/59) audits the five tracks after merged #70 (`8ac34a8` on dev). Their methods, recommended destinations, available resources and canonical ownership remain useful. The missing information was the browser/setup requirement beside the first action and the explicit no-install reading note on direct guide entry.
+
+| Track | Recommended action and useful context | Available resources and limits retained |
+| --- | --- | --- |
+| System design | Read API design principles in the browser. Its existing `http-basics` prerequisite explains requests/replies in plain language; the track now reuses that source description. No install, account or API key to read. | Platform/API references and the reporting preview; public documentation is not verified account access. |
+| Algorithms & Data | Step through the Heap top-three example in the browser; JavaScript for selection/playback, no install or credentials. The starting method already explains the operation and memory limits. | All 15 visualizers, grouped pattern summaries, reporting section and related reading. Prepared examples do not contact a live account. |
+| Software & production | Step through the lease queue example with the same browser requirements. Ownership, safe retries and completed results are already explained. | Separate local collector says Sample data and links to pinned setup (Node 20+ at that revision); durable service remains unlinked In development. The app checkout's Node 22 engine is a separate contributor requirement. |
+| Measurement & ML | Read the attribution/lift guide without setup. Its starting method already asks for a decision, outcome and comparison; the guide explains attribution/holdout in context. | Fictional example, reporting interpretation, research and prototype write-up. Forecast/allocation work remains unlinked In development. |
+| AI engineering | Read the small-code-change guide without setup. It explains the installer/identifier and independent checks before optional local practice. | Pinned Skills 0.2.0 helper needs Node 22 and prints a plan; suggested `go test` is not an observed repair or merge. Approval/control-plane examples and Skills references stay optional; the mock section retains Python/Skills setup and live-access limits. |
+
+The recommended action's requirements are resolved in `discovery.js` using its existing guide/lab/pattern kind. Guide prerequisites come from `prerequisiteConceptIds` and the existing concept collection, not a second authored description. `TrackPage.jsx` associates visible setup prose with the action using `aria-describedby`. New guides retain the same authoring fields; there is no new taxonomy, persona choice or required sequence.
+
+The guide reader adds only the missing no-install statement beside its existing account/access note. The lab intro states its JavaScript requirement and default static Binary Search fallback, and links to the existing pattern summaries. No control semantics, visualizer data, runtime installer or live integration is added. Detailed keyboard/assistive-technology improvements remain with #62; #63 owns practitioner evidence.
+
+The independent #42 reading fixture remains frozen. `check:routes` requires exactly one new requirements block in each eligible retained track/guide/lab route, checks its specific location/kind and nonempty text, then excludes only that addition when comparing the original reading body and links. Existing metadata, original prose/anchors/links and download hashes remain checked. Discovery browser assertions independently check the new requirements, prerequisite explanation, accessible action descriptions and static reading alternative. Do not put existing guide content into the requirements block or weaken the original fixture to accept unrelated changes.

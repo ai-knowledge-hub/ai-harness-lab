@@ -103,7 +103,13 @@ export function TrackPage({ track }) {
             ))}
           </ol>
         </div>
-        <SiteLink href={next.href} className="action-link">{next.action}</SiteLink>
+        <SiteLink href={next.href} className="action-link" aria-describedby="start-requirements">{next.action}</SiteLink>
+        <p className="task-requirements" id="start-requirements" data-task-requirements="start">
+          {next.requirements}
+          {next.prerequisites?.map((description) => (
+            <span className="task-prerequisite" key={description}>Useful context: {description}</span>
+          ))}
+        </p>
       </section>
       {showPatterns && <AlgorithmPatterns />}
       {groups.map(({ id, title, resources }) => (
