@@ -50,3 +50,30 @@ test("browser search can reach inactive explanation text", async ({ page }) => {
     await expect(page.getByRole("button", { name: /^Stage 5:/ })).toHaveAttribute("aria-current", "step");
   } else await expect(page.locator(".ads-stage-copy:visible")).toHaveCount(5);
 });
+
+test("the Markdown guide keeps its reading layout, fragment and table without JavaScript", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({
+    baseURL,
+    javaScriptEnabled: false,
+    viewport: { width: 320, height: 800 },
+  });
+  try {
+    const page = await context.newPage();
+    await page.goto("/learn/measurement-ml/attribution-and-lift#read-the-results");
+    await expect(page.getByRole("heading", { level: 1, name: "How to compare attributed conversions and lift" })).toBeVisible();
+    const section = page.locator("#read-the-results");
+    await expect(section.getByRole("heading", { level: 2 })).toHaveAttribute("id", "read-the-results-title");
+    await expect(section.getByRole("columnheader", { name: "Order rate" })).toBeVisible();
+    await expect(section.getByRole("rowheader", { name: "Holdout" })).toBeVisible();
+    await expect(section.getByRole("cell", { name: "2.0%" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Google Research on geographic experiments" })).toHaveAttribute(
+      "href", "https://research.google/pubs/measuring-ad-effectiveness-using-geo-experiments/",
+    );
+    const tableRegion = section.getByRole("region", { name: "Scrollable comparison table" });
+    await tableRegion.focus();
+    await expect(tableRegion).toBeFocused();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  } finally {
+    await context.close();
+  }
+});

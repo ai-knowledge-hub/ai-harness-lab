@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { SiteLink } from "./SiteLink";
 
 const views = [
   {
@@ -39,11 +39,12 @@ const views = [
   },
 ];
 
-export function AdsOrchestrator() {
+/** @param {{ GuideLink?: "a" | typeof SiteLink }} props */
+export function AdsOrchestrator({ GuideLink = SiteLink }) {
   return <div className="orchestrator-detail">
     <p>The orchestrator is the AI model that decides which ad selection tools to use. Open each step to see what it starts with and what it produces. The model can go back to a tool when it needs to.</p>
     <p><a className="source-citation" href="https://openai.com/index/building-chatgpt-ad-stack/">Source: OpenAI’s engineering account</a></p>
-    <p className="reference-small">The steps below describe work that happens inside OpenAI. Advertiser reports give you campaign results. <Link className="text-link" to="/learn/system-design/chatgpt-ads-apis">See what advertisers can do with the APIs.</Link></p>
+    <p className="reference-small">The steps below describe work that happens inside OpenAI. Advertiser reports give you campaign results. <GuideLink className="text-link" href="/learn/system-design/chatgpt-ads-apis">See what advertisers can do with the APIs.</GuideLink></p>
     <ol className="orchestrator-views">{views.map((view, index) => <li key={view.title}>
       <details>
         <summary><span aria-hidden="true">0{index + 1}</span>{view.title}</summary>

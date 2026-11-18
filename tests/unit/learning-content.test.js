@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { learningContent } from "../../src/content/learning";
 import { validateLearningContent } from "../../src/content/validate-learning";
 import { getPageMetadata } from "../../src/content/page-metadata";

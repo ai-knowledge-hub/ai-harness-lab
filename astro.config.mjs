@@ -1,5 +1,8 @@
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
+import mdx from "@astrojs/mdx";
+import { satteri } from "@astrojs/markdown-satteri";
+import { guideSections } from "./scripts/markdown-guide-sections.mjs";
 import { copyFile, readdir } from "node:fs/promises";
 import { constants } from "node:fs";
 import { join, relative } from "node:path";
@@ -33,8 +36,12 @@ export default defineConfig({
   build: { format: "directory" },
   devToolbar: { enabled: false },
   vite: { build: { assetsInlineLimit: 0 } },
+  markdown: {
+    processor: satteri({ hastPlugins: [guideSections], features: { smartPunctuation: false } }),
+  },
   integrations: [
     react(),
+    mdx(),
     { name: "legacy-html-addresses", hooks: { "astro:build:done": ({ dir }) => mirrorHtml(fileURLToPath(dir)) } },
   ],
 });

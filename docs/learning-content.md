@@ -8,7 +8,7 @@ The existing `/learn/` routes and internal `lesson`/`learning` identifiers remai
 
 ## Ownership and relationships
 
-`src/content/learning.js` owns the related-resource collections. `src/content/guides.ts` discovers each default-exported guide record in `src/content/lessons/`; the resulting catalogue supplies the guide registry, routes, metadata, track discovery, and sitemap eligibility. Each collection has stable, unique kebab-case IDs. The guide files are authored practitioner references, not a scrape of external articles.
+`src/content/learning.js` owns the related-resource collections. `src/content/guides.ts` combines the typed guide records and the Astro content collection in `src/content/lessons/`. The resulting catalogue supplies routes, metadata, track discovery, and sitemap eligibility. Each collection has stable, unique kebab-case IDs. The guide files are authored practitioner references, not a scrape of external articles.
 
 | Object | Role |
 | --- | --- |
@@ -37,6 +37,12 @@ Supported lifecycle rules:
 - Publication and capability links are curated reference relationships, not claims that an article's example and a package are identical or that an integration has been deployed.
 
 To add a standard guide, create one `.ts` file in `src/content/lessons/` and default-export the record with `satisfies Guide` from `src/content/guide-types.ts`. Run `pnpm check`. Its route, primary-track listing, metadata and eligible sitemap entry are automatic. New principles enter Reusable guides, cases enter Worked examples, and platform/reference kinds enter References. Existing curated starting paths, custom actions and cross-track case relationships remain in `discovery.js`; they continue to resolve metadata from the same records. Do not add a navigation entry pointing to a nonexistent guide. Use `pnpm check:authoring` to exercise published, draft and invalid-reference records end to end.
+
+## Markdown and MDX pilot
+
+[Issue #77](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/77) has two examples in `src/content/lessons/`. [Attribution and Lift](../src/content/lessons/attribution-and-lift.md) uses Markdown headings, links, and a table. [ChatGPT Ads](../src/content/lessons/chatgpt-ads.mdx) embeds the existing architecture walkthrough and references in MDX. The rest of the catalogue uses the typed record format above.
+
+Both formats use the validated frontmatter in [the collection schema](../src/content.config.ts). Astro derives the canonical path from `trackId` and `id`. The document starts with a level-two heading after any MDX imports. Keep one stable `sectionIds` entry for each level-two heading, in the same order. Move an ID with its section when reordering and keep the ID when renaming a heading. The single source file supplies the section titles and contents links. The publishing checks are the same as for a typed record.
 
 ## Optional companion selection and upkeep
 

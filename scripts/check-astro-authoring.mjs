@@ -4,8 +4,11 @@ import { readFile, writeFile, unlink, access } from "node:fs/promises";
 import { JSDOM } from "jsdom";
 
 const source = "src/content/lessons/migration-authoring-check.ts";
-try { await access(source); throw new Error(`Refusing to overwrite ${source}`); }
-catch (error) { if (error.code !== "ENOENT") throw error; }
+const markdownSource = "src/content/lessons/markdown-authoring-check.md";
+for (const file of [source, markdownSource]) {
+  try { await access(file); throw new Error(`Refusing to overwrite ${file}`); }
+  catch (error) { if (error.code !== "ENOENT") throw error; }
+}
 const path = "/learn/software-production/migration-authoring-check";
 const guide = {
   id: "migration-authoring-check", trackId: "software-production", path,
@@ -21,7 +24,21 @@ const guide = {
 const writeGuide = () => writeFile(source, `import type { Guide } from "../guide-types";\nexport default ${JSON.stringify(guide, null, 2)} satisfies Guide;\n`);
 const build = () => execFileSync("pnpm", ["build"], { encoding: "utf8", stdio: "pipe" });
 const html = (file) => readFile(`dist/${file}`, "utf8");
+const { sections, path: _, ...metadata } = guide;
+const markdown = { ...metadata, id: "markdown-authoring-check", sectionIds: ["check-section"] };
+const markdownPath = `/learn/${markdown.trackId}/${markdown.id}`;
+const writeMarkdown = () => writeFile(markdownSource, [
+  "---",
+  ...Object.entries(markdown).map(([key, value]) => `${key}: ${JSON.stringify(value)}`),
+  "---",
+  "",
+  "## Keep the reference stable",
+  "",
+  "Keep the request identity with its completed result.",
+  "",
+].join("\n"));
 let created = false;
+let createdMarkdown = false;
 try {
   await writeGuide(); created = true; build();
   const page = new JSDOM(await html(`${path.slice(1)}/index.html`)).window.document;
@@ -62,7 +79,48 @@ try {
 
   guide.prerequisiteConceptIds = ["missing-migration-concept"]; await writeGuide();
   assert.throws(build, (error) => /unknown concepts reference missing-migration-concept/.test(String(error.stdout) + String(error.stderr)));
-  console.log("One authored record created its route, anchor, metadata, primary-track discovery and sitemap entry; repeated diagram blocks, draft eligibility, reserved index routes and invalid references were enforced.");
+  guide.prerequisiteConceptIds = [];
+  await writeGuide();
+
+  await writeMarkdown();
+  createdMarkdown = true;
+  build();
+  const markdownPage = new JSDOM(await html(`${markdownPath.slice(1)}/index.html`)).window.document;
+  assert.match(markdownPage.querySelector('a[href="#check-section"]').textContent, /Keep the reference stable/);
+  assert.equal(markdownPage.querySelector("#check-section > h2").id, "check-section-title");
+  assert.equal(markdownPage.querySelector("#check-section > p").textContent.trim(), "Keep the request identity with its completed result.");
+  assert.equal(markdownPage.querySelector('link[rel="canonical"]').href, "https://harness.ai-knowledge-hub.org" + markdownPath);
+  assert.ok((await html("sitemap.xml")).includes(markdownPath));
+  assert.ok(new JSDOM(await html("learn/software-production/index.html")).window.document.querySelector(`a[href="${markdownPath}"]`));
+
+  markdown.publicationStatus = "draft";
+  await writeMarkdown(); build();
+  const markdownDraft = new JSDOM(await html(`${markdownPath.slice(1)}/index.html`)).window.document;
+  assert.equal(markdownDraft.querySelector('meta[name="robots"]').content, "noindex, follow");
+  assert.ok(!(await html("sitemap.xml")).includes(markdownPath));
+
+  markdown.readingMinutes = 0;
+  await writeMarkdown();
+  assert.throws(build, (error) => /readingMinutes/.test(String(error.stdout) + String(error.stderr)));
+  markdown.readingMinutes = 3;
+
+  markdown.id = guide.id;
+  await writeMarkdown();
+  assert.throws(build, (error) => /duplicate path/.test(String(error.stdout) + String(error.stderr)));
+  markdown.id = "markdown-authoring-check";
+
+  markdown.relatedGuideIds = ["missing-guide"];
+  await writeMarkdown();
+  assert.throws(build, (error) => /unknown lessons reference missing-guide/.test(String(error.stdout) + String(error.stderr)));
+  markdown.relatedGuideIds = [];
+
+  markdown.sectionIds.push("missing-section");
+  await writeMarkdown();
+  assert.throws(build, (error) => /expected a heading for every section ID/.test(String(error.stdout) + String(error.stderr)));
+
+  console.log("Typed and Markdown guides created their routes, anchors, metadata, track entries and sitemap entries. Drafts, invalid metadata, mixed-format collisions and invalid references were checked.");
 } finally {
-  if (created) { await unlink(source); build(); }
+  if (createdMarkdown) await unlink(markdownSource);
+  if (created) await unlink(source);
+  if (created || createdMarkdown) build();
 }

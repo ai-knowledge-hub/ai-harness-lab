@@ -1,8 +1,7 @@
-import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react";
+import { sync } from "astro";
+import { getViteConfig } from "astro/config";
 
-export default defineConfig({
-  plugins: [react()],
+const config = getViteConfig({
   test: {
     environment: "jsdom",
     setupFiles: "./vitest.setup.js",
@@ -11,3 +10,9 @@ export default defineConfig({
     exclude: ["tests/e2e/**", "tests/pilot/**", "tests/site/**", "node_modules/**"],
   },
 });
+
+export default async (env) => {
+  // Vitest uses Vite's serve mode, so Astro reads the development content store.
+  await sync({ cacheDir: "./.astro", logLevel: "warn" });
+  return config(env);
+};
