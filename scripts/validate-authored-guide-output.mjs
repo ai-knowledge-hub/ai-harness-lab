@@ -19,7 +19,14 @@ function duplicateIds(document) {
   return duplicates;
 }
 
-async function checkLink(href, base, origin, files, readPage) {
+function allowsPath(path, trailingSlash) {
+  if (path === "/") return true;
+  if (trailingSlash === "never") return !path.endsWith("/");
+  if (trailingSlash === "always") return path.endsWith("/") || /\.[^/]+$/.test(path);
+  return true;
+}
+
+async function checkLink(href, base, origin, files, readPage, trailingSlash) {
   let target;
   try {
     target = new URL(href, base);
@@ -37,6 +44,10 @@ async function checkLink(href, base, origin, files, readPage) {
     fragment = decodeURIComponent(target.hash.slice(1).split(":~:")[0]);
   } catch {
     return { error: `invalid URL encoding: ${href}` };
+  }
+
+  if (!allowsPath(target.pathname, trailingSlash)) {
+    return { error: `local destination violates trailingSlash=${trailingSlash}: ${href}` };
   }
 
   const index = `${path.replace(/\/$/, "")}/index.html`;
@@ -58,7 +69,10 @@ async function checkLink(href, base, origin, files, readPage) {
 
 // Validate the static output so component-rendered links and IDs are covered
 // alongside the Markdown source. Only authored guides opt into these checks.
-export async function validateAuthoredGuideOutput(output, origin) {
+export async function validateAuthoredGuideOutput(output, origin, trailingSlash) {
+  if (!["never", "always", "ignore"].includes(trailingSlash)) {
+    throw new Error("Guide validation requires Astro's resolved trailingSlash policy");
+  }
   const files = new Map();
   for (const entry of await readdir(output, { recursive: true, withFileTypes: true })) {
     if (!entry.isFile()) continue;
@@ -93,7 +107,7 @@ export async function validateAuthoredGuideOutput(output, origin) {
       if (files.has(flatAlias)) addresses.add(flatAlias);
 
       // Parse at each address so the document's base reflects how it was opened.
-      const bases = await Promise.all([...addresses].map(async (address) => ({
+      const bases = await Promise.all([...addresses].filter((address) => allowsPath(address, trailingSlash)).map(async (address) => ({
         address,
         base: (await readPage(file, html, address)).baseURI,
       })));
@@ -107,7 +121,7 @@ export async function validateAuthoredGuideOutput(output, origin) {
           const reported = new Set();
           let firstDestination;
           for (const { address, base } of bases) {
-            const { error, destination } = await checkLink(href, base, origin, files, readPage);
+            const { error, destination } = await checkLink(href, base, origin, files, readPage, trailingSlash);
             if (error && !reported.has(error)) {
               errors.push(`${address}#${section.id}: ${error}`);
               reported.add(error);

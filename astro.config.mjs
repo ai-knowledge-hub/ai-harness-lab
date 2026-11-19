@@ -29,6 +29,8 @@ async function mirrorHtml(directory, root = directory) {
   }
 }
 
+let trailingSlash;
+
 export default defineConfig({
   site: site.origin,
   output: "static",
@@ -47,10 +49,13 @@ export default defineConfig({
     {
       name: "harness-static-output",
       hooks: {
+        "astro:config:done": ({ config }) => {
+          trailingSlash = config.trailingSlash;
+        },
         "astro:build:done": async ({ dir }) => {
           const output = fileURLToPath(dir);
           await mirrorHtml(output);
-          await validateAuthoredGuideOutput(output, site.origin);
+          await validateAuthoredGuideOutput(output, site.origin, trailingSlash);
         },
       },
     },

@@ -34,7 +34,7 @@ const footnote = "A note adds context.[^source]\n\n[^source]: Footnote text.";
 const validLinks = [
   "[This section](#check-section)",
   "[An HTML alias](/learn/software-production/migration-authoring-check.html#identify-the-request)",
-  "[An absolute guide URL](https://harness.ai-knowledge-hub.org/learn/measurement-ml/attribution-and-lift/#read-the-results)",
+  "[An absolute guide URL](https://harness.ai-knowledge-hub.org/learn/measurement-ml/attribution-and-lift#read-the-results)",
   "[A relative download](../../../references/chatgpt-ads/v1/README.md)",
   "[A citation](https://example.com/source)",
 ].join(" ");
@@ -157,6 +157,11 @@ try {
     `${markdownPath}/index.html#check-section: unbuilt local destination: ${relativeReference}`,
   ));
 
+  await writeAuthored("[API design](/learn/system-design/api-design/)");
+  assert.throws(build, buildErrorIncludes(
+    "local destination violates trailingSlash=never: /learn/system-design/api-design/",
+  ));
+
   await writeAuthored("[Back to this track](./index.html)");
   assert.throws(build, buildErrorIncludes("link destination changes across served URLs: ./index.html"));
 
@@ -171,11 +176,13 @@ try {
   await writeAuthored([
     paragraph,
     '<a href={"/learn/absent"}>MDX reference</a>',
+    '<a href={"/learn/system-design/api-design/"}>API design</a>',
     '<a href={"ftp://example.com/source"}>Non-HTTPS reference</a>',
     `<a href={"${relativeReference}"}>Relative MDX reference</a>`,
   ].join("\n\n"), mdxSource);
   assert.throws(build, buildErrorIncludes(
     "unbuilt local destination: /learn/absent",
+    "local destination violates trailingSlash=never: /learn/system-design/api-design/",
     "use HTTPS for web references: ftp://example.com/source",
     `${markdownPath}/index.html#check-section: unbuilt local destination: ${relativeReference}`,
   ));
