@@ -119,20 +119,22 @@ describe("Learning content integrity", () => {
   it("rejects an unknown block instead of silently omitting content", () => {
     expect(() =>
       validateLearningContent(
-        changed((content) =>
-          content.lessons[0].sections[0].blocks.push({ type: "unsupported" }),
-        ),
+        changed((content) => {
+          delete content.lessons[0].contentEntryId;
+          content.lessons[0].sections[0].blocks = [{ type: "unsupported" }];
+        }),
       ),
     ).toThrow("invalid unsupported block");
   });
   it("rejects a source citation on a block that cannot render it", () => {
     const content = changed((draft) => {
-      draft.lessons[0].sections[0].blocks.push({
+      delete draft.lessons[0].contentEntryId;
+      draft.lessons[0].sections[0].blocks = [{
         type: "callout",
         title: "Example",
         text: "A callout with an unsupported citation.",
         source: { title: "Source", href: "https://example.com/" },
-      });
+      }];
     });
     expect(() => validateLearningContent(content)).toThrow(
       "only paragraph blocks can cite a source",

@@ -1,0 +1,16 @@
+---
+import { discovery } from "../content/discovery";
+import { tracks, trackPath } from "../content/site";
+
+interface Props {
+  guideId: string;
+  sectionId: string;
+}
+
+const { guideId, sectionId } = Astro.props;
+const relationships = discovery.caseTracks[guideId as keyof typeof discovery.caseTracks];
+const track = tracks.find((track) =>
+  relationships?.[track.slug as keyof typeof relationships]?.anchor === sectionId
+);
+---
+{track && <a class="text-link case-track-return" href={trackPath(track)}>Explore {track.nav}</a>}

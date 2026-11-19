@@ -8,7 +8,7 @@ The existing `/learn/` routes and internal `lesson`/`learning` identifiers remai
 
 ## Ownership and relationships
 
-`src/content/learning.js` owns the related-resource collections. `src/content/guides.ts` combines the typed guide records and the Astro content collection in `src/content/lessons/`. The resulting catalogue supplies routes, metadata, track discovery, and sitemap eligibility. Each collection has stable, unique kebab-case IDs. The guide files are authored practitioner references, not a scrape of external articles.
+`src/content/learning.js` owns the related-resource collections. `src/content/guides.ts` discovers Markdown and MDX guides through the Astro content collection in `src/content/lessons/`. The resulting catalogue supplies routes, metadata, track discovery, and sitemap eligibility. Each collection has stable, unique kebab-case IDs. The guide files are authored practitioner references, not a scrape of external articles.
 
 | Object | Role |
 | --- | --- |
@@ -25,9 +25,9 @@ Cross-track relevance creates relationships, not copies of the guide. A reusable
 
 ## Guide fields
 
-A guide defines `id`, `path`, `title`, optional `shortTitle`, `description`, `trackId`, `kind`, `publicationStatus`, `format`, `readingMinutes`, `updatedAt`, `introduction`, `objectives`, `prerequisiteConceptIds`, `conceptIds`, `projectIds`, `platformIds`, `publicationIds`, `capabilityIds`, `videoIds`, `relatedGuideIds`, and ordered `sections`.
+A guide’s frontmatter defines `id`, `trackId`, `title`, optional `shortTitle`, `description`, `kind`, `publicationStatus`, `format`, `readingMinutes`, `updatedAt`, `introduction`, `objectives`, relationship ID arrays, and ordered `sectionIds`. Empty relationship arrays can be omitted. The collection schema validates these fields.
 
-Canonical paths use `/learn/<trackId>/<lessonId>`. The guide ID `index` is reserved: its flat `.html` alias would collide with the track document. Both Astro and compatibility builds reject it. A section has a stable `id`, `title`, and blocks. Current prose block types are paragraph, list, callout, code, flow and table. Closed visual blocks are `ads-architecture`, `ads-orchestrator`, `ads-capabilities` and `ads-reporting-reference`. The `reference-downloads` block selects a known collection from `src/content/reference-downloads.js`. Paragraph blocks can carry a source citation. Code and text render through React escaping; content does not inject raw HTML. Section IDs form contents/deep-link anchors and must remain unique within the guide.
+Astro derives the canonical path as `/learn/<trackId>/<id>`. The guide ID `index` is reserved because its flat HTML alias would collide with the track document. Each level-two Markdown heading has one corresponding stable section ID. Keep an ID when renaming a heading, and move it with its section when reordering. The single source file supplies the section titles, contents links, route, primary-track listing, metadata and eligible sitemap entry.
 
 Supported lifecycle rules:
 
@@ -36,13 +36,15 @@ Supported lifecycle rules:
 - Platforms distinguish `research-planned`, `documented`, and `account-verified`, plus `unverified`, `verified`, or `unavailable` account access. Source review alone does not establish account access.
 - Publication and capability links are curated reference relationships, not claims that an article's example and a package are identical or that an integration has been deployed.
 
-To add a standard guide, create one `.ts` file in `src/content/lessons/` and default-export the record with `satisfies Guide` from `src/content/guide-types.ts`. Run `pnpm check`. Its route, primary-track listing, metadata and eligible sitemap entry are automatic. New principles enter Reusable guides, cases enter Worked examples, and platform/reference kinds enter References. Existing curated starting paths, custom actions and cross-track case relationships remain in `discovery.js`; they continue to resolve metadata from the same records. Do not add a navigation entry pointing to a nonexistent guide. Use `pnpm check:authoring` to exercise published, draft and invalid-reference records end to end.
+To add a guide, create one `.md` file in `src/content/lessons/` for prose, or use `.mdx` when it embeds components. Begin the body with a level-two heading after any MDX imports. Run `pnpm check` and `pnpm check:authoring`. New principles enter Reusable guides, cases enter Worked examples, and platform/reference kinds enter References. Existing curated starting paths, custom actions and cross-track relationships remain in `discovery.js`.
 
-## Markdown and MDX pilot
+## Markdown and MDX authoring
 
-[Issue #77](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/77) has two examples in `src/content/lessons/`. [Attribution and Lift](../src/content/lessons/attribution-and-lift.md) uses Markdown headings, links, and a table. [ChatGPT Ads](../src/content/lessons/chatgpt-ads.mdx) embeds the existing architecture walkthrough and references in MDX. The rest of the catalogue uses the typed record format above.
+All eight guides use Markdown or MDX, following the [#77 pilot](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/77). Attribution and Lift, Advertising Platforms, API Design, Verify a Small Code Change, and the checkout-timeout draft use Markdown. ChatGPT Ads, the Advertiser API map and the reporting example use MDX for their existing components and downloads.
 
-Both formats use the validated frontmatter in [the collection schema](../src/content.config.ts). Astro derives the canonical path from `trackId` and `id`. The document starts with a level-two heading after any MDX imports. Keep one stable `sectionIds` entry for each level-two heading, in the same order. Move an ID with its section when reordering and keep the ID when renaming a heading. The single source file supplies the section titles and contents links. Footnotes render with their own links and stay outside the guide contents list.
+Use standard paragraphs, links, lists, tables and fenced code. A code fence can include a caption as JSON-quoted metadata, for example `http title="Status lookup"`. The renderer keeps the language label, caption and keyboard-accessible code region. HTML figures and asides preserve labelled flows and callouts. Footnotes render with their own links and stay outside the guide contents list.
+
+The reporting MDX uses `CaseTrackReturn` at section boundaries to derive return links from the shared track relationships. Component IDs remain stable for reference examples and walkthroughs. Reading components render at build time, and the existing walkthrough enhancement remains scoped to its guide.
 
 The build rejects duplicate IDs and sections without rendered reading content, including sections that contain only editorial comments. Use HTTPS for web references. Links within Harness can target built pages, section fragments, and files such as reference downloads. The build checks local destinations from the guide URL forms allowed by Astro’s resolved `trailingSlash` configuration, including its `.html` and `/index.html` aliases. The current `never` policy rejects non-root trailing-slash links. Links must resolve to the same document, query, and fragment from every form. Use root-relative paths such as `/learn/system-design/api-design` when linking between guides.
 
@@ -79,7 +81,7 @@ Current validation is structural. It does not establish the accuracy of an exter
 
 ## Rendering and metadata
 
-`src/views/LessonPage.tsx` supplies the shared build-time reader: breadcrumbs, desktop contents, native mobile contents, intended outcomes, working context, typed content blocks, related resources, source dates and planned-next-step information. Data drives labels and update dates. Astro owns the shell and `/learn/[trackId]/[id]` routes.
+`src/views/LessonPage.tsx` supplies the shared build-time reader: breadcrumbs, desktop contents, native mobile contents, intended outcomes, working context, rendered Markdown and MDX, related resources, source dates and planned-next-step information. Data drives labels and update dates. Astro owns the shell and `/learn/[trackId]/[id]` routes.
 
 `pnpm build` validates content and emits static Astro HTML into `dist/`. The existing React reading components render only at build time. The native sitemap endpoint includes indexable canonical routes, and the robots endpoint points to it. The build mirrors directory-index HTML to the previous flat `.html` addresses for compatibility; it does not rewrite a client template into pages.
 
