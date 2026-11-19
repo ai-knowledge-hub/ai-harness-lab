@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="580" viewBox="0 0 840 580" role="img" aria-labelledby="title desc">
+<title id="title">The order is confirmed; the agent does not know it yet</title><desc id="desc">Proposed merchant design: submit att-42, payment success, order commit, lost reply, client timeout, then authenticated lookup returning ord-704. Timeout is an observation, not an order-state transition.</desc>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto-start-reverse"><path d="M0 0L9 4.5L0 9" fill="#3b4447"/></marker><marker id="warning" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#a7441e"/></marker></defs>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#20282b}.heading{font-size:23px;font-weight:700}.label{font-size:12px;font-weight:700;letter-spacing:1.2px}.title{font-size:19px;font-weight:700}.body{font-size:16px}.note{font-size:14px;fill:#455155}.line{fill:none;stroke:#3b4447;stroke-width:1.6;marker-end:url(#arrow)}.lost{fill:none;stroke:#a7441e;stroke-width:2;stroke-dasharray:6 5}</style>
+<rect width="840" height="580" fill="#f5f3ed"/>
+<text x="24" y="38" class="heading">The order is confirmed. The agent does not know it yet.</text>
+<text x="24" y="66" class="note">Worked example · fictional merchant API</text>
+<text x="140" y="108" class="title" text-anchor="middle">Agent</text>
+<path d="M140 126V540" stroke="#9ca3a5" stroke-dasharray="4 5"/>
+<text x="440" y="108" class="title" text-anchor="middle">Merchant</text>
+<path d="M440 126V540" stroke="#9ca3a5" stroke-dasharray="4 5"/>
+<text x="700" y="108" class="title" text-anchor="middle">Payment provider</text>
+<path d="M700 126V540" stroke="#9ca3a5" stroke-dasharray="4 5"/>
+<path d="M140 150H436" class="line"/>
+<text x="290" y="140" class="body" text-anchor="middle">10:02:03 · submit att-42</text>
+<path d="M440 208H696" class="line"/>
+<text x="570" y="195" class="body" text-anchor="middle">Request payment</text>
+<path d="M700 267H444" class="line"/>
+<text x="570" y="253" class="body" text-anchor="middle">Payment succeeds</text>
+<rect x="348" y="291" width="184" height="49" fill="#e9e5d8" stroke="#657175"/>
+<text x="440" y="322" class="body" text-anchor="middle">Commit ord-704</text>
+<path d="M440 363H180" class="lost"/>
+<path d="M168 354L186 372M168 372L186 354" stroke="#a7441e" stroke-width="3"/>
+<text x="300" y="351" class="body" text-anchor="middle">Reply lost</text>
+<rect x="35" y="384" width="210" height="49" fill="#fff" stroke="#a7441e"/>
+<text x="140" y="415" class="body" text-anchor="middle">10:02:13 · unknown</text>
+<path d="M140 468H436" class="line"/>
+<text x="290" y="456" class="body" text-anchor="middle">Authenticated status lookup</text>
+<path d="M440 523H144" class="line"/>
+<text x="290" y="510" class="body" text-anchor="middle">Confirmed · ord-704</text>
+<text x="24" y="565" class="note">The timeout changes what the agent knows; it does not undo the merchant’s commit.</text>
+</svg>

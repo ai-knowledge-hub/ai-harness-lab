@@ -193,6 +193,32 @@ html:has(.lesson-page) {
   margin: 30px 0;
   min-width: 0;
 }
+.system-diagram {
+  margin: 32px 0;
+  min-inline-size: 0;
+}
+.system-diagram figcaption {
+  font-weight: 650;
+  color: var(--text);
+}
+.system-diagram .system-diagram-hint {
+  margin-block: 8px 16px;
+  font-size: 14px;
+}
+.system-diagram-viewport {
+  max-inline-size: 100%;
+  overflow-x: auto;
+}
+.system-diagram-viewport:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
+}
+.system-diagram-viewport img {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 760px;
+  block-size: auto;
+}
 .lesson-code figcaption {
   display: flex;
   justify-content: space-between;

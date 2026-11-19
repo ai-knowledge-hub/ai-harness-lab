@@ -5,13 +5,14 @@ import { guideSections } from "../../scripts/markdown-guide-sections.mjs";
 import { codeFenceExamples, ordinaryCodeFences } from "../fixtures/ordinary-code-fences.js";
 
 const baseline = JSON.parse(await readFile(new URL("../fixtures/markdown-migration-baseline.json", import.meta.url), "utf8"));
+const restoration = JSON.parse(await readFile(new URL("../fixtures/checkout-systems-restoration.json", import.meta.url), "utf8"));
 
 for (const width of [390, 1440]) {
   test(`all migrated guides retain reading and accessible code without JavaScript at ${width}px`, async ({ browser, baseURL }, testInfo) => {
     const context = await browser.newContext({ baseURL, javaScriptEnabled: false, viewport: { width, height: 1000 } });
     try {
       const page = await context.newPage();
-      for (const [path, expected] of Object.entries(baseline.routes)) {
+      for (const [path, expected] of Object.entries({ ...baseline.routes, ...restoration.routes })) {
         const response = await page.goto(path);
         expect(response.status()).toBe(200);
         await expect(page.locator("h1")).toBeVisible();

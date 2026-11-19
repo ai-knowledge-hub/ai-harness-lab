@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="760" viewBox="0 0 840 760" role="img" aria-labelledby="title desc">
+<title id="title">Who owns the state?</title><desc id="desc">Responsibility map: business information, advertising and purchase flows are separate. Merchant order records and payment-provider records require reconciliation.</desc>
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto-start-reverse"><path d="M0 0L9 4.5L0 9" fill="#3b4447"/></marker><marker id="warning" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#a7441e"/></marker></defs>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#20282b}.heading{font-size:23px;font-weight:700}.label{font-size:12px;font-weight:700;letter-spacing:1.2px}.title{font-size:19px;font-weight:700}.body{font-size:16px}.note{font-size:14px;fill:#455155}.line{fill:none;stroke:#3b4447;stroke-width:1.6;marker-end:url(#arrow)}.lost{fill:none;stroke:#a7441e;stroke-width:2;stroke-dasharray:6 5}</style>
+<rect width="840" height="760" fill="#f5f3ed"/>
+<text x="24" y="40" class="heading">The marketplace has several owners of truth</text>
+<text x="24" y="68" class="note">A responsibility map · arrows show possible journeys, not internal RPCs</text>
+<text x="24" y="110" class="label">DISCOVERY</text>
+<rect x="24" y="130" width="240" height="100" fill="#ffffff" stroke="#657175"/>
+<text x="40" y="161" class="title">Merchant facts</text>
+<text x="40" y="188" class="body">Products, stock, policies</text>
+<rect x="300" y="130" width="240" height="100" fill="#ffffff" stroke="#657175"/>
+<text x="316" y="161" class="title">Business Hub</text>
+<text x="316" y="188" class="body">Profile and product feed</text>
+<rect x="576" y="130" width="240" height="100" fill="#ffffff" stroke="#657175"/>
+<text x="592" y="161" class="title">Discovery answer</text>
+<text x="592" y="188" class="body">A presented claim</text>
+<path d="M264 180H296" class="line"/>
+<path d="M540 180H572" class="line"/>
+<text x="24" y="268" class="label">ADVERTISING · A SEPARATE SURFACE</text>
+<rect x="24" y="288" width="240" height="100" fill="#ffffff" stroke="#657175"/>
+<text x="40" y="319" class="title">Campaign</text>
+<text x="40" y="346" class="body">Creative, goals, budget</text>
+<rect x="300" y="288" width="240" height="100" fill="#ffffff" stroke="#657175"/>
+<text x="316" y="319" class="title">Ad tools + auction</text>
+<text x="316" y="346" class="body">Retrieve, score, select</text>
+<rect x="576" y="288" width="240" height="100" fill="#ffffff" stroke="#657175"/>
+<text x="592" y="319" class="title">Sponsored placement</text>
+<text x="592" y="346" class="body">Delivery and reporting</text>
+<path d="M264 338H296" class="line"/>
+<path d="M540 338H572" class="line"/>
+<text x="24" y="426" class="label">PURCHASE · AFTER THE SHOPPER CHOOSES</text>
+<rect x="24" y="446" width="240" height="100" fill="#ffffff" stroke="#657175"/>
+<text x="40" y="477" class="title">Shopper approval</text>
+<text x="40" y="504" class="body">Authority for stated terms</text>
+<rect x="300" y="446" width="240" height="100" fill="#ffffff" stroke="#657175"/>
+<text x="316" y="477" class="title">Dot + Wallet</text>
+<text x="316" y="504" class="body">Submit approved purchase</text>
+<rect x="576" y="446" width="240" height="100" fill="#ffffff" stroke="#657175"/>
+<text x="592" y="477" class="title">Merchant checkout</text>
+<text x="592" y="504" class="body">Validate, pay, accept</text>
+<path d="M264 496H296" class="line"/>
+<path d="M540 496H572" class="line"/>
+<rect x="300" y="624" width="240" height="100" fill="#e9e5d8" stroke="#657175"/>
+<text x="316" y="655" class="title">Order record</text>
+<text x="316" y="682" class="body">Accepted order / fulfilment</text>
+<rect x="576" y="624" width="240" height="100" fill="#e9e5d8" stroke="#657175"/>
+<text x="592" y="655" class="title">Payment record</text>
+<text x="592" y="682" class="body">Provider / network / issuer</text>
+<path d="M668 546V580H420V620" class="line"/>
+<path d="M748 546V620" class="line"/>
+<path d="M576 681H544" class="line"/>
+<text x="24" y="648" class="label">SEPARATE</text>
+<text x="24" y="670" class="label">AUTHORITIES</text>
+<text x="302" y="751" class="note">Connect order and payment evidence through reconciliation.</text>
+</svg>
