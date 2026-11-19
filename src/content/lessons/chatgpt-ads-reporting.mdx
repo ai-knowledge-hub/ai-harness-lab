@@ -1,0 +1,163 @@
+---
+id: "chatgpt-ads-reporting"
+title: "How to collect ChatGPT Ads reports"
+shortTitle: "Reporting example"
+description: "Request campaign results, check which data you received and show readers what is missing."
+trackId: "system-design"
+kind: "case"
+publicationStatus: "draft"
+format: "Worked example"
+readingMinutes: 11
+updatedAt: "2026-11-09"
+objectives:
+  - "Turn a question about daily campaign spend into an Insights request."
+  - "Collect the result in batches and show which rows, dates, or metrics are missing."
+  - "Decide whether the result is ready for a decision or safe to pass to an agent."
+prerequisiteConceptIds:
+  - "http-basics"
+conceptIds:
+  - "api-contracts"
+  - "reporting-evidence"
+projectIds:
+  - "advertising-reporting"
+  - "local-reporting-adapters"
+  - "live-advertising-reporting"
+platformIds:
+  - "chatgpt-ads"
+publicationIds:
+  - "christmas-pilot"
+capabilityIds:
+  - "auth-review"
+videoIds:
+  - "api-design-walkthrough"
+relatedGuideIds:
+  - "api-design"
+  - "chatgpt-ads-apis"
+  - "chatgpt-ads"
+  - "advertising-platforms"
+introduction: "Build a read-only report of daily spend by campaign. Return the rows you received, their totals, and enough detail to tell whether the report is complete and current. Try the collector locally with fictional data. Live setup is in development and requires verified advertiser API access."
+sectionIds:
+  - scope-the-operation
+  - provider-request
+  - complete-retrieval
+  - application-result
+  - report-outcomes
+  - interpret-metrics
+  - bounded-agent-tool
+  - reference-downloads
+---
+
+import { ReferenceDownloads } from "../../components/AdsReference.jsx";
+import { AdsReportingReference } from "../../components/AdsReportingReference.jsx";
+import CaseTrackReturn from "../../components/CaseTrackReturn.astro";
+
+## Decide what the report should cover
+
+Start with results by campaign and day for one ad account you have permission to use. Choose the dates and metrics, then keep the account’s time zone, currency and the time you collected the data with the report. A live request needs separate Advertiser API access. [Reporting definitions and data updates](https://developers.openai.com/ads/reporting)
+
+<figure class="lesson-flow">
+<figcaption>Harness example of how to collect and save a report</figcaption>
+<ol>
+<li><span class="track-number">01</span><span>Request data from your server</span></li>
+<li><span class="track-number">02</span><span>Collect results in batches</span></li>
+<li><span class="track-number">03</span><span>Save data and progress</span></li>
+<li><span class="track-number">04</span><span>Show results and gaps</span></li>
+</ol>
+</figure>
+
+Reports show totals for the campaigns or ads you ask about. Individual conversations, the ads considered for them and their ranking scores stay inside the platform. Keep the Ads API key, a secret your software uses to sign in, on your server. [Authentication and account scope](https://developers.openai.com/ads/api-reference/authentication)
+
+Define the result before choosing the interface. Return the requested scope, the scope actually covered, and a status with the reason collection stopped. A subtotal should identify the rows it covers so the caller can tell whether it answers the original question.
+
+<CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="scope-the-operation" />
+
+## Ask Insights for daily campaign results
+
+Insights is the part of the Ads API that returns performance reports. This request asks for one row per campaign per day, with the campaign ID, date, impressions, clicks and spend. [Insights request reference](https://developers.openai.com/ads/api-reference/insights)
+
+```http title="Example API request · sample dates"
+GET https://api.ads.openai.com/v1/ad_account/insights
+
+aggregation_level=campaign
+time_granularity=daily
+fields[]=metadata.readable_time
+fields[]=campaign.id
+fields[]=campaign.impressions
+fields[]=campaign.clicks
+fields[]=campaign.spend
+time_ranges[]={"type":"unix_range","start":1793491200,"end":1793577600}
+
+# Query values must be URL-encoded.
+# Authorisation is supplied by your server, never this page.
+```
+
+This request covers 1 November 2026 in UTC, the time standard used for the example. The end time is midnight at the start of 2 November, so the request excludes that day. Check the account’s reporting time zone if you want a local calendar day. The download labels OpenAI’s request fields and our own report fields separately.
+
+<CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="provider-request" />
+
+## Check that you have every batch
+
+| Interface | How to get the full result |
+| --- | --- |
+| General Insights | Insights sends results in batches called pages. Save first\_id, last\_id and has\_more. If has\_more is true, send the same request with after set to the last\_id from that page. Stop when has\_more is false. |
+| Dedicated conversion report | A request to POST /conversions/insights can return error 413 if the report is too large. In that case you get no rows or marker for a next page. Split the request by campaign or other ID, or use shorter date ranges that do not overlap. |
+| Local sample collector | Track the page markers already seen and the campaign and date pairs already accepted. Stop on a repeated marker or duplicate row and retain the earlier valid batches. |
+
+Pagination means asking for the next page of the same result. Splitting an oversized conversion report means making several smaller requests and combining their results. Use the rules for the report you asked for. [Reporting limits](https://developers.openai.com/ads/reporting)
+
+<CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="complete-retrieval" />
+
+## Show what your report is missing
+
+```json title="Sample report from Harness · made-up data"
+{
+  "reference_kind": "illustrative-reporting-envelope",
+  "account_ref": "sample-account",
+  "status": "partial",
+  "coverage": {"completed_partitions": 2, "expected_partitions": 3},
+  "missing_partitions": ["campaign-group-c"],
+  "stop_reason": "retry_budget_exhausted"
+}
+```
+
+In this example, two of three batches are ready and the remaining batch is named. Give temporary failures a bounded retry budget. If access is denied or the results cannot be validated, stop and return the batches you already accepted with the reason the report is incomplete.
+
+To resume across runs in production, save the original request, accepted batches, and the next cursor. Use the campaign and date to avoid counting a row twice within this report. When figures arrive late, reconcile the newer snapshot for the same scope instead of adding both snapshots together.
+
+<aside class="lesson-note">
+
+### Try a retry or a partial run
+
+The local collector can retry a simulated temporary failure and return accepted rows when it stops early. Each invocation starts a fresh run. Durable checkpoints and live deployment are in development.
+
+</aside>
+
+<CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="application-result" />
+
+## Can you use this report?
+
+<AdsReportingReference id="chatgpt-ads-reporting-report-outcomes-0" />
+
+<CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="report-outcomes" />
+
+## Interpret credited conversions
+
+Before comparing reports, check that the account, dates, time zone, currency, and attribution settings match. Check coverage and freshness too. An unavailable conversion count represents missing information. A newer snapshot may have a different count for the same dates.
+
+An attributed conversion is an action the platform credits to an ad under its reporting rules. To estimate how many additional sales the campaign caused, define the outcome and compare it with a credible estimate of what would have happened without the campaign. A suitable holdout can provide that comparison.
+
+<CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="interpret-metrics" />
+
+## Give an agent a bounded reporting tool
+
+Give the tool one job: read a campaign report within an explicit scope. For a live design, the service should enforce account access and request limits. Return the scope, status, coverage, and freshness alongside the values so an agent can explain an incomplete result before recommending a decision.
+
+The local MCP tool reads the bundled fictional reports. Its inputs select a scenario and a page limit. Try the partial scenario and check whether the agent can explain which totals are available and why collection stopped. The collector and adapter run instructions are below.
+
+<CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="bounded-agent-tool" />
+
+## Reference downloads
+
+<ReferenceDownloads collection="reporting" />
+
+<CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="reference-downloads" />

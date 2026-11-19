@@ -41,6 +41,7 @@ export default defineConfig({
   devToolbar: { enabled: false },
   vite: { build: { assetsInlineLimit: 0 } },
   markdown: {
+    syntaxHighlight: false,
     processor: satteri({ hastPlugins: [guideSections], features: { smartPunctuation: false } }),
   },
   integrations: [

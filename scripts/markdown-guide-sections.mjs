@@ -37,6 +37,31 @@ function guideTable(node, context) {
   });
 }
 
+function guideCode(node, context) {
+  const code = node.children.find((child) => child.tagName === "code");
+  if (!code) return;
+  const metadata = code?.data;
+  const hasTitle = metadata?.meta?.startsWith("title=");
+  const label = hasTitle
+    ? JSON.parse(metadata.meta.slice("title=".length))
+    : metadata?.lang ? `${metadata.lang} code example` : "Code example";
+  if (typeof label !== "string" || !label.trim()) throw new Error("Code fence title must be nonempty text");
+  context.replaceNode(node, {
+    type: "element",
+    tagName: "figure",
+    properties: { className: ["lesson-code"] },
+    children: [
+      ...(hasTitle ? [{
+        type: "element",
+        tagName: "figcaption",
+        properties: {},
+        children: [text(label), { type: "element", tagName: "span", properties: {}, children: [text(metadata.lang)] }],
+      }] : []),
+      { ...node, properties: { ...node.properties, tabIndex: 0, role: "region", ariaLabel: label } },
+    ],
+  });
+}
+
 // Keep the same document structure and fragment IDs as the typed guide renderer.
 export function guideSections({ data, fileURL }) {
   const ids = data.astro?.frontmatter?.sectionIds;
@@ -44,7 +69,19 @@ export function guideSections({ data, fileURL }) {
 
   return {
     name: "harness-guide-sections",
-    element: { filter: ["table"], visit: guideTable },
+    element: [
+      { filter: ["table"], visit: guideTable },
+      { filter: ["pre"], visit: guideCode },
+      { filter: ["ul"], visit: (node, context) => context.setProperty(node, "className", ["lesson-list"]) },
+      {
+        filter: ["a"],
+        visit(node, context) {
+          if (context.parent(node)?.tagName === "p" && node.properties.href?.startsWith("https://")) {
+            context.setProperty(node, "className", ["source-citation"]);
+          }
+        },
+      },
+    ],
     before(root, context) {
       const children = [];
       let section;

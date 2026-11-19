@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readFile, writeFile, unlink, access } from "node:fs/promises";
 import { JSDOM } from "jsdom";
+import { codeFenceExamples, ordinaryCodeFences } from "../tests/fixtures/ordinary-code-fences.js";
 
 const source = "src/content/lessons/migration-authoring-check.ts";
 const markdownSource = "src/content/lessons/markdown-authoring-check.md";
@@ -49,6 +50,17 @@ const buildErrorIncludes = (...messages) => (error) => {
   for (const message of messages) assert.ok(output.includes(message), output);
   return true;
 };
+function checkOrdinaryCodeFences(document) {
+  const blocks = [...document.querySelectorAll("#check-section pre")];
+  assert.equal(blocks.length, codeFenceExamples.length);
+  for (const [index, pre] of blocks.entries()) {
+    assert.equal(pre.parentElement.className, "lesson-code");
+    assert.equal(pre.tabIndex, 0);
+    assert.equal(pre.getAttribute("role"), "region");
+    assert.equal(pre.getAttribute("aria-label"), codeFenceExamples[index].label);
+    assert.equal(pre.querySelector("code").textContent, codeFenceExamples[index].code + "\n");
+  }
+}
 let created = false;
 try {
   await writeGuide(); created = true; build();
@@ -106,6 +118,9 @@ try {
   assert.equal(markdownPage.querySelector('link[rel="canonical"]').href, "https://harness.ai-knowledge-hub.org" + markdownPath);
   assert.ok((await html("sitemap.xml")).includes(markdownPath));
   assert.ok(new JSDOM(await html("learn/software-production/index.html")).window.document.querySelector(`a[href="${markdownPath}"]`));
+
+  await writeAuthored(ordinaryCodeFences); build();
+  checkOrdinaryCodeFences(new JSDOM(await html(`${markdownPath.slice(1)}/index.html`)).window.document);
 
   markdown.publicationStatus = "draft";
   await writeAuthored(); build();
@@ -196,6 +211,9 @@ try {
   assert.equal(mdxPage.querySelector('#check-section a[href="#check-section"]').textContent, "MDX reference");
   assert.ok(mdxPage.querySelector("[data-footnotes]"));
   assert.equal(mdxPage.querySelectorAll('nav[aria-label="Guide contents"] a').length, 2);
+
+  await writeAuthored(ordinaryCodeFences, mdxSource); build();
+  checkOrdinaryCodeFences(new JSDOM(await html(`${markdownPath.slice(1)}/index.html`)).window.document);
 
   console.log("Typed, Markdown and MDX guides passed the authoring checks, including draft eligibility, rendered links and IDs, readable sections and footnotes.");
 } finally {
