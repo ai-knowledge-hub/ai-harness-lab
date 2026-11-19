@@ -33,9 +33,9 @@ const paragraph = "Keep the request identity with its completed result.";
 const footnote = "A note adds context.[^source]\n\n[^source]: Footnote text.";
 const validLinks = [
   "[This section](#check-section)",
-  "[A relative HTML alias](./migration-authoring-check.html#identify-the-request)",
+  "[An HTML alias](/learn/software-production/migration-authoring-check.html#identify-the-request)",
   "[An absolute guide URL](https://harness.ai-knowledge-hub.org/learn/measurement-ml/attribution-and-lift/#read-the-results)",
-  "[A download](/references/chatgpt-ads/v1/README.md)",
+  "[A relative download](../../../references/chatgpt-ads/v1/README.md)",
   "[A citation](https://example.com/source)",
 ].join(" ");
 const authoredFiles = new Set();
@@ -141,14 +141,20 @@ try {
   await writeAuthored([
     "[Missing route](/learn/software-production/missing-route#missing)",
     "[Missing fragment](#missing-fragment)",
-    "[Missing cross-guide fragment](./migration-authoring-check.html#missing-target)",
+    "[Missing cross-guide fragment](/learn/software-production/migration-authoring-check.html#missing-target)",
     "[Insecure citation](http://example.com/source)",
   ].join(" "));
   assert.throws(build, buildErrorIncludes(
     "unbuilt local destination: /learn/software-production/missing-route#missing",
     "missing local fragment: #missing-fragment",
-    "missing local fragment: ./migration-authoring-check.html#missing-target",
+    "missing local fragment: /learn/software-production/migration-authoring-check.html#missing-target",
     "use HTTPS for web references: http://example.com/source",
+  ));
+
+  const relativeReference = "../system-design/api-design";
+  await writeAuthored(`[Cross-track guide](${relativeReference})`);
+  assert.throws(build, buildErrorIncludes(
+    `${markdownPath}/index.html#check-section: unbuilt local destination: ${relativeReference}`,
   ));
 
   await writeAuthored("<!-- Editorial TODO -->");
@@ -163,10 +169,12 @@ try {
     paragraph,
     '<a href={"/learn/absent"}>MDX reference</a>',
     '<a href={"ftp://example.com/source"}>Non-HTTPS reference</a>',
+    `<a href={"${relativeReference}"}>Relative MDX reference</a>`,
   ].join("\n\n"), mdxSource);
   assert.throws(build, buildErrorIncludes(
     "unbuilt local destination: /learn/absent",
     "use HTTPS for web references: ftp://example.com/source",
+    `${markdownPath}/index.html#check-section: unbuilt local destination: ${relativeReference}`,
   ));
 
   await writeAuthored(`${paragraph}\n\n<a href={"#check-section"}>MDX reference</a>\n\n${footnote}`, mdxSource);

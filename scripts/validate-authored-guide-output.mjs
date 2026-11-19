@@ -19,11 +19,10 @@ function duplicateIds(document) {
   return duplicates;
 }
 
-async function linkError(link, origin, files, readPage) {
-  const href = link.getAttribute("href");
+async function linkError(href, base, origin, files, readPage) {
   let target;
   try {
-    target = new URL(href, link.baseURI);
+    target = new URL(href, base);
   } catch {
     return `invalid URL ${JSON.stringify(href)}`;
   }
@@ -62,13 +61,13 @@ export async function validateAuthoredGuideOutput(output, origin) {
   }
 
   const pages = new Map();
-  const readPage = async (file, html) => {
-    if (!pages.has(file)) {
-      const route = file.replace(/\/index\.html$/, "") || "/";
-      const dom = new JSDOM(html ?? await readFile(files.get(file), "utf8"), { url: new URL(route, origin).href });
-      pages.set(file, dom);
+  const readPage = async (file, html, address = file.replace(/\/index\.html$/, "") || "/") => {
+    const url = new URL(address, origin).href;
+    if (!pages.has(url)) {
+      const contents = html ?? await readFile(files.get(file), "utf8");
+      pages.set(url, new JSDOM(contents, { url }));
     }
-    return pages.get(file).window.document;
+    return pages.get(url).window.document;
   };
   const errors = [];
 
@@ -82,14 +81,31 @@ export async function validateAuthoredGuideOutput(output, origin) {
       if (!article) continue;
 
       const path = new URL(document.URL).pathname;
+      const directory = file.slice(0, -"index.html".length);
+      const addresses = new Set([path, file, directory]);
+      const flatAlias = `${path}.html`;
+      if (files.has(flatAlias)) addresses.add(flatAlias);
+
+      // Parse at each address so the document's base reflects how it was opened.
+      const bases = await Promise.all([...addresses].map(async (address) => ({
+        address,
+        base: (await readPage(file, html, address)).baseURI,
+      })));
       for (const id of duplicateIds(document)) {
         errors.push(`${path}: duplicate rendered id ${JSON.stringify(id)}`);
       }
       for (const section of article.querySelectorAll(":scope > section.lesson-section")) {
         if (!hasReadingContent(section)) errors.push(`${path}#${section.id}: guide section is empty`);
         for (const link of section.querySelectorAll("a[href]")) {
-          const error = await linkError(link, origin, files, readPage);
-          if (error) errors.push(`${path}#${section.id}: ${error}`);
+          const href = link.getAttribute("href");
+          const reported = new Set();
+          for (const { address, base } of bases) {
+            const error = await linkError(href, base, origin, files, readPage);
+            if (error && !reported.has(error)) {
+              errors.push(`${address}#${section.id}: ${error}`);
+              reported.add(error);
+            }
+          }
         }
       }
     }
