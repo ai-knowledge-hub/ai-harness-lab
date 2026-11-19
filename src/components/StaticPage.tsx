@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { StaticRouter } from "react-router-dom";
 import { HomePage } from "../views/HomePage";
 import { TrackPage } from "../views/TrackPage";
@@ -13,14 +14,14 @@ type Page = { kind: "home" | "control" | "examples" }
 
 // React is used only at build time for these existing reading components.
 // The Astro layout owns the shell; no router or renderer is sent to readers.
-export function StaticPage({ path, page }: {
-  path: string; page: Page;
+export function StaticPage({ path, page, children }: {
+  path: string; page: Page; children?: ReactNode;
 }) {
   return (
     <StaticRouter location={path}>
       {page.kind === "home" && <HomePage />}
       {page.kind === "track" && <TrackPage track={page.track} />}
-      {page.kind === "guide" && <LessonPage lesson={page.guide} />}
+      {page.kind === "guide" && <LessonPage lesson={page.guide}>{children}</LessonPage>}
       {page.kind === "control" && <PatternsPage />}
       {page.kind === "examples" && <ExamplesPage />}
     </StaticRouter>

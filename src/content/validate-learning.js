@@ -110,8 +110,7 @@ export function validateLearningContent(content = learningContent) {
       anchors.add(section.id);
       if (
         !text(section.title) ||
-        !Array.isArray(section.blocks) ||
-        !section.blocks.length
+        (lesson.contentEntryId === undefined && (!Array.isArray(section.blocks) || !section.blocks.length))
       )
         fail(`${label}/${section.id}: incomplete section`);
       for (const block of section.blocks ?? []) {

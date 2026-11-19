@@ -21,11 +21,12 @@ export type GuideBlock =
   | { type: "paragraph"; text: string; source?: SourceCitation }
   | (BlockWithoutSource & { source?: never });
 
-export type GuideSection = {
+export type GuideHeading = {
   id: string;
   title: string;
-  blocks: GuideBlock[];
 };
+
+export type GuideSection = GuideHeading & { blocks: GuideBlock[] };
 
 export type Guide = {
   id: string;
@@ -49,5 +50,7 @@ export type Guide = {
   capabilityIds: string[];
   videoIds: string[];
   relatedGuideIds: string[];
-  sections: GuideSection[];
-};
+} & (
+  | { contentEntryId?: never; sections: GuideSection[] }
+  | { contentEntryId: string; sections: GuideHeading[] }
+);

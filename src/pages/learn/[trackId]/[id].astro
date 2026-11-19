@@ -1,4 +1,5 @@
 ---
+import { getEntry, render } from "astro:content";
 import SiteLayout from "../../../layouts/SiteLayout.astro";
 import { StaticPage } from "../../../components/StaticPage";
 import Architecture from "../../../components/Architecture.astro";
@@ -9,9 +10,14 @@ export function getStaticPaths() {
   return lessons.map((guide) => ({ params: { trackId: guide.trackId, id: guide.id }, props: { guide } }));
 }
 const { guide } = Astro.props;
-const hasArchitecture = guide.sections.some(({ blocks }) => blocks.some((block) => block.type === "ads-architecture"));
+const entry = guide.contentEntryId === undefined ? undefined : await getEntry("authoredGuides", guide.contentEntryId);
+if (guide.contentEntryId !== undefined && !entry) throw new Error(`Missing guide source: ${guide.contentEntryId}`);
+const Content = entry && (await render(entry)).Content;
+const hasArchitecture = guide.contentEntryId === undefined && guide.sections.some(({ blocks }) => blocks.some((block) => block.type === "ads-architecture"));
 ---
 <SiteLayout path={guide.path}>
-  <StaticPage path={guide.path} page={{ kind: "guide", guide }} />
+  <StaticPage path={guide.path} page={{ kind: "guide", guide }}>
+    {Content && <Content />}
+  </StaticPage>
   {hasArchitecture && <Architecture />}
 </SiteLayout>

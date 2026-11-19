@@ -1,5 +1,10 @@
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
+import mdx from "@astrojs/mdx";
+import { satteri } from "@astrojs/markdown-satteri";
+import { guideSections } from "./scripts/markdown-guide-sections.mjs";
+import { validateAuthoredGuideOutput } from "./scripts/validate-authored-guide-output.mjs";
+import { site } from "./src/content/site.js";
 import { copyFile, readdir } from "node:fs/promises";
 import { constants } from "node:fs";
 import { join, relative } from "node:path";
@@ -24,8 +29,10 @@ async function mirrorHtml(directory, root = directory) {
   }
 }
 
+let trailingSlash;
+
 export default defineConfig({
-  site: "https://harness.ai-knowledge-hub.org",
+  site: site.origin,
   output: "static",
   // Preserve the established inline spacing across the Astro 7 compiler change.
   compressHTML: true,
@@ -33,8 +40,24 @@ export default defineConfig({
   build: { format: "directory" },
   devToolbar: { enabled: false },
   vite: { build: { assetsInlineLimit: 0 } },
+  markdown: {
+    processor: satteri({ hastPlugins: [guideSections], features: { smartPunctuation: false } }),
+  },
   integrations: [
     react(),
-    { name: "legacy-html-addresses", hooks: { "astro:build:done": ({ dir }) => mirrorHtml(fileURLToPath(dir)) } },
+    mdx(),
+    {
+      name: "harness-static-output",
+      hooks: {
+        "astro:config:done": ({ config }) => {
+          trailingSlash = config.trailingSlash;
+        },
+        "astro:build:done": async ({ dir }) => {
+          const output = fileURLToPath(dir);
+          await mirrorHtml(output);
+          await validateAuthoredGuideOutput(output, site.origin, trailingSlash);
+        },
+      },
+    },
   ],
 });
