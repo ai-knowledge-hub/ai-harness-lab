@@ -96,7 +96,7 @@ for (const [path, expected] of Object.entries(markdownBaseline.routes)) {
   assert.deepEqual([...main.querySelectorAll("a[href]")].map((link) => link.getAttribute("href")), expected.hrefs, `${path}: pre-migration links`);
   for (const id of expected.ids) assert.ok(document.getElementById(id), `${path}: pre-migration anchor ${id}`);
   assert.deepEqual([...main.querySelectorAll("pre code")].map((code) => code.textContent.trimEnd()), expected.code, `${path}: pre-migration code`);
-  for (const pre of main.querySelectorAll(".lesson-code pre")) {
+  for (const pre of main.querySelectorAll("pre")) {
     assert.equal(pre.tabIndex, 0, `${path}: keyboard-accessible code`);
     assert.ok(pre.getAttribute("aria-label"), `${path}: named code`);
   }

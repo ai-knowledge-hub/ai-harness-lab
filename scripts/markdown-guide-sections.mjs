@@ -39,21 +39,24 @@ function guideTable(node, context) {
 
 function guideCode(node, context) {
   const code = node.children.find((child) => child.tagName === "code");
+  if (!code) return;
   const metadata = code?.data;
-  if (!metadata?.meta?.startsWith("title=")) return;
-  const label = JSON.parse(metadata.meta.slice("title=".length));
+  const hasTitle = metadata?.meta?.startsWith("title=");
+  const label = hasTitle
+    ? JSON.parse(metadata.meta.slice("title=".length))
+    : metadata?.lang ? `${metadata.lang} code example` : "Code example";
   if (typeof label !== "string" || !label.trim()) throw new Error("Code fence title must be nonempty text");
   context.replaceNode(node, {
     type: "element",
     tagName: "figure",
     properties: { className: ["lesson-code"] },
     children: [
-      {
+      ...(hasTitle ? [{
         type: "element",
         tagName: "figcaption",
         properties: {},
         children: [text(label), { type: "element", tagName: "span", properties: {}, children: [text(metadata.lang)] }],
-      },
+      }] : []),
       { ...node, properties: { ...node.properties, tabIndex: 0, role: "region", ariaLabel: label } },
     ],
   });

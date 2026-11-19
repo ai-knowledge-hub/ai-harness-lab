@@ -42,7 +42,7 @@ To add a guide, create one `.md` file in `src/content/lessons/` for prose, or us
 
 All eight guides use Markdown or MDX, following the [#77 pilot](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/77). Attribution and Lift, Advertising Platforms, API Design, Verify a Small Code Change, and the checkout-timeout draft use Markdown. ChatGPT Ads, the Advertiser API map and the reporting example use MDX for their existing components and downloads.
 
-Use standard paragraphs, links, lists, tables and fenced code. A code fence can include a caption as JSON-quoted metadata, for example `http title="Status lookup"`. The renderer keeps the language label, caption and keyboard-accessible code region. HTML figures and asides preserve labelled flows and callouts. Footnotes render with their own links and stay outside the guide contents list.
+Use standard paragraphs, links, lists, tables and fenced code. All code fences get a scrollable, keyboard-accessible region, including fences without a language or caption. A code fence can include a caption as JSON-quoted metadata, for example `http title="Status lookup"`. The renderer keeps the language label and caption; untitled fences use the language or “Code example” as their accessible name. HTML figures and asides preserve labelled flows and callouts. Footnotes render with their own links and stay outside the guide contents list.
 
 The reporting MDX uses `CaseTrackReturn` at section boundaries to derive return links from the shared track relationships. Component IDs remain stable for reference examples and walkthroughs. Reading components render at build time, and the existing walkthrough enhancement remains scoped to its guide.
 
