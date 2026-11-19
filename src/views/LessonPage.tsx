@@ -116,7 +116,11 @@ export function LessonPage({ lesson, children }: { lesson: Guide; children?: Rea
             Back to the track
           </Link>
         </aside>
-        <article className="lesson-article" aria-labelledby="lesson-title">
+        <article
+          className="lesson-article"
+          aria-labelledby="lesson-title"
+          data-authored-guide={lesson.contentEntryId === undefined ? undefined : ""}
+        >
           <header className="lesson-header">
             <p className="eyebrow">
               {track.title} · {lesson.format}

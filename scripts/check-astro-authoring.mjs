@@ -5,7 +5,8 @@ import { JSDOM } from "jsdom";
 
 const source = "src/content/lessons/migration-authoring-check.ts";
 const markdownSource = "src/content/lessons/markdown-authoring-check.md";
-for (const file of [source, markdownSource]) {
+const mdxSource = "src/content/lessons/markdown-authoring-check.mdx";
+for (const file of [source, markdownSource, mdxSource]) {
   try { await access(file); throw new Error(`Refusing to overwrite ${file}`); }
   catch (error) { if (error.code !== "ENOENT") throw error; }
 }
@@ -27,18 +28,28 @@ const html = (file) => readFile(`dist/${file}`, "utf8");
 const { sections, path: _, ...metadata } = guide;
 const markdown = { ...metadata, id: "markdown-authoring-check", sectionIds: ["check-section"] };
 const markdownPath = `/learn/${markdown.trackId}/${markdown.id}`;
-const writeMarkdown = () => writeFile(markdownSource, [
-  "---",
-  ...Object.entries(markdown).map(([key, value]) => `${key}: ${JSON.stringify(value)}`),
-  "---",
-  "",
-  "## Keep the reference stable",
-  "",
-  "Keep the request identity with its completed result.",
-  "",
-].join("\n"));
+const heading = "## Keep the reference stable";
+const paragraph = "Keep the request identity with its completed result.";
+const footnote = "A note adds context.[^source]\n\n[^source]: Footnote text.";
+const validLinks = [
+  "[This section](#check-section)",
+  "[A relative HTML alias](./migration-authoring-check.html#identify-the-request)",
+  "[An absolute guide URL](https://harness.ai-knowledge-hub.org/learn/measurement-ml/attribution-and-lift/#read-the-results)",
+  "[A download](/references/chatgpt-ads/v1/README.md)",
+  "[A citation](https://example.com/source)",
+].join(" ");
+const authoredFiles = new Set();
+async function writeAuthored(body = [paragraph, validLinks, footnote].join("\n\n"), file = markdownSource) {
+  const frontmatter = Object.entries(markdown).map(([key, value]) => `${key}: ${JSON.stringify(value)}`);
+  await writeFile(file, ["---", ...frontmatter, "---", "", heading, "", body, ""].join("\n"));
+  authoredFiles.add(file);
+}
+const buildErrorIncludes = (...messages) => (error) => {
+  const output = String(error.stdout) + String(error.stderr);
+  for (const message of messages) assert.ok(output.includes(message), output);
+  return true;
+};
 let created = false;
-let createdMarkdown = false;
 try {
   await writeGuide(); created = true; build();
   const page = new JSDOM(await html(`${path.slice(1)}/index.html`)).window.document;
@@ -82,45 +93,92 @@ try {
   guide.prerequisiteConceptIds = [];
   await writeGuide();
 
-  await writeMarkdown();
-  createdMarkdown = true;
+  await writeAuthored();
   build();
   const markdownPage = new JSDOM(await html(`${markdownPath.slice(1)}/index.html`)).window.document;
   assert.match(markdownPage.querySelector('a[href="#check-section"]').textContent, /Keep the reference stable/);
   assert.equal(markdownPage.querySelector("#check-section > h2").id, "check-section-title");
-  assert.equal(markdownPage.querySelector("#check-section > p").textContent.trim(), "Keep the request identity with its completed result.");
+  assert.equal(markdownPage.querySelector("#check-section > p").textContent.trim(), paragraph);
+  assert.ok(markdownPage.querySelector("[data-footnotes]"));
+  for (const contents of markdownPage.querySelectorAll('nav[aria-label="Guide contents"]')) {
+    assert.deepEqual([...contents.querySelectorAll("a")].map((link) => link.hash), ["#check-section"]);
+  }
   assert.equal(markdownPage.querySelector('link[rel="canonical"]').href, "https://harness.ai-knowledge-hub.org" + markdownPath);
   assert.ok((await html("sitemap.xml")).includes(markdownPath));
   assert.ok(new JSDOM(await html("learn/software-production/index.html")).window.document.querySelector(`a[href="${markdownPath}"]`));
 
   markdown.publicationStatus = "draft";
-  await writeMarkdown(); build();
+  await writeAuthored(); build();
   const markdownDraft = new JSDOM(await html(`${markdownPath.slice(1)}/index.html`)).window.document;
   assert.equal(markdownDraft.querySelector('meta[name="robots"]').content, "noindex, follow");
   assert.ok(!(await html("sitemap.xml")).includes(markdownPath));
 
   markdown.readingMinutes = 0;
-  await writeMarkdown();
+  await writeAuthored();
   assert.throws(build, (error) => /readingMinutes/.test(String(error.stdout) + String(error.stderr)));
   markdown.readingMinutes = 3;
 
   markdown.id = guide.id;
-  await writeMarkdown();
+  await writeAuthored();
   assert.throws(build, (error) => /duplicate path/.test(String(error.stdout) + String(error.stderr)));
   markdown.id = "markdown-authoring-check";
 
   markdown.relatedGuideIds = ["missing-guide"];
-  await writeMarkdown();
+  await writeAuthored();
   assert.throws(build, (error) => /unknown lessons reference missing-guide/.test(String(error.stdout) + String(error.stderr)));
   markdown.relatedGuideIds = [];
 
   markdown.sectionIds.push("missing-section");
-  await writeMarkdown();
+  await writeAuthored();
   assert.throws(build, (error) => /expected a heading for every section ID/.test(String(error.stdout) + String(error.stderr)));
 
-  console.log("Typed and Markdown guides created their routes, anchors, metadata, track entries and sitemap entries. Drafts, invalid metadata, mixed-format collisions and invalid references were checked.");
+  markdown.sectionIds.pop();
+  markdown.publicationStatus = "published";
+
+  await writeAuthored(`${paragraph}\n\n### Check section\n\nProse.\n\n### Check section title\n\nMore prose.`);
+  assert.throws(build, buildErrorIncludes('duplicate rendered id "check-section"', 'duplicate rendered id "check-section-title"'));
+
+  await writeAuthored([
+    "[Missing route](/learn/software-production/missing-route#missing)",
+    "[Missing fragment](#missing-fragment)",
+    "[Missing cross-guide fragment](./migration-authoring-check.html#missing-target)",
+    "[Insecure citation](http://example.com/source)",
+  ].join(" "));
+  assert.throws(build, buildErrorIncludes(
+    "unbuilt local destination: /learn/software-production/missing-route#missing",
+    "missing local fragment: #missing-fragment",
+    "missing local fragment: ./migration-authoring-check.html#missing-target",
+    "use HTTPS for web references: http://example.com/source",
+  ));
+
+  await writeAuthored("<!-- Editorial TODO -->");
+  assert.throws(build, buildErrorIncludes("#check-section: guide section is empty"));
+
+  await unlink(markdownSource);
+  authoredFiles.delete(markdownSource);
+  await writeAuthored("{/* Editorial TODO */}\n\n{null}", mdxSource);
+  assert.throws(build, buildErrorIncludes("#check-section: guide section is empty"));
+
+  await writeAuthored([
+    paragraph,
+    '<a href={"/learn/absent"}>MDX reference</a>',
+    '<a href={"ftp://example.com/source"}>Non-HTTPS reference</a>',
+  ].join("\n\n"), mdxSource);
+  assert.throws(build, buildErrorIncludes(
+    "unbuilt local destination: /learn/absent",
+    "use HTTPS for web references: ftp://example.com/source",
+  ));
+
+  await writeAuthored(`${paragraph}\n\n<a href={"#check-section"}>MDX reference</a>\n\n${footnote}`, mdxSource);
+  build();
+  const mdxPage = new JSDOM(await html(`${markdownPath.slice(1)}/index.html`)).window.document;
+  assert.equal(mdxPage.querySelector('#check-section a[href="#check-section"]').textContent, "MDX reference");
+  assert.ok(mdxPage.querySelector("[data-footnotes]"));
+  assert.equal(mdxPage.querySelectorAll('nav[aria-label="Guide contents"] a').length, 2);
+
+  console.log("Typed, Markdown and MDX guides passed the authoring checks, including draft eligibility, rendered links and IDs, readable sections and footnotes.");
 } finally {
-  if (createdMarkdown) await unlink(markdownSource);
+  for (const file of authoredFiles) await unlink(file);
   if (created) await unlink(source);
-  if (created || createdMarkdown) build();
+  if (created || authoredFiles.size) build();
 }

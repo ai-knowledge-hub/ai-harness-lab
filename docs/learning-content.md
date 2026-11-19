@@ -42,7 +42,9 @@ To add a standard guide, create one `.ts` file in `src/content/lessons/` and def
 
 [Issue #77](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/77) has two examples in `src/content/lessons/`. [Attribution and Lift](../src/content/lessons/attribution-and-lift.md) uses Markdown headings, links, and a table. [ChatGPT Ads](../src/content/lessons/chatgpt-ads.mdx) embeds the existing architecture walkthrough and references in MDX. The rest of the catalogue uses the typed record format above.
 
-Both formats use the validated frontmatter in [the collection schema](../src/content.config.ts). Astro derives the canonical path from `trackId` and `id`. The document starts with a level-two heading after any MDX imports. Keep one stable `sectionIds` entry for each level-two heading, in the same order. Move an ID with its section when reordering and keep the ID when renaming a heading. The single source file supplies the section titles and contents links. The publishing checks are the same as for a typed record.
+Both formats use the validated frontmatter in [the collection schema](../src/content.config.ts). Astro derives the canonical path from `trackId` and `id`. The document starts with a level-two heading after any MDX imports. Keep one stable `sectionIds` entry for each level-two heading, in the same order. Move an ID with its section when reordering and keep the ID when renaming a heading. The single source file supplies the section titles and contents links. Footnotes render with their own links and stay outside the guide contents list.
+
+The build rejects duplicate IDs and sections without rendered reading content, including sections that contain only editorial comments. Use HTTPS for web references. Links within Harness can target built pages, section fragments, and files such as reference downloads. The build checks local destinations using the rendered guide and the build output.
 
 ## Optional companion selection and upkeep
 

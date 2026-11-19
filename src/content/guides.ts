@@ -7,10 +7,11 @@ const records = import.meta.glob<Guide>("./lessons/*.ts", { eager: true, import:
 const authored = await Promise.all((await getCollection("authoredGuides")).map(async (entry): Promise<Guide> => {
   const { sectionIds, ...metadata } = entry.data;
   const { headings } = await render(entry);
-  const sections = headings.filter(({ depth }) => depth === 2).map(({ slug, text }) => ({
-    id: slug.replace(/-title$/, ""),
-    title: text,
-  }));
+  // Astro also reports generated headings such as the footnotes label.
+  const sectionSlugs = new Set(sectionIds.map((id) => `${id}-title`));
+  const sections = headings
+    .filter(({ depth, slug }) => depth === 2 && sectionSlugs.has(slug))
+    .map(({ slug, text }) => ({ id: slug.slice(0, -"-title".length), title: text }));
   if (sections.length !== sectionIds.length || sections.some(({ id }, index) => id !== sectionIds[index])) {
     throw new Error(`Guide ${metadata.id} must have one level-two heading per section ID in order`);
   }

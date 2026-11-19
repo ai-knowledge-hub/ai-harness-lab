@@ -73,11 +73,6 @@ export function guideSections({ data, fileURL }) {
         }
       }
       if (index !== ids.length) throw new Error(`${fileURL}: expected a heading for every section ID`);
-      for (const node of children) {
-        if (node.tagName === "section" && !node.children.slice(1).some((child) => child.type !== "text" || child.value.trim())) {
-          throw new Error(`${fileURL}: guide section ${node.properties.id} is empty`);
-        }
-      }
       context.setField(root, "children", children);
     },
   };
