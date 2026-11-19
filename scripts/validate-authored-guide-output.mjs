@@ -19,16 +19,16 @@ function duplicateIds(document) {
   return duplicates;
 }
 
-async function linkError(href, base, origin, files, readPage) {
+async function checkLink(href, base, origin, files, readPage) {
   let target;
   try {
     target = new URL(href, base);
   } catch {
-    return `invalid URL ${JSON.stringify(href)}`;
+    return { error: `invalid URL ${JSON.stringify(href)}` };
   }
-  if (target.protocol === "mailto:" || target.protocol === "tel:") return;
-  if (target.protocol !== "https:") return `use HTTPS for web references: ${href}`;
-  if (target.origin !== origin) return;
+  if (target.protocol === "mailto:" || target.protocol === "tel:") return { destination: target.href };
+  if (target.protocol !== "https:") return { error: `use HTTPS for web references: ${href}` };
+  if (target.origin !== origin) return { destination: target.href };
 
   let path;
   let fragment;
@@ -36,18 +36,24 @@ async function linkError(href, base, origin, files, readPage) {
     path = decodeURI(target.pathname);
     fragment = decodeURIComponent(target.hash.slice(1).split(":~:")[0]);
   } catch {
-    return `invalid URL encoding: ${href}`;
+    return { error: `invalid URL encoding: ${href}` };
   }
 
   const index = `${path.replace(/\/$/, "")}/index.html`;
   const file = [path, index, `${path}.html`].find((candidate) => files.has(candidate));
-  if (!file) return `unbuilt local destination: ${href}`;
-  if (!fragment || fragment.toLowerCase() === "top" || !file.endsWith(".html")) return;
-
-  const document = await readPage(file);
-  if (!document.getElementById(fragment) && ![...document.querySelectorAll("a[name]")].some((anchor) => anchor.name === fragment)) {
-    return `missing local fragment: ${href}`;
+  if (!file) return { error: `unbuilt local destination: ${href}` };
+  if (fragment && fragment.toLowerCase() !== "top" && file.endsWith(".html")) {
+    const document = await readPage(file);
+    if (!document.getElementById(fragment) && ![...document.querySelectorAll("a[name]")].some((anchor) => anchor.name === fragment)) {
+      return { error: `missing local fragment: ${href}` };
+    }
   }
+
+  // The build mirrors directory pages to flat HTML aliases. Compare their
+  // underlying document while retaining the query and full fragment.
+  const directoryFile = file.replace(/\.html$/, "/index.html");
+  const documentFile = files.has(directoryFile) ? directoryFile : file;
+  return { destination: documentFile + target.search + target.hash };
 }
 
 // Validate the static output so component-rendered links and IDs are covered
@@ -99,11 +105,19 @@ export async function validateAuthoredGuideOutput(output, origin) {
         for (const link of section.querySelectorAll("a[href]")) {
           const href = link.getAttribute("href");
           const reported = new Set();
+          let firstDestination;
           for (const { address, base } of bases) {
-            const error = await linkError(href, base, origin, files, readPage);
+            const { error, destination } = await checkLink(href, base, origin, files, readPage);
             if (error && !reported.has(error)) {
               errors.push(`${address}#${section.id}: ${error}`);
               reported.add(error);
+            }
+            if (destination !== undefined) {
+              if (firstDestination === undefined) firstDestination = destination;
+              else if (destination !== firstDestination) {
+                errors.push(`${address}#${section.id}: link destination changes across served URLs: ${href} (${firstDestination} versus ${destination})`);
+                break;
+              }
             }
           }
         }

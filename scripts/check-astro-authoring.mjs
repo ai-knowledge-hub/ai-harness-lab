@@ -157,6 +157,9 @@ try {
     `${markdownPath}/index.html#check-section: unbuilt local destination: ${relativeReference}`,
   ));
 
+  await writeAuthored("[Back to this track](./index.html)");
+  assert.throws(build, buildErrorIncludes("link destination changes across served URLs: ./index.html"));
+
   await writeAuthored("<!-- Editorial TODO -->");
   assert.throws(build, buildErrorIncludes("#check-section: guide section is empty"));
 
@@ -176,6 +179,9 @@ try {
     "use HTTPS for web references: ftp://example.com/source",
     `${markdownPath}/index.html#check-section: unbuilt local destination: ${relativeReference}`,
   ));
+
+  await writeAuthored('<a href={"./index.html"}>Back to this track</a>', mdxSource);
+  assert.throws(build, buildErrorIncludes("link destination changes across served URLs: ./index.html"));
 
   await writeAuthored(`${paragraph}\n\n<a href={"#check-section"}>MDX reference</a>\n\n${footnote}`, mdxSource);
   build();
