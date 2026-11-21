@@ -70,7 +70,7 @@ export const discovery = {
         next: { kind: "guide", id: "api-design", action: "Read API design principles" },
       },
       examples: [
-        { kind: "guide", id: "when-an-agent-checkout-times-out", action: "Work through the checkout timeout" },
+        { kind: "guide", id: "when-an-agent-checkout-times-out", action: "Explore marketplace consistency" },
       ],
       references: [
         { kind: "guide", id: "advertising-platforms", action: "Read the platform overview" },

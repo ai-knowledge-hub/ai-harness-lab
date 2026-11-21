@@ -6,9 +6,9 @@ import { readingText } from "./reading-text.mjs";
 
 const baseline = JSON.parse(await readFile("tests/fixtures/reading-baseline.json", "utf8"));
 const markdownBaseline = JSON.parse(await readFile("tests/fixtures/markdown-migration-baseline.json", "utf8"));
-// This requested editorial restoration supersedes the checkout draft's copy;
+// The marketplace case study replaces the original checkout draft’s copy;
 // keep the original migration snapshot frozen for the other guides and anchors.
-const checkoutRestoration = JSON.parse(await readFile("tests/fixtures/checkout-systems-restoration.json", "utf8"));
+const marketplaceArticle = JSON.parse(await readFile("tests/fixtures/marketplace-systems-article.json", "utf8"));
 // Reviewed #60 copy changes are asserted before restoring their historical
 // wording for #42 parity. This is a bounded list, not a skipped content region.
 const companionCopy = [
@@ -60,11 +60,11 @@ for (const [path, expected] of Object.entries(baseline.routes)) {
     assert.ok(element.textContent.trim(), `${path}: requirements context must have text`);
     element.remove();
   }
-  // The checkout draft adds one explicitly checked track entry. Its requested
-  // editorial restoration has a separate snapshot below.
+  // The marketplace case study adds one explicitly checked track entry.
+  // Its approved copy has a separate snapshot below.
   if (path === "/learn/system-design") {
     const draft = main.querySelector('a[href="/learn/system-design/when-an-agent-checkout-times-out"]').closest("li");
-    assert.equal(readingText(draft), checkoutRestoration.checkoutTrackEntry, "restored checkout draft track entry");
+    assert.equal(readingText(draft), marketplaceArticle.trackEntry, "marketplace case-study track entry");
     draft.remove();
   }
   main.querySelectorAll("script,style,template").forEach((element) => element.remove());
@@ -88,7 +88,7 @@ for (const [file, expected] of Object.entries(baseline.downloads)) {
 }
 console.log(`Astro preserves ${Object.keys(baseline.routes).length} independent baseline routes, their retained reading text, anchors, links and metadata, plus all five download hashes. New requirements context is scoped separately. Sitemap contains ${urls.length} eligible URLs.`);
 
-for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...checkoutRestoration.routes })) {
+for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...marketplaceArticle.routes })) {
   const document = new JSDOM(await readFile(`dist${path}/index.html`, "utf8")).window.document;
   const main = document.querySelector("main");
   assert.equal(document.title, expected.title, `${path}: migrated title`);
@@ -106,4 +106,4 @@ for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...c
   }
   if (expected.robots.startsWith("noindex")) assert.ok(!urls.includes(expected.canonical), `${path}: draft sitemap exclusion`);
 }
-console.log("Five migrated guides preserve their pre-migration content; the restored checkout article matches its editorial snapshot and retains the original anchors and draft indexing.");
+console.log("Five migrated guides preserve their pre-migration content; the marketplace case study matches its editorial snapshot and retains historical anchors and draft indexing.");

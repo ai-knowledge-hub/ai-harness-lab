@@ -178,5 +178,5 @@
       ]
     }
   },
-  "checkoutTrackEntry": "System-design case study · Preview How Marketplaces Work When Their Systems Disagree Follow one coffee grinder through CAP, selective consistency, distributed transactions and agentic checkout. Learn where agreement is required and how uncertain purchases recover. Work through the checkout timeout"
+  "trackEntry": "System-design case study · Preview How Marketplaces Work When Their Systems Disagree Follow one coffee grinder through CAP, selective consistency, distributed transactions and agentic checkout. Learn where agreement is required and how uncertain purchases recover. Explore marketplace consistency"
 }
