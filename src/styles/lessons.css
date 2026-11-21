@@ -76,6 +76,13 @@ html:has(.lesson-page) {
   color: var(--text);
   max-width: 60ch;
 }
+.lesson-lede p {
+  margin: 0;
+  font: inherit;
+}
+.lesson-lede p + p {
+  margin-block-start: 1em;
+}
 .lesson-mobile-contents {
   display: none;
 }
@@ -425,6 +432,11 @@ html:has(.lesson-page) {
 .source-citation,
 .lesson-section > p > a:not([class]) {
   font-size: .85em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lesson-section > ol a,
+.lesson-section > p > em a {
   text-decoration: underline;
   text-underline-offset: 3px;
 }

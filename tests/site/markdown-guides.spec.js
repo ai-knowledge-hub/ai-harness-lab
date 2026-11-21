@@ -5,13 +5,14 @@ import { guideSections } from "../../scripts/markdown-guide-sections.mjs";
 import { codeFenceExamples, ordinaryCodeFences } from "../fixtures/ordinary-code-fences.js";
 
 const baseline = JSON.parse(await readFile(new URL("../fixtures/markdown-migration-baseline.json", import.meta.url), "utf8"));
+const marketplaceArticle = JSON.parse(await readFile(new URL("../fixtures/marketplace-systems-article.json", import.meta.url), "utf8"));
 
 for (const width of [390, 1440]) {
   test(`all migrated guides retain reading and accessible code without JavaScript at ${width}px`, async ({ browser, baseURL }, testInfo) => {
     const context = await browser.newContext({ baseURL, javaScriptEnabled: false, viewport: { width, height: 1000 } });
     try {
       const page = await context.newPage();
-      for (const [path, expected] of Object.entries(baseline.routes)) {
+      for (const [path, expected] of Object.entries({ ...baseline.routes, ...marketplaceArticle.routes })) {
         const response = await page.goto(path);
         expect(response.status()).toBe(200);
         await expect(page.locator("h1")).toBeVisible();
@@ -27,7 +28,7 @@ for (const width of [390, 1440]) {
       }
       await page.goto("/learn/system-design/when-an-agent-checkout-times-out#look-up-the-order-before-retrying");
       await page.locator("#look-up-the-order-before-retrying").scrollIntoViewIfNeeded();
-      await page.screenshot({ path: testInfo.outputPath(`checkout-markdown-${width}.png`) });
+      await page.screenshot({ path: testInfo.outputPath(`marketplace-reading-${width}.png`) });
     } finally {
       await context.close();
     }

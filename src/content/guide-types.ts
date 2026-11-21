@@ -41,6 +41,7 @@ export type Guide = {
   readingMinutes: number;
   updatedAt: string;
   introduction: string;
+  introductionHtml?: string;
   objectives: string[];
   prerequisiteConceptIds: string[];
   conceptIds: string[];

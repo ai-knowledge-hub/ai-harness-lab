@@ -1,0 +1,32 @@
+/* Build-time diagrams share Harness's monochrome node-and-arrow vocabulary. */
+.marketplace-diagram {
+  margin: 38px 0;
+  min-inline-size: 0;
+  container-type: inline-size;
+}
+.marketplace-diagram figcaption { font-size: 18px; line-height: 1.5; font-weight: 500; color: var(--text); }
+.marketplace-diagram figcaption > span { font-size: 12px; font-variant-numeric: tabular-nums; margin-inline-end: 10px; color: var(--muted); }
+.marketplace-diagram-hint, .marketplace-diagram-note { font-size: 13px; line-height: 1.7; color: var(--muted); }
+.marketplace-diagram-hint { margin: 10px 0 16px; }
+.marketplace-diagram-note { margin-top: 16px; }
+.marketplace-diagram-scroll { overflow-x: auto; max-inline-size: 100%; border-block: 1px solid var(--line); background: var(--surface); }
+.marketplace-diagram-map { position: relative; inline-size: 800px; margin-inline: auto; }
+.marketplace-diagram-map > svg { position: absolute; inset: 0; color: var(--text); }
+.marketplace-edge { fill: none; stroke: currentColor; stroke-width: 1.3; }
+.marketplace-edge-uncertain { stroke-dasharray: 5 5; }
+.marketplace-nodes { list-style: none; margin: 0; padding: 0; }
+.marketplace-node { position: absolute; border: 1px solid var(--text); padding: 14px 16px; background: var(--bg); color: var(--text); display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.marketplace-node-uncertain { border-style: dashed; }
+.marketplace-node > span { font-size: 10px; line-height: 1.4; color: var(--muted); }
+.marketplace-node > strong { font-size: 17px; line-height: 1.25; font-weight: 500; letter-spacing: -.02em; }
+.marketplace-node > p { font-size: 12px; line-height: 1.5; color: var(--muted); margin: 0; }
+.marketplace-lane { position: absolute; font-size: 10px; line-height: 1.4; letter-spacing: .08em; color: var(--muted); margin: 0; }
+.marketplace-edge-label { position: absolute; transform: translateX(-50%); font-size: 9px; letter-spacing: .06em; background: var(--surface); color: var(--muted); padding: 3px 6px; white-space: nowrap; }
+.marketplace-diagram-description { border-bottom: 1px solid var(--line); margin-top: 16px; }
+.marketplace-diagram-description summary { cursor: pointer; min-block-size: 44px; padding: 12px 0; font-size: 13px; line-height: 1.6; color: var(--text); }
+.marketplace-diagram-description ol { margin: 0; padding: 0 0 20px 24px; }
+.marketplace-diagram-description li { font-size: 15px; line-height: 1.7; color: var(--muted); margin-block-start: 10px; }
+.marketplace-diagram-scroll:focus-visible, .marketplace-diagram-description summary:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+.guide-legacy-anchor { display: block; block-size: 1px; margin-block-end: -1px; scroll-margin-top: calc(var(--header-height) + 20px); }
+@container (min-width: 800px) { .marketplace-diagram-hint { visibility: hidden; } }
+@media (forced-colors: active) { .marketplace-node, .marketplace-diagram-scroll { border-color: CanvasText; } }

@@ -18,7 +18,7 @@ const guide = {
   description: "Identify a reporting request so a retry can reuse its completed result.",
   kind: "principle", publicationStatus: "published", format: "Reusable guide",
   readingMinutes: 3, updatedAt: "2026-11-11",
-  introduction: "Give repeated report requests one stable identity.",
+  introduction: "Give **repeated report requests** one stable identity.\n\nContact hello@example.com or visit https://example.com/retries?mode=safe&limit=1 or www.example.com for details.",
   objectives: ["Recognise a repeated request."], prerequisiteConceptIds: [], conceptIds: [],
   projectIds: [], platformIds: [], publicationIds: [], capabilityIds: [], videoIds: [], relatedGuideIds: [],
   sections: [{ id: "identify-the-request", title: "Identify the request", blocks: [{ type: "paragraph", text: "Keep the request identity with its completed result." }] }],
@@ -61,10 +61,19 @@ function checkOrdinaryCodeFences(document) {
     assert.equal(pre.querySelector("code").textContent, codeFenceExamples[index].code + "\n");
   }
 }
+function checkIntroduction(document) {
+  const introduction = document.querySelector(".lesson-lede");
+  assert.equal(introduction.querySelectorAll("p").length, 2);
+  assert.equal(introduction.querySelector("strong").textContent, "repeated report requests");
+  assert.equal(introduction.querySelectorAll("a").length, 0);
+  assert.equal(introduction.querySelectorAll("p")[1].textContent,
+    "Contact hello@example.com or visit https://example.com/retries?mode=safe&limit=1 or www.example.com for details.");
+}
 let created = false;
 try {
   await writeGuide(); created = true; build();
   const page = new JSDOM(await html(`${path.slice(1)}/index.html`)).window.document;
+  checkIntroduction(page);
   assert.equal(page.querySelector("h1").textContent, guide.title);
   assert.ok(page.getElementById("identify-the-request"));
   assert.equal(page.querySelector('link[rel="canonical"]').href, "https://harness.ai-knowledge-hub.org" + path);
@@ -108,6 +117,7 @@ try {
   await writeAuthored();
   build();
   const markdownPage = new JSDOM(await html(`${markdownPath.slice(1)}/index.html`)).window.document;
+  checkIntroduction(markdownPage);
   assert.match(markdownPage.querySelector('a[href="#check-section"]').textContent, /Keep the reference stable/);
   assert.equal(markdownPage.querySelector("#check-section > h2").id, "check-section-title");
   assert.equal(markdownPage.querySelector("#check-section > p").textContent.trim(), paragraph);
@@ -208,6 +218,7 @@ try {
   await writeAuthored(`${paragraph}\n\n<a href={"#check-section"}>MDX reference</a>\n\n${footnote}`, mdxSource);
   build();
   const mdxPage = new JSDOM(await html(`${markdownPath.slice(1)}/index.html`)).window.document;
+  checkIntroduction(mdxPage);
   assert.equal(mdxPage.querySelector('#check-section a[href="#check-section"]').textContent, "MDX reference");
   assert.ok(mdxPage.querySelector("[data-footnotes]"));
   assert.equal(mdxPage.querySelectorAll('nav[aria-label="Guide contents"] a').length, 2);

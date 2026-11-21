@@ -6,6 +6,9 @@ import { readingText } from "./reading-text.mjs";
 
 const baseline = JSON.parse(await readFile("tests/fixtures/reading-baseline.json", "utf8"));
 const markdownBaseline = JSON.parse(await readFile("tests/fixtures/markdown-migration-baseline.json", "utf8"));
+// The marketplace case study replaces the original checkout draft’s copy;
+// keep the original migration snapshot frozen for the other guides and anchors.
+const marketplaceArticle = JSON.parse(await readFile("tests/fixtures/marketplace-systems-article.json", "utf8"));
 // Reviewed #60 copy changes are asserted before restoring their historical
 // wording for #42 parity. This is a bounded list, not a skipped content region.
 const companionCopy = [
@@ -57,11 +60,11 @@ for (const [path, expected] of Object.entries(baseline.routes)) {
     assert.ok(element.textContent.trim(), `${path}: requirements context must have text`);
     element.remove();
   }
-  // The checkout draft adds one explicitly checked track entry. The separate
-  // pre-migration snapshot below verifies the full new guide.
+  // The marketplace case study adds one explicitly checked track entry.
+  // Its approved copy has a separate snapshot below.
   if (path === "/learn/system-design") {
     const draft = main.querySelector('a[href="/learn/system-design/when-an-agent-checkout-times-out"]').closest("li");
-    assert.equal(readingText(draft), markdownBaseline.checkoutTrackEntry, "checkout draft track entry");
+    assert.equal(readingText(draft), marketplaceArticle.trackEntry, "marketplace case-study track entry");
     draft.remove();
   }
   main.querySelectorAll("script,style,template").forEach((element) => element.remove());
@@ -85,21 +88,22 @@ for (const [file, expected] of Object.entries(baseline.downloads)) {
 }
 console.log(`Astro preserves ${Object.keys(baseline.routes).length} independent baseline routes, their retained reading text, anchors, links and metadata, plus all five download hashes. New requirements context is scoped separately. Sitemap contains ${urls.length} eligible URLs.`);
 
-for (const [path, expected] of Object.entries(markdownBaseline.routes)) {
+for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...marketplaceArticle.routes })) {
   const document = new JSDOM(await readFile(`dist${path}/index.html`, "utf8")).window.document;
   const main = document.querySelector("main");
   assert.equal(document.title, expected.title, `${path}: migrated title`);
   assert.equal(document.querySelector('meta[name="description"]').content, expected.description, `${path}: migrated description`);
   assert.equal(document.querySelector('link[rel="canonical"]').href, expected.canonical, `${path}: migrated canonical`);
   assert.equal(document.querySelector('meta[name="robots"]').content, expected.robots, `${path}: migrated indexing`);
-  assert.equal(readingText(main), expected.text, `${path}: complete pre-migration reading text`);
-  assert.deepEqual([...main.querySelectorAll("a[href]")].map((link) => link.getAttribute("href")), expected.hrefs, `${path}: pre-migration links`);
-  for (const id of expected.ids) assert.ok(document.getElementById(id), `${path}: pre-migration anchor ${id}`);
-  assert.deepEqual([...main.querySelectorAll("pre code")].map((code) => code.textContent.trimEnd()), expected.code, `${path}: pre-migration code`);
+  assert.equal(readingText(main), expected.text, `${path}: complete approved reading text`);
+  assert.deepEqual([...main.querySelectorAll("a[href]")].map((link) => link.getAttribute("href")), expected.hrefs, `${path}: approved reading links`);
+  for (const id of expected.ids) assert.ok(document.getElementById(id), `${path}: approved anchor ${id}`);
+  for (const id of markdownBaseline.routes[path].ids) assert.ok(document.getElementById(id), `${path}: retained migration anchor ${id}`);
+  assert.deepEqual([...main.querySelectorAll("pre code")].map((code) => code.textContent.trimEnd()), expected.code, `${path}: approved code`);
   for (const pre of main.querySelectorAll("pre")) {
     assert.equal(pre.tabIndex, 0, `${path}: keyboard-accessible code`);
     assert.ok(pre.getAttribute("aria-label"), `${path}: named code`);
   }
   if (expected.robots.startsWith("noindex")) assert.ok(!urls.includes(expected.canonical), `${path}: draft sitemap exclusion`);
 }
-console.log("All six migrated guides preserve their complete pre-migration text, links, anchors, code and indexing.");
+console.log("Five migrated guides preserve their pre-migration content; the marketplace case study matches its editorial snapshot and retains historical anchors and draft indexing.");
