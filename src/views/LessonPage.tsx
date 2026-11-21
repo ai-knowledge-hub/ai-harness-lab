@@ -140,7 +140,9 @@ export function LessonPage({ lesson, children }: { lesson: Guide; children?: Rea
                 <span>Guide preview</span>
               )}
             </div>
-            <p className="lesson-lede">{lesson.introduction}</p>
+            {lesson.introductionHtml ? (
+              <div className="lesson-lede" dangerouslySetInnerHTML={{ __html: lesson.introductionHtml }} />
+            ) : <p className="lesson-lede">{lesson.introduction}</p>}
           </header>
           {hasReferenceContext && !trackLinks && (
             <ReferenceContext lessonId={lesson.id} label="Read these guides in any order" />
