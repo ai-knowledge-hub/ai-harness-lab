@@ -40,7 +40,7 @@ To add a guide, create one `.md` file in `src/content/lessons/` for prose, or us
 
 ## Markdown and MDX authoring
 
-All eight guides use Markdown or MDX, following the [#77 pilot](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/77). Attribution and Lift, Advertising Platforms, API Design, Verify a Small Code Change, and the checkout-timeout draft use Markdown. ChatGPT Ads, the Advertiser API map and the reporting example use MDX for their existing components and downloads.
+All eight guides use Markdown or MDX, following the [#77 pilot](https://github.com/ai-knowledge-hub/ai-harness-lab/issues/77). Attribution and Lift and Verify a Small Code Change use Markdown. API Design uses MDX for its static contract diagrams, native timeline disclosures and answer explanations. Advertising Platforms and the checkout-timeout draft also use MDX for their reading components. ChatGPT Ads, the Advertiser API map and the reporting example use MDX for their existing components and downloads.
 
 Use standard paragraphs, links, lists, tables and fenced code. All code fences get a scrollable, keyboard-accessible region, including fences without a language or caption. A code fence can include a caption as JSON-quoted metadata, for example `http title="Status lookup"`. The renderer keeps the language label and caption; untitled fences use the language or “Code example” as their accessible name. HTML figures and asides preserve labelled flows and callouts. Footnotes render with their own links and stay outside the guide contents list.
 
@@ -100,6 +100,22 @@ A publication relationship with `kind: "case-study"` renders as a labelled suppo
 ## Staged ChatGPT Ads architecture
 
 The closed `ads-architecture` block renders the dedicated HTML/SVG walkthrough, backed by `src/content/chatgpt-ad-architecture.js`. The guide/section/block position supplies deterministic DOM and SVG IDs. The server renders the complete map and all explanations; typed client enhancement adds stage controls and illustrative delivery outcomes. Inactive explanations use searchable `hidden="until-found"` where supported, with `beforematch` and fragment state synchronisation. Other browsers retain the linear reference. SVG edges and HTML nodes share fixed layout coordinates inside a keyboard-scrollable region. Documented responsibilities use solid borders; the planned Harness worker and evidence store use dashed borders. No internal logs-to-reporting pipeline is asserted.
+
+## API Design publication revision · 23 November 2026
+
+The API Design guide uses the author's publication candidate v3 with the reviewed corrections: an explicitly fictional campaign API, concrete duplicate-request and snapshot-expiry policies, a tool schema requiring the observed ETag and logical request key, consistent money representations, and a practitioner contract checklist. The canonical URL, published indexing, five historical section IDs and their heading IDs remain stable. The reading estimate is 25 minutes. `tests/fixtures/api-design-article.json` records the replacement; the independent #42 and Markdown migration snapshots are unchanged. Other guides' references to the updated title and description are normalized through two explicit substitutions in the route checker.
+
+The three production briefs are implemented as build-time HTML in `ApiDesignVisual.astro`:
+
+- **Contract boundary:** distinguish independent clients, public observable promises and private service internals. The figure is conceptual; an internal change is safe only if the contract remains true.
+- **Lost-response timeline:** align client, API and authoritative-state lanes, mark commits and lost messages, and explain the next safe action. Native disclosures expose lost-response, lost-request, concurrent-update and expired-record scenarios; all budgets and versions follow campaign `cmp_42`. This scenario explorer replaces the draft's unimplemented simulation controls without adding a client runtime.
+- **Compatibility comparison:** expose the reporting client's attribution and unknown-field assumptions. An optional field is potentially compatible for this consumer; unchanged syntax does not preserve a changed metric definition.
+
+The four comprehension questions remain separate from those figures. Each uses a native answer disclosure with reasoning; no score or reset control suggests state that has not been implemented. All reading, diagrams and answers work without JavaScript, and no React island is introduced. Narrow screens retain keyboard-scrollable timeline lanes; the other figures stack. Both themes and Chromium/WebKit are covered by `tests/site/api-design.spec.js`, including the 63,477-gzip-byte reading-script gate through the first native scenario change.
+
+On 23 November 2026, the nine primary-source URLs returned HTTP 200: HTTP Semantics, PATCH, JSON Merge Patch, Problem Details, OpenAPI 3.2.1, AWS's retry article, Google AIP-158/AIP-180 and the MCP specification. RFC URLs resolve to their RFC Editor information pages; MCP resolves to the 2026-07-28 specification. Tracking parameters were removed. An example-only problem URI is not a source link. Eighteen JSON documents/request bodies parse, and the agent input schema validates the final request's arguments while rejecting a missing ETag or request key. This checks examples and publication behaviour; no campaign API implementation or provider account operation is claimed. A runnable reference implementation remains an optional future companion.
+
+Validation used Node 22.23.4: `pnpm check` passed with 63 unit/component tests and clean Astro diagnostics; `pnpm check:authoring`, `pnpm check:routes`, all 42 site checks and all 28 end-to-end checks passed. The final six article-specific Chromium/WebKit checks also passed after semantic cleanup. Screenshots were inspected in both themes at phone and desktop sizes. The measured reading scripts through the first native scenario change totalled 1,468 gzip bytes in each browser, below the 63,477-byte gate. All five reference-download hashes remain unchanged.
 
 ## Reference artifacts
 

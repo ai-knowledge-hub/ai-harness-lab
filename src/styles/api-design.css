@@ -1,0 +1,79 @@
+.api-visual {
+  margin: 32px 0;
+  padding: clamp(16px, 3vw, 28px);
+  border-block: 1px solid var(--line);
+}
+.api-visual > figcaption {
+  font-weight: 650;
+  margin-bottom: 20px;
+}
+.api-boundary {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  gap: 24px;
+  align-items: center;
+}
+.api-boundary > div,
+.api-comparison > div { min-width: 0; }
+.api-boundary-contract {
+  border-inline: 2px solid var(--text);
+  padding: 12px 20px;
+}
+.api-boundary-contract > span {
+  display: block;
+  font-size: 26px;
+}
+.api-boundary ul { padding-left: 20px; }
+.api-visual p,
+.api-visual li { font-size: 15px; line-height: 1.65; }
+.api-visual .api-visual-note { margin-top: 24px; color: var(--muted); }
+.api-disclosure {
+  margin-block: 16px;
+  border: 1px solid var(--line);
+  padding: 0 16px;
+}
+.api-disclosure > summary {
+  cursor: pointer;
+  padding-block: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.api-disclosure[open] > summary { border-bottom: 1px solid var(--line); }
+.api-disclosure > p { margin-block: 16px; }
+.api-timeline-scroll { overflow-x: auto; margin-block: 16px; }
+.api-timeline {
+  width: 100%;
+  min-width: 650px;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.api-timeline caption { text-align: left; margin-bottom: 12px; color: var(--muted); }
+.api-timeline th,
+.api-timeline td {
+  text-align: left;
+  vertical-align: top;
+  padding: 12px;
+  border: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.api-timeline th { font-weight: 650; }
+.api-visual .api-scroll-hint { font-size: 13px; color: var(--muted); }
+.api-retry-decision { border-inline-start: 3px solid var(--text); padding-inline-start: 12px; }
+.api-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.api-comparison > div { border-top: 2px solid var(--text); padding-top: 16px; }
+.api-exercise > ol { padding-left: 24px; }
+.api-exercise > ol > li { margin-block: 28px; }
+.api-exercise .api-disclosure p { padding-bottom: 8px; }
+.api-disclosure > summary:focus-visible,
+.api-timeline-scroll:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+@media (max-width: 680px) {
+  .api-boundary,
+  .api-comparison { grid-template-columns: 1fr; }
+  .api-boundary-contract { border-inline: 0; border-block: 2px solid var(--text); padding: 16px 0; }
+  .api-boundary-contract > span { transform: rotate(90deg); width: 1em; }
+  .api-visual { padding-inline: 12px; }
+  .api-disclosure { padding-inline: 12px; }
+}

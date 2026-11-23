@@ -28,7 +28,7 @@ const routes = [
   { path: "/", heading: /build and operate ai products/i },
   {
     path: "/learn/system-design/api-design",
-    heading: "API design principles",
+    heading: /^(API design principles|API Design: How Software Makes Promises It Can Keep)$/,
   },
   {
     path: "/learn/system-design/chatgpt-ads",

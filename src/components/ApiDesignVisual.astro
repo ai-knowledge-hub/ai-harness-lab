@@ -1,0 +1,79 @@
+---
+interface Props { kind: "boundary" | "timeline" | "compatibility" }
+const { kind } = Astro.props;
+const scenarios = [
+  {
+    id: "lost-response", title: "Lost response: the change committed",
+    steps: [
+      ["Reads version 7: £1,000", "Returns campaign-v7", "Version 7 · £1,000"],
+      ["Sends £1,200, version 7, key budget-change-781 →", "Validates permission and precondition", "Version 7 · £1,000"],
+      ["Waits for a response", "Commits budget and deduplication record together", "COMMIT · Version 8 · £1,200"],
+      ["Timeout: outcome unknown", "← 200 response LOST in transit", "Version 8 · £1,200"],
+      ["Retries identical request and key →", "Returns recorded result; does not apply again", "Version 8 · £1,200"],
+    ],
+    decision: "Within the 24-hour deduplication window, retry the identical request with the same key. A recorded success proves the earlier commit, even if the campaign changes again later.",
+  },
+  {
+    id: "lost-request", title: "Lost request: nothing reached the service",
+    steps: [
+      ["Reads version 7: £1,000", "Returns campaign-v7", "Version 7 · £1,000"],
+      ["Request LOST in transit →", "Receives no update", "NO COMMIT · Version 7 · £1,000"],
+      ["Timeout: outcome unknown", "Has no record of this operation", "Version 7 · £1,000"],
+      ["Retries identical request and key →", "Checks version 7 and commits once", "COMMIT · Version 8 · £1,200"],
+    ],
+    decision: "The timeout looks the same as a lost response. The same retry can execute once if the original request never arrived and version 7 is still current.",
+  },
+  {
+    id: "concurrent-update", title: "Concurrent update: another operator intervenes",
+    steps: [
+      ["Reads version 7: £1,000", "Returns campaign-v7", "Version 7 · £1,000"],
+      ["Prepares £1,200 based on version 7", "Human operator commits £1,500", "COMMIT · Version 8 · £1,500"],
+      ["Sends update with If-Match version 7 →", "Rejects stale precondition with 412", "NO AGENT COMMIT · Version 8 · £1,500"],
+      ["Retrieves fresh state and reconsiders", "Returns current version 8", "Version 8 · £1,500"],
+    ],
+    decision: "Do not replace the ETag automatically and resubmit. The operator's condition no longer holds; a new decision and any required approval must use the fresh state.",
+  },
+  {
+    id: "expired-record", title: "Expired record: the earlier outcome cannot be replayed",
+    steps: [
+      ["Loses the response to budget-change-781", "Earlier operation may have committed", "OUTCOME UNKNOWN to the client"],
+      ["Waits beyond the retry window", "24-hour deduplication window expires", "Current budget alone cannot prove history"],
+      ["Does not blindly replay or mint a new key", "Requires reconciliation using retained operation evidence", "No new write during reconciliation"],
+    ],
+    decision: "Stop automatic retries. Inspect operation or audit evidence and current state; if the outcome remains unproven, report it as unconfirmed. An expired key may be treated as new by the server.",
+  },
+];
+---
+{kind === "boundary" && <figure class="api-visual" data-api-visual="boundary">
+  <figcaption>Figure 1 · The contract boundary</figcaption>
+  <div class="api-boundary">
+    <div><strong>Independent clients</strong><ul><li>Dashboard · settings</li><li>Reporting app · measurements</li><li>AI agent · proposed changes</li></ul></div>
+    <div class="api-boundary-contract"><span aria-hidden="true">→</span><strong>Public contract</strong><p>Meaning · authority · effects · results · limits</p><span aria-hidden="true">→</span></div>
+    <div><strong>Campaign service</strong><p>Private database, workers and storage choices</p></div>
+  </div>
+  <p class="api-visual-note">Conceptual architecture. Clients rely on observable behaviour. Internal changes remain safe only while that behaviour is preserved.</p>
+</figure>}
+{kind === "timeline" && <figure class="api-visual" data-api-visual="timeline">
+  <figcaption>Figure 2 · Trace the timeout before choosing a retry</figcaption>
+  <p>Open a scenario to follow the client, API and authoritative state. Rows run from top to bottom. All scenarios use campaign cmp_42.</p>
+  {scenarios.map((scenario, index) => <details class="api-disclosure" open={index === 0} id={`api-${scenario.id}`}>
+    <summary>{scenario.title}</summary>
+    <p class="api-scroll-hint">Scroll across the three lanes on narrow screens.</p>
+    <div class="api-timeline-scroll" role="region" aria-label={`${scenario.title}: three-lane timeline`} tabindex="0">
+      <table class="api-timeline">
+        <caption>{scenario.title} · events in time order</caption>
+        <thead><tr><th scope="col">Agent / client</th><th scope="col">Campaign API</th><th scope="col">Authoritative state</th></tr></thead>
+        <tbody>{scenario.steps.map((step) => <tr>{step.map((event) => <td>{event}</td>)}</tr>)}</tbody>
+      </table>
+    </div>
+    <p class="api-retry-decision"><strong>Next safe action:</strong> {scenario.decision}</p>
+  </details>)}
+</figure>}
+{kind === "compatibility" && <figure class="api-visual" data-api-visual="compatibility">
+  <figcaption>Figure 3 · The same reporting client, two kinds of change</figcaption>
+  <p><strong>Client assumption:</strong> conversions are attributed to the advertising interaction date, and unknown optional response fields are tolerated.</p>
+  <div class="api-comparison">
+    <div><strong>Optional field added</strong><p>Before: conversions = 42.<br />After: conversions = 42, plus report_generated_at.</p><p>The attribution definition stays the same. This tolerant client can still interpret the result.</p><p><strong>Potentially compatible</strong> under this consumer contract.</p></div>
+    <div><strong>Attribution changed</strong><p>Before: interaction-date conversions = 42.<br />After: purchase-date conversions = 42.</p><p>The field name and number type stay the same. The client still groups the value by interaction date.</p><p><strong>Semantically incompatible:</strong> its historical comparison now answers a different question.</p></div>
+  </div>
+</figure>}

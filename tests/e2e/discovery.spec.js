@@ -58,7 +58,7 @@ test("a reader can start with a principle or go directly to the featured case", 
   const start = page.getByRole("region", { name: "Start here" });
   await expect(start.getByRole("heading", { name: "Map the system before choosing components" })).toBeVisible();
   await start.getByRole("link", { name: "Read API design principles" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "API design principles" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "API Design: How Software Makes Promises It Can Keep" })).toBeVisible();
   await page.getByRole("region", { name: "How Advertising Reporting Systems Work" })
     .getByRole("link", { name: "Read the reporting case" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "How Advertising Reporting Systems Work" })).toBeVisible();

@@ -13,9 +13,12 @@ const marketplaceArticle = JSON.parse(await readFile("tests/fixtures/marketplace
 // #42 and the Markdown-migration fixtures frozen, including their old copy.
 const reportingArticle = JSON.parse(await readFile("tests/fixtures/advertising-reporting-article.json", "utf8"));
 const platformArticle = JSON.parse(await readFile("tests/fixtures/advertising-platforms-article.json", "utf8"));
-const replacementArticles = { ...reportingArticle.routes, ...platformArticle.routes };
+const apiArticle = JSON.parse(await readFile("tests/fixtures/api-design-article.json", "utf8"));
+const replacementArticles = { ...reportingArticle.routes, ...platformArticle.routes, ...apiArticle.routes };
 function historicalEditorialReferences(value) {
   return value
+    .replaceAll("API Design: How Software Makes Promises It Can Keep", "API design principles")
+    .replaceAll("Design API contracts for permissions, completion, safe retries, concurrent updates and meaningful reports, using one fictional campaign API.", "Define what someone can ask an API to do, who has permission, and how to tell whether the task is finished.")
     .replaceAll("How Advertising Platforms Work", "How advertising platforms work")
     .replaceAll("System-design case study · Preview How Advertising Reporting Systems Work", "Worked example · Preview How to collect ChatGPT Ads reports")
     .replaceAll("How Advertising Reporting Systems Work", "How to collect ChatGPT Ads reports")
@@ -124,4 +127,4 @@ for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...m
   }
   if (expected.robots.startsWith("noindex")) assert.ok(!urls.includes(expected.canonical), `${path}: draft sitemap exclusion`);
 }
-console.log("Migrated guides retain their original content; marketplace, reporting and platform rewrites match their editorial snapshots and retain historical anchors and indexing.");
+console.log("Migrated guides retain their original content; marketplace, reporting, platform and API rewrites match their editorial snapshots and retain historical anchors and indexing.");

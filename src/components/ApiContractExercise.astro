@@ -1,0 +1,21 @@
+---
+const questions = [
+  { question: "The budget update times out. Does that prove the change failed?", choices: ["Yes, no response means no commit", "No, the outcome is uncertain", "Yes, unless the method is PUT"], answer: "No, the outcome is uncertain.", reason: "The request could have been lost, the change could have committed while its response was lost, or processing could still be underway. PUT's idempotency does not make a timeout evidence of failure." },
+  { question: "The agent has a valid access token. Can it modify any campaign?", choices: ["Yes, authentication is sufficient", "Only if the schema validates", "Only when authorized for the operation and resource"], answer: "Only when authorized for the operation and resource.", reason: "Authentication establishes identity. The resource boundary must also enforce operation permissions, campaign access and any additional approval policy." },
+  { question: "The API adds an optional field. Is compatibility guaranteed?", choices: ["Yes, optional fields never break clients", "No, it depends on consumer expectations", "No, every change requires a new version"], answer: "No, it depends on consumer expectations.", reason: "A client that tolerates unknown response fields may continue working. A strict consumer may reject the new property. Existing meaning must also be preserved." },
+  { question: "The reporting client retrieves every page. Is the result necessarily a consistent snapshot?", choices: ["Yes, if all pages return 200", "Yes, if a cursor is used", "No, snapshot consistency needs an explicit guarantee"], answer: "No, snapshot consistency needs an explicit guarantee.", reason: "Successful responses and cursors alone do not freeze a changing dataset. The server must define and implement the promised consistency model; a stable snapshot can still contain provisional measurements." },
+];
+---
+<div class="api-exercise">
+  <p>Choose an answer in your head, then open the explanation. Every answer is available without JavaScript.</p>
+  <ol>
+    {questions.map(({ question, choices, answer, reason }, index) => <li>
+      <p><strong>{question}</strong></p>
+      <ul>{choices.map((choice) => <li>{choice}</li>)}</ul>
+      <details class="api-disclosure" data-api-answer={index + 1}>
+        <summary>Reveal answer {index + 1} and reasoning</summary>
+        <p><strong>{answer}</strong> {reason}</p>
+      </details>
+    </li>)}
+  </ol>
+</div>
