@@ -1,0 +1,612 @@
+---
+id: "api-design"
+title: "API Design: How Software Makes Promises It Can Keep"
+shortTitle: "API design"
+description: "Design API contracts for permissions, completion, safe retries, concurrent updates and meaningful reports, using one fictional campaign API."
+trackId: "system-design"
+kind: "principle"
+publicationStatus: "published"
+format: "Reusable principles"
+readingMinutes: 25
+updatedAt: "2026-11-23"
+objectives:
+  - "Define the meaning, authority, effects and completion guarantees of an API operation."
+  - "Separate request deduplication from concurrency protection and recover safely from uncertain outcomes."
+  - "Review reporting consistency, compatibility and agent tools against an explicit contract."
+prerequisiteConceptIds:
+  - "http-basics"
+conceptIds:
+  - "api-contracts"
+publicationIds:
+  - "tool-layer"
+relatedGuideIds:
+  - "chatgpt-ads-apis"
+  - "chatgpt-ads-reporting"
+introduction: "An advertising campaign has a daily budget of £1,000. An operator asks an AI agent to change it to £1,200. What must the API promise before the agent can safely act—and report that it has finished?"
+sectionIds:
+  - start-with-the-operation
+  - define-the-contract
+  - give-the-request-meaning
+  - authorize-the-operation
+  - make-failures-useful
+  - retry-without-overwriting
+  - preserve-reporting-meaning
+  - evolve-the-contract
+  - when-the-client-is-an-agent
+  - review-the-contract
+  - connect-to-chatgpt-ads
+---
+
+import ApiDesignVisual from "../../components/ApiDesignVisual.astro";
+import ApiContractExercise from "../../components/ApiContractExercise.astro";
+import "../../styles/api-design.css";
+
+## Start with a budget change
+
+This guide designs a **fictional campaign API**. Its paths, limits, policies and tool definitions are teaching examples, not a provider contract or a connected advertising service.
+
+An API (application programming interface) defines how software can request data or actions from another system. The examples use HTTP methods, headers and JSON, a structured data format. Code blocks are illustrative excerpts; authentication and transport framing are omitted. Requests develop the design step by step rather than forming a sequence to execute against a service.
+
+The operator wants to set campaign cmp_42's daily budget to £1,200 **only if its current budget is still £1,000**. Start with the apparently simple request, then make its assumptions explicit.
+
+The agent sends:
+
+```http
+PATCH /campaigns/cmp_42
+Content-Type: application/json
+
+{
+  "daily_budget": 1200
+}
+```
+
+The server understands the JSON and updates the campaign. Everything appears to work.
+
+But what exactly did the request mean?
+
+Was `1200` pounds or pence? Was it a spending limit or a target? What if another operator changed the budget while the request was travelling across the network? And if the connection failed, how would the agent know whether the change happened?
+
+The request contains data. Its documentation does not yet establish enough meaning for the client and server to cooperate reliably. That is the problem API design must solve.
+
+## The contract between independent programs
+
+Our campaign platform serves three clients: a dashboard displaying settings, a reporting application retrieving performance measurements, and an AI agent proposing and executing changes. Each may be written in a different language, maintained by a different team and deployed independently.
+
+Inside one program, functions can share types, libraries and implementation assumptions. Across a service boundary, those assumptions become dependencies that are difficult to coordinate.
+
+The reporting application should not need to know which database stores campaigns. The agent should not need to understand how the service coordinates internal workers. The dashboard should not break when the service changes its storage engine.
+
+What these clients need is an agreement about externally observable behaviour. That agreement is the **API contract**: the operations clients may request, the representations they exchange, the permissions required, the responses they can expect and the guarantees attached to those responses.
+
+The contract is not the implementation. The server may change its internals without breaking clients, provided it preserves the behaviour on which those clients are entitled to rely.
+
+<ApiDesignVisual kind="boundary" />
+
+## Giving a request a precise meaning
+
+The first requirement is identifying the resource. Our campaign is exposed at:
+
+```text
+/campaigns/cmp_42
+```
+
+The URI identifies a resource in the API's public model. It does not imply that the server stores a corresponding object or database row.
+
+HTTP methods then express the intended operation. `GET` retrieves a representation. `PUT` requests creation or replacement of the target resource's state. `PATCH` applies changes described by a patch document. `POST` asks the target resource to process supplied content according to resource-specific rules. `DELETE` requests removal of the association between the URI and its current functionality.
+
+These methods carry semantics beyond their names. HTTP defines GET as safe: the client is not requesting a state-changing effect. PUT and DELETE are idempotent in their intended effects. PATCH is not inherently idempotent, although a particular patch operation can be designed to be so.
+
+These distinctions matter when clients and intermediaries decide how to handle requests. They are defined in [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110) and [RFC 5789 — PATCH Method for HTTP](https://www.rfc-editor.org/rfc/rfc5789).
+
+### From ambiguous JSON to a defined operation
+
+Our original request contained:
+
+```json
+{
+  "daily_budget": 1200
+}
+```
+
+For the proposed API, we will express money in integer minor currency units and make the currency explicit. We will also use JSON Merge Patch, defined by [RFC 7396](https://www.rfc-editor.org/rfc/rfc7396). The request becomes:
+
+```http
+PATCH /campaigns/cmp_42
+Content-Type: application/merge-patch+json
+
+{
+  "daily_budget": {
+    "amount_minor": 120000,
+    "currency": "GBP"
+  }
+}
+```
+
+For GBP, `120000` minor units represent £1,200.
+
+JSON Merge Patch defines how the supplied document modifies the target representation. Objects are merged recursively; non-object values replace existing values, arrays are replaced as a whole, and a `null` object member removes that member. Omitting a member leaves it unchanged. The server must define which fields may be modified and reject changes that violate the resource's rules.
+
+In our example, the campaign's currency is fixed by its configuration. A budget update must use that currency; changing it requires a separate supported operation.
+
+The API also defines *daily budget* as a configured maximum daily spending amount, not a promise that the advertising system will spend exactly that amount.
+
+The units and patch semantics are now explicit. But correct structure is not sufficient. A request can satisfy its schema and still exceed an account limit, target a campaign the caller cannot modify, or conflict with a newer resource version. These are behavioural constraints that the server must enforce.
+
+The [OpenAPI Specification](https://spec.openapis.org/oas/v3.2.1.html) can describe paths, operations, parameters, request bodies, responses and security schemes in a machine-readable form. It supports documentation, client generation and structural validation. It does not independently enforce the application's business rules.
+
+## A valid request from the wrong actor
+
+Suppose the reporting application sends a budget update. It has valid credentials, knows the campaign identifier and constructs a request that satisfies the schema.
+
+Should the server accept it? Not if the application is authorized to read performance data but not modify budgets.
+
+**Authentication establishes who the caller is. Authorization determines what that caller may do.**
+
+A valid access token does not imply permission to perform every operation. Even a caller allowed to modify budgets may have access to only certain campaigns. For our API, a budget change requires both permission to perform the operation and authorization for the specific campaign.
+
+The server must enforce these conditions independently of the interface. Hiding a button in the dashboard is useful interaction design, not access control; a client can send HTTP requests without using the dashboard.
+
+The AI agent introduces delegated authority. An operator may permit the agent to prepare a budget change while requiring separate approval before execution. That approval is an application-level rule, not something OAuth automatically provides. The API must establish whose authority is being exercised, what permissions apply and whether the requested action satisfies any additional approval policy.
+
+HTTP helps distinguish failures. A `401 Unauthorized` response normally indicates missing or invalid authentication credentials. A `403 Forbidden` response indicates that the server understands the request but refuses to fulfill it. Clients should not respond to every permission denial by repeatedly authenticating. Nor should error messages disclose protected resource details unnecessarily.
+
+Authorization belongs at the boundary that controls the resource.
+
+## What does a successful response prove?
+
+The agent submits the budget update. The server returns:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "campaign_id": "cmp_42",
+  "daily_budget": {
+    "amount_minor": 120000,
+    "currency": "GBP"
+  }
+}
+```
+
+Can the agent report that the budget changed?
+
+For our proposed contract, yes. We explicitly define this response to mean that the campaign service committed the new budget to its authoritative configuration state. It does not mean that every downstream advertising system has already observed the change.
+
+That boundary matters because another API might process updates asynchronously. Instead of committing the change immediately, the service could return:
+
+```http
+HTTP/1.1 202 Accepted
+Content-Type: application/json
+
+{
+  "operation_id": "op_781",
+  "status": "pending"
+}
+```
+
+The request has been accepted for processing, but the work may not be complete. The client can inspect its status through a documented endpoint:
+
+```http
+GET /operations/op_781
+```
+
+The API must define what `pending`, `completed` and `failed` mean, and which state transition constitutes completion.
+
+An operation identifier helps the client inspect a particular operation. It is not the same as an idempotency key, which identifies repeated submissions of one logical request.
+
+### Errors should explain the next safe action
+
+An invalid budget, permission denial, stale resource version and temporary service failure require different client responses. [RFC 9457 — Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457) provides a standard representation for machine-readable errors. For example:
+
+```http
+HTTP/1.1 422 Unprocessable Content
+Content-Type: application/problem+json
+
+{
+  "type": "https://api.example.test/problems/budget-limit",
+  "title": "Budget exceeds the permitted limit",
+  "status": 422,
+  "detail": "The requested daily budget exceeds the account limit."
+}
+```
+
+The problem URI is illustrative.
+
+A validation error may require corrected arguments. A `403` may require different authorization. A `412 Precondition Failed` may require refreshing the resource. A temporary server failure may permit a retry, depending on the operation's semantics. Structured errors should help clients choose the next safe action, not merely provide more elaborate prose.
+
+Keep these outcomes distinct in the contract:
+
+| Condition | What the result must explain |
+| --- | --- |
+| Empty | The authorized account and requested range were checked and had no matches. An empty report is not a service failure. |
+| Partial | Which results are present, which are missing, and whether a continuation can complete the report. |
+| Rejected | The stable problem type and a safe next step. Exclude passwords, keys and protected resource details. |
+| Unavailable | Whether the operation permits retry, when to try again and how to resume. |
+| Unconfirmed change | The logical request or operation identifier and a way to investigate its outcome. A timeout alone cannot establish failure. |
+
+Limits are part of this behaviour. Publish maximum page sizes, operation deadlines and retry windows. For this example, the client makes at most three automatic retries within 30 seconds, with exponential backoff and jitter, respecting a longer `Retry-After` value when supplied. If that delay exceeds the retry deadline, stop and report the unresolved outcome. The deadline bounds client waiting; it does not cancel a server operation or prove that no commit occurred.
+
+## The server changes the budget. The response disappears.
+
+The campaign service validates the request, commits the new budget and prepares a successful response.
+
+Then the connection breaks. The agent receives nothing.
+
+Should it retry?
+
+A timeout means the client did not receive a usable response within the expected time. It does not reveal whether the server received the request or committed the change. The request may have been lost. The change may have committed while the response disappeared. Or the server may still be processing it. All three histories can look identical to the client.
+
+### Repeating an assignment is different from repeating an increment
+
+Consider two operations. One assigns an absolute value:
+
+```json
+{
+  "set_daily_budget_minor": 120000
+}
+```
+
+The other increases the current value:
+
+```json
+{
+  "increase_daily_budget_minor": 20000
+}
+```
+
+If the first operation is applied twice without intervening changes, the intended final budget remains £1,200. If the second is applied twice, the budget increases by £400 instead of £200.
+
+Mathematically, an operation `f` is idempotent when `f(f(x)) = f(x)`: applying it again leaves the same result. Assigning a constant can satisfy this property. Incrementing a value generally does not.
+
+This property concerns the intended effect, rather than every piece of work performed while handling a request. However, repeating an idempotent update does not guarantee that every secondary effect occurs only once. The server might produce another audit record or notification. If those effects matter, the application needs additional guarantees.
+
+### Identifying one logical operation
+
+Suppose the API supports request deduplication through an `Idempotency-Key` header. The agent sends:
+
+```http
+PATCH /campaigns/cmp_42
+Content-Type: application/merge-patch+json
+Idempotency-Key: "budget-change-781"
+
+{
+  "daily_budget": {
+    "amount_minor": 120000,
+    "currency": "GBP"
+  }
+}
+```
+
+If the response disappears, the agent retries with the same key and identical request. The server can recognize that both submissions represent one logical operation. But this requires more than a header. The service must define the key's scope, how it detects argument mismatches, how concurrent submissions are handled and how long deduplication records remain available.
+
+Our proposed contract scopes keys to the authenticated client, operation and campaign. The request fingerprint includes the patch body and `If-Match` precondition. Permission is checked on every submission, including a duplicate. Reusing a key with a different fingerprint is rejected.
+
+For this fictional API, the recovery policy is:
+
+| Submission state | Response and client action |
+| --- | --- |
+| First submission | Reserve the key atomically before execution. Only one handler may commit this logical change. |
+| Same request still processing | Return `409 Conflict` with problem type `operation-in-progress` and `Retry-After: 2`. Wait before retrying the identical request and key. |
+| Same request completed | Return the recorded outcome without executing again. A recorded success describes the earlier commit; it does not assert that the budget is unchanged now. |
+| Same key, different request | Return `422 Unprocessable Content` with problem type `idempotency-key-reused`. Do not silently alter the arguments or precondition. |
+| More than 24 hours after first acceptance | Deduplication is no longer guaranteed. A missing record can be treated as a new submission. Stop automatic replay and reconcile operation evidence and current state before deciding on a new change. |
+
+Records remain available for at least 24 hours after first acceptance and are never evicted while execution is unresolved. A worker crash must be reconciled before another handler is allowed to execute the reserved operation. The problem types above belong to this example's contract, not to a universal header policy.
+
+One implementation could commit the budget update and its deduplication record in the same database transaction, making those two changes atomic within that database. That does not automatically include external notifications or other services in the same transaction. Those effects require their own coordination and recovery mechanisms.
+
+Amazon's [Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/) explains how request identifiers support safer retries and why late-arriving requests and changing caller intent complicate the design. An idempotency key therefore provides a bounded application guarantee, not a promise that every possible downstream effect occurs exactly once.
+
+### Another actor changes the budget
+
+Now introduce a different problem. The agent reads the campaign while its budget is £1,000. Before it submits the change, a human operator updates the budget to £1,500.
+
+An unconditional assignment to £1,200 could overwrite that newer decision. The request might be idempotent. It would still violate the operator's instruction to change the budget only if it remained £1,000. This is a concurrency problem. One solution is optimistic concurrency control using an HTTP conditional request.
+
+When the agent reads the campaign, the server returns a strong ETag:
+
+```http
+HTTP/1.1 200 OK
+ETag: "campaign-v7"
+Content-Type: application/json
+
+{
+  "campaign_id": "cmp_42",
+  "daily_budget": {
+    "amount_minor": 100000,
+    "currency": "GBP"
+  }
+}
+```
+
+The agent makes its update conditional on the version it observed:
+
+```http
+PATCH /campaigns/cmp_42
+Content-Type: application/merge-patch+json
+If-Match: "campaign-v7"
+Idempotency-Key: "budget-change-781"
+
+{
+  "daily_budget": {
+    "amount_minor": 120000,
+    "currency": "GBP"
+  }
+}
+```
+
+The server must evaluate the precondition against the current representation before modifying the resource. Any change to this selected representation must invalidate its strong ETag, and checking the condition must be coordinated atomically with the update.
+
+If the ETag no longer matches, the server does not perform the requested modification. The normal response is `412 Precondition Failed`, subject to the narrow already-applied exception permitted by HTTP semantics. The agent must retrieve fresh state and reconsider the operation.
+
+Idempotency and concurrency control answer different questions.
+
+| Mechanism          | Question answered                                                     |
+| ------------------ | --------------------------------------------------------------------- |
+| Idempotency key    | Have we already processed this logical request?                       |
+| Conditional update | Is the resource still in the version on which the decision was based? |
+| Operation status   | What outcome has the service recorded for this operation?             |
+
+Our proposed API uses both an idempotency key and a conditional update. A retry of an already completed operation can retrieve its recorded result under the documented deduplication policy. A genuinely new operation must satisfy its current preconditions.
+
+An in-progress duplicate follows the `409` policy above. Once the 24-hour retry window has passed, the client must reconcile rather than assume the key still prevents another execution.
+
+### Where the guarantee ends
+
+The same boundary applies during recovery: a recorded commit in the campaign service does not establish immediate propagation to downstream systems.
+
+The important question is therefore not simply whether the request succeeded. It is **which state transition has been confirmed, by which authority, and what remains uncertain**.
+
+<ApiDesignVisual kind="timeline" />
+
+## A valid report can still be wrong
+
+The budget update has shown why clients need precise contracts for changing state. The reporting application faces the complementary problem: observing state accurately.
+
+It needs many daily performance records for campaign cmp_42 over a long reporting period. Returning everything in one response could require excessive memory, bandwidth and processing time, so the API divides the result into pages.
+
+```http
+GET /campaigns/cmp_42/performance?start_date=2026-01-01&end_date=2026-11-01&page_size=100
+```
+
+The server returns records and a continuation token:
+
+```json
+{
+  "results": [
+    {
+      "date": "2026-11-01",
+      "impressions": 15000,
+      "conversions": 42
+    }
+  ],
+  "next_page_token": "opaque-token"
+}
+```
+
+The client repeats the same filters and supplies the returned token:
+
+```http
+GET /campaigns/cmp_42/performance?start_date=2026-01-01&end_date=2026-11-01&page_size=100&page_token=opaque-token
+```
+
+For this API, dates are inclusive UTC reporting dates and records are ordered by date, newest first. An absent `next_page_token` marks the final page. A short or empty page with a token is not proof of completion. The default page size is 100 and the maximum is 500; larger requests are rejected.
+
+But what happens if the underlying data changes between pages?
+
+### The collection moves while the client reads it
+
+The reporting client retrieves the first 100 daily records. Before it requests the next page, a late-arriving day's record is inserted near the beginning of the collection. With offset-based pagination, the insertion may shift the boundary. A record can appear twice, or another can be skipped. Every request may return `200 OK`. The combined report can still be incomplete.
+
+Cursor-based pagination can avoid some problems caused by shifting offsets, but a cursor alone does not guarantee a stable snapshot.
+
+For our reporting API, we will define an explicit snapshot contract. The first request establishes a logical snapshot. Its opaque continuation token is bound to that snapshot, the caller's authorization context, the query filters and the ordering.
+
+Subsequent requests traverse the same dataset for 15 minutes from snapshot creation. Each page still requires current authorization; possession of a token never grants access. If the snapshot expires, the service returns `410 Gone` with problem type `snapshot-expired`. The client must restart and discard the incomplete run rather than combine pages from two snapshots.
+
+The snapshot fixes what was known at creation time. Late conversions and later corrections are excluded from that run; consistent retrieval does not make provisional measurements final.
+
+The server must implement the storage, versioning or materialization needed to uphold this guarantee. Other APIs may deliberately offer a live, changing view. The important point is that clients must know which consistency model they are receiving.
+
+[Google AIP-158 — Pagination](https://google.aip.dev/158) documents pagination patterns and emphasizes that continuation tokens must not substitute for authorization.
+
+### Meaning can be lost without losing data
+
+Suppose the reporting API returns:
+
+```json
+{
+  "conversions": 0
+}
+```
+
+Does that mean the campaign generated no conversions?
+
+Perhaps. But it could also mean measurement is unavailable or attribution is incomplete. If every state is represented as zero, the reporting application cannot distinguish them. A better contract separates the measurement from its availability:
+
+```json
+{
+  "conversions": {
+    "value": null,
+    "status": "not_available"
+  }
+}
+```
+
+A measured zero would instead have `value: 0` and a documented `measured` status.
+
+The contract should also explain whether values are final, estimated or subject to revision. Preserve campaign IDs, currency, timezone, attribution definition, source system and data-as-of time with exported results, alongside any transformations. A report generation time alone does not establish source freshness.
+
+Reporting dates create similar problems. A conversion attributed to the advertising interaction date is not necessarily comparable to one attributed to the purchase date. Both can be valid numbers attached to valid dates while answering different questions. A schema can establish that a field contains a number. The API contract must explain what that number measures.
+
+**Correct transmission is not the same as correct interpretation.**
+
+## The API changes without asking its clients
+
+The campaign platform evolves. New features are introduced, internal services change and reporting definitions improve. But its clients may not change at the same pace. The dashboard might be updated weekly. An external integration might run unchanged for years. An agent might discover a tool schema dynamically while still relying on assumptions embedded in its instructions.
+
+How can the service evolve without unexpectedly breaking them?
+
+### Structural compatibility is not semantic compatibility
+
+Suppose the original response contains:
+
+```json
+{
+  "campaign_id": "cmp_42",
+  "daily_budget": {
+    "amount_minor": 120000,
+    "currency": "GBP"
+  }
+}
+```
+
+The service adds a field:
+
+```json
+{
+  "campaign_id": "cmp_42",
+  "daily_budget": {
+    "amount_minor": 120000,
+    "currency": "GBP"
+  },
+  "display_name": "Coffee grinder campaign"
+}
+```
+
+Clients that tolerate unknown response fields may continue working. Strict clients might reject the new property. Compatibility depends partly on the consumer contract.
+
+Now consider a different change. The reporting API keeps a numeric field named `conversions`, but silently changes its attribution definition from interaction date to purchase date. The schema is unchanged. Every response remains structurally valid. Yet a client comparing historical values may now produce misleading trends. This is a semantic breaking change.
+
+Structural compatibility concerns whether existing clients can continue exchanging and parsing messages. Semantic compatibility concerns whether the operations and data still mean what clients are entitled to expect. The two are related, but not identical.
+
+### Versioning manages incompatible contracts
+
+A service can introduce a new API version:
+
+```http
+GET /v2/campaigns/cmp_42/performance
+```
+
+This may allow old and new reporting definitions to coexist while clients migrate. But versioning carries costs: maintaining multiple contracts, documenting differences, testing behaviour and eventually retiring older versions.
+
+Not every change requires a new version. An additive optional field may be compatible under the existing contract. A changed metric definition might require a new field, explicit metric identifier or versioned interface.
+
+[Google AIP-180 — Backwards Compatibility](https://google.aip.dev/180) describes compatibility principles used in Google's API design system. These are useful engineering references, not universal requirements imposed on every API.
+
+### Documentation does not prove compatibility
+
+OpenAPI descriptions can help detect structural changes such as removed fields, changed types and newly required parameters. They cannot reliably detect that a metric's meaning has silently changed. Nor can a schema comparison prove that stale updates are rejected, duplicate operations are handled correctly or unauthorized callers are denied access. Those guarantees require behavioural tests.
+
+For our campaign API, tests should verify that an obsolete ETag cannot overwrite a newer budget, repeated logical requests follow the documented deduplication policy, unauthorized callers cannot modify campaigns and paginated reports respect their consistency contract.
+
+API evolution is not simply about keeping endpoints available. It is about preserving the expectations on which clients legitimately depend.
+
+<ApiDesignVisual kind="compatibility" />
+
+## When the client becomes an AI agent
+
+Our API was designed for applications whose developers explicitly programmed the requests they would make. Now an AI agent can select operations dynamically. The operator instructs it:
+
+> Increase the daily budget of campaign 42 to £1,200, but only if the current budget is still £1,000.
+
+The agent must identify the campaign, inspect its current state, choose the correct operation, supply valid arguments and interpret the result. It may also need approval before execution.
+
+These are familiar API problems, but autonomous invocation exposes weaknesses that carefully programmed integrations might have hidden.
+
+### A tool schema is not a security boundary
+
+An agent-facing tool might be described as:
+
+```json
+{
+  "name": "update_campaign_budget",
+  "description": "Update a campaign's configured daily budget.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "campaign_id": {"type": "string"},
+      "amount_minor": {"type": "integer"},
+      "currency": {"type": "string", "enum": ["GBP"]},
+      "expected_etag": {"type": "string"},
+      "idempotency_key": {"type": "string"}
+    },
+    "required": [
+      "campaign_id",
+      "amount_minor",
+      "currency",
+      "expected_etag",
+      "idempotency_key"
+    ],
+    "additionalProperties": false
+  }
+}
+```
+
+This illustrative schema helps the agent construct valid arguments. It does not establish that the agent selected the correct campaign, has permission to modify it or is acting on current information.
+
+Here, `expected_etag` is the exact strong ETag returned by a preceding campaign read, including its quotes. The trusted adapter maps it to `If-Match`, maps `idempotency_key` to `Idempotency-Key`, and builds the nested JSON Merge Patch body from the amount and currency. It rejects a missing precondition rather than falling back to an unconditional update. For the original decision, the observed ETag is `"campaign-v7"` and the logical key is `budget-change-781`.
+
+The adapter obtains caller identity and any approval evidence from trusted execution context, not from model-supplied identity claims. The server enforces current permission, approval policy and an atomic version check. The harness must bind approval to the campaign, amount, currency and observed version so the agent cannot substitute a fresh ETag after the underlying decision has become stale.
+
+The [Model Context Protocol specification](https://modelcontextprotocol.io/specification) defines mechanisms for discovering and invoking tools, including schemas and behavioural annotations. Annotations can describe intended properties such as whether a tool is read-only or destructive. They are not proof that the implementation behaves accordingly. The service must still enforce permissions, preconditions and business rules.
+
+### Approval is not execution
+
+Suppose the operator approves the budget change. That approval permits a particular action under defined conditions. It does not mean the action has happened.
+
+The agent must invoke the operation. The server must validate it. The service must process it. The result must be interpreted according to the contract.
+
+An agent receiving `202 Accepted` can report that the request was accepted for processing. It cannot yet claim that the budget changed. If the API returns an operation identifier, the agent can inspect its status. If the API defines a synchronous authoritative update, the agent can rely on that result within its documented boundary.
+
+The agent should preserve evidence connecting the operator's instruction, the approved action, the submitted request and the observed outcome. That might include the campaign identifier, requested amount, approval reference, resource version, operation identifier and authoritative result. The exact fields depend on the application. The separation between proposal, approval, execution and verification does not.
+
+Autonomous clients make explicit contracts more important, not less. An agent should not be expected to infer guarantees that the API has never made.
+
+## Test the contract by breaking it
+
+Return to the original request:
+
+```http
+PATCH /campaigns/cmp_42
+Content-Type: application/json
+
+{
+  "daily_budget": 1200
+}
+```
+
+Imagine this is the only documentation provided by an unfamiliar API. You can identify the resource and construct a syntactically valid request. But you cannot yet build a reliable client.
+
+The units are unclear. The operation's meaning is incomplete. The permissions, concurrency rules and response guarantees are unspecified. The safe response to a timeout is unknown. The interface exposes an operation, but it has not established enough of a contract.
+
+<ApiContractExercise />
+
+The exercise offers a practical way to evaluate unfamiliar APIs: identify what the client knows, what it assumes and which assumptions the contract actually guarantees.
+
+### Review your API contract
+
+Use this checklist when reviewing an endpoint or an agent tool. Record the guarantee and the evidence for each answer.
+
+| Decision | Questions to resolve |
+| --- | --- |
+| Inputs and meaning | Which resource, units, currency, dates, defaults and patch semantics apply? Which fields may change? |
+| Authority | Who is calling, which operation and records may they access, and where is approval enforced? |
+| Effects and completion | What state transition does success confirm? What is still pending downstream? How can accepted work be inspected? |
+| Failure and recovery | Can clients distinguish empty, partial, rejected, unavailable and unconfirmed outcomes? Which stable problem type guides the next action? |
+| Retries and concurrency | What identifies one logical request? What happens during processing or after expiry? Which precondition protects the decision from stale state? |
+| Reporting and provenance | How do pagination and snapshots work? What do missing, zero and provisional values mean? Which source, timezone, attribution and freshness travel with exports? |
+| Limits | What bounds page size, work, waiting, retries and retention? Does a client deadline leave server work running? |
+| Evolution and evidence | Which structural and semantic promises must survive change? Which behavioural tests exercise permission denial, lost responses, duplicate requests, stale versions and expired snapshots? |
+
+A well-designed API cannot eliminate network failures, concurrent modifications or changing requirements. It can make those conditions explicit enough that independently developed clients know how to behave when they occur.
+
+**A reliable API is not one that promises nothing will go wrong. It is one whose promises remain meaningful when things do.**
+
+## Apply the principles in a case
+
+The [advertising reporting case](/learn/system-design/chatgpt-ads-reporting) applies these questions to campaign reports: collect every page, preserve measurement definitions and make gaps visible. Its examples do not establish live advertising account access.
+
+Use the [advertiser API guide](/learn/system-design/chatgpt-ads-apis) to distinguish the interfaces available for different tasks. The [platform guide](/learn/system-design/advertising-platforms) explains how ads are chosen, delivered and measured. These references have their own sources and limits; the fictional campaign API above is not their provider contract.
+

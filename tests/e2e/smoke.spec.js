@@ -284,11 +284,11 @@ test("the guide is readable as static HTML without JavaScript", async ({
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "API design principles",
+        name: "API Design: How Software Makes Promises It Can Keep",
       }),
     ).toBeVisible();
     await expect(page).toHaveTitle(
-      "API design principles · Harness · AI Knowledge Hub",
+      "API Design: How Software Makes Promises It Can Keep · Harness · AI Knowledge Hub",
     );
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",
@@ -301,20 +301,20 @@ test("the guide is readable as static HTML without JavaScript", async ({
     await expect(page.getByRole("navigation", { name: "Reference context" })).toBeVisible();
     await page
       .getByRole("navigation", { name: "Guide contents" })
-      .getByRole("link", { name: /Define the contract/ })
+      .getByRole("link", { name: /The contract between independent programs/ })
       .click();
     await expect(
-      page.getByRole("heading", { name: "Define the contract", exact: true }),
+      page.getByRole("heading", { name: "The contract between independent programs", exact: true }),
     ).toBeInViewport();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
     await page.locator(".lesson-mobile-contents summary").click();
     await page
       .getByRole("navigation", { name: "Guide contents" })
-      .getByRole("link", { name: /Make failures useful/ })
+      .getByRole("link", { name: /What does a successful response prove/ })
       .click();
     await expect(
-      page.getByRole("heading", { name: "Make failures useful", exact: true }),
+      page.getByRole("heading", { name: "What does a successful response prove?", exact: true }),
     ).toBeInViewport();
     const sitemap = await request.get("/sitemap.xml");
     const sitemapText = await sitemap.text();
@@ -438,14 +438,14 @@ test("guide navigation, hydration, saved theme and metadata stay coherent", asyn
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("How Advertising Platforms Work");
   await page.getByRole("link", { name: "How ChatGPT Ads works", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("How ChatGPT Ads works");
-  await page.getByRole("link", { name: "API design principles", exact: true }).click();
+  await page.getByRole("link", { name: "API Design: How Software Makes Promises It Can Keep", exact: true }).click();
   await expect(page).toHaveURL(/\/learn\/system-design\/api-design$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "API design principles",
+    "API Design: How Software Makes Promises It Can Keep",
   );
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     "content",
-    /how to tell whether the task is finished/,
+    /permissions, completion, safe retries/,
   );
   await page.getByRole("button", { name: "Switch to light mode" }).click();
   await page.reload();
@@ -529,9 +529,9 @@ test("guide content reflows in both themes with usable mobile contents", async (
   await page.locator(".lesson-mobile-contents summary").click();
   await page
     .locator(".lesson-mobile-contents")
-    .getByRole("link", { name: /Define the contract/ })
+    .getByRole("link", { name: /The contract between independent programs/ })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Define the contract", exact: true }),
+    page.getByRole("heading", { name: "The contract between independent programs", exact: true }),
   ).toBeInViewport();
 });
