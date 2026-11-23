@@ -1,0 +1,15 @@
+/* Use the marketplace article's monochrome maps with larger reading labels. */
+.reporting-diagram .marketplace-node > span,
+.reporting-diagram .marketplace-node > p { font-size: .875rem; }
+.reporting-diagram .marketplace-lane { font-size: .75rem; letter-spacing: .04em; }
+.reporting-diagram .marketplace-diagram-note,
+.reporting-diagram .marketplace-diagram-hint,
+.reporting-diagram .marketplace-diagram-description summary { font-size: .875rem; }
+.reporting-clock-grid { fill: none; stroke: var(--line); stroke-width: 1; }
+.reporting-clock-tick,
+.reporting-clock-mark { position: absolute; transform: translateX(-50%); color: var(--text); font-size: .875rem; line-height: 1.5; white-space: nowrap; }
+.reporting-clock-mark { background: var(--surface); padding-inline: 3px; }
+.reporting-answer { margin-block: 24px; border-block: 1px solid var(--line); }
+.reporting-answer summary { padding-block: 14px; min-block-size: 44px; cursor: pointer; font-size: 1rem; }
+.reporting-answer p { font-size: 1rem; line-height: 1.8; color: var(--muted); margin-block: 16px; }
+.reporting-answer summary:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }

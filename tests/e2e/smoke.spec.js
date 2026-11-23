@@ -33,11 +33,11 @@ test("five tracks connect to the existing labs and preserve deep links", async (
   await page.goto("/");
   const navigation = page.locator(".desktop-navigation");
   for (const [label, title, slug, caseAction, caseHeading] of [
-    ["System design", "System design", "system-design", "Define the report contract", "Decide what the report should cover"],
-    ["Algorithms & data", "Algorithms & Data", "algorithms", "Check that you have every batch", "Check that you have every batch"],
-    ["Software & production", "Software & production", "software-production", "Handle an interrupted report", "Show what your report is missing"],
-    ["Measurement & ML", "Measurement & ML", "measurement-ml", "Interpret credited conversions", "Interpret credited conversions"],
-    ["AI engineering", "AI Engineering & Harnesses", "ai-engineering", "Give an agent a bounded reporting tool", "Give an agent a bounded reporting tool"],
+    ["System design", "System design", "system-design", "Define the report contract", "Twelve conversions. Then fifteen. Then fourteen."],
+    ["Algorithms & data", "Algorithms & Data", "algorithms", "Check that you have every batch", "When the API returns only part of the answer"],
+    ["Software & production", "Software & production", "software-production", "Handle an interrupted report", "Recovery requires more than saving a cursor"],
+    ["Measurement & ML", "Measurement & ML", "measurement-ml", "Interpret credited conversions", "What the reported conversions actually mean"],
+    ["AI engineering", "AI Engineering & Harnesses", "ai-engineering", "Give an agent a bounded reporting tool", "Building a report another system can safely use"],
   ]) {
     await navigation.getByRole("link", { name: label, exact: true }).click();
     await expect(
@@ -472,11 +472,11 @@ test("guide navigation, hydration, saved theme and metadata stay coherent", asyn
     .not.toMatch(/Christmas|holiday/i);
   await page
     .getByRole("navigation", { name: "Guide contents" })
-    .getByRole("link", { name: /Show what your report is missing/ })
+    .getByRole("link", { name: /Recovery requires more than saving a cursor/ })
     .click();
   await expect(
     page.getByRole("heading", {
-      name: "Show what your report is missing",
+      name: "Recovery requires more than saving a cursor",
       exact: true,
     }),
   ).toBeInViewport();

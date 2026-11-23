@@ -165,6 +165,6 @@ describe("Learning content integrity", () => {
     expect(metadata.canonical).toBe(
       "https://harness.ai-knowledge-hub.org/learn/system-design/chatgpt-ads-reporting",
     );
-    expect(metadata.title).toContain("How to collect ChatGPT Ads reports");
+    expect(metadata.title).toContain("How Advertising Reporting Systems Work");
   });
 });

@@ -59,9 +59,9 @@ test("a reader can start with a principle or go directly to the featured case", 
   await expect(start.getByRole("heading", { name: "Map the system before choosing components" })).toBeVisible();
   await start.getByRole("link", { name: "Read API design principles" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "API design principles" })).toBeVisible();
-  await page.getByRole("region", { name: "How to collect ChatGPT Ads reports" })
+  await page.getByRole("region", { name: "How Advertising Reporting Systems Work" })
     .getByRole("link", { name: "Read the reporting case" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "How to collect ChatGPT Ads reports" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "How Advertising Reporting Systems Work" })).toBeVisible();
   await expect(page.getByText("Guide preview", { exact: true })).toBeVisible();
   await page.getByRole("navigation", { name: "Breadcrumb" })
     .getByRole("link", { name: "System design" }).click();
@@ -69,14 +69,14 @@ test("a reader can start with a principle or go directly to the featured case", 
 
   await page.goto("/");
   await page.getByRole("link", { name: "See the featured case" }).click();
-  const featured = page.getByRole("region", { name: "How to collect ChatGPT Ads reports" });
+  const featured = page.getByRole("region", { name: "How Advertising Reporting Systems Work" });
   await expect(featured.getByText("Featured case · Preview", { exact: true })).toBeInViewport();
   await featured.getByRole("link", { name: "Read the reporting case" }).click();
   await expect(page).toHaveURL(/\/learn\/system-design\/chatgpt-ads-reporting$/);
   const tracks = page.getByRole("navigation", { name: "Explore the case by track" });
   await expect(tracks.getByRole("listitem")).toHaveCount(5);
   await tracks.getByRole("link", { name: /AI engineering/ }).click();
-  await expect(page.getByRole("heading", { name: "Give an agent a bounded reporting tool" })).toBeInViewport();
+  await expect(page.getByRole("heading", { name: "Building a report another system can safely use" })).toBeInViewport();
   await tracks.getByRole("link", { name: "Run the samples locally" }).click();
   await expect(page.getByRole("heading", { name: "Try the report collector" })).toBeInViewport();
   await expect(page.getByRole("link", { name: "Open run instructions for Local reporting CLI and MCP tool" })).toBeVisible();
@@ -113,7 +113,7 @@ test.describe("production discovery on a phone without JavaScript", () => {
     await expect(page.getByRole("region", { name: "In development" }).getByRole("link")).toHaveCount(0);
     await examples.getByRole("link", { name: "Handle an interrupted report" }).click();
     await expect(page).toHaveURL(/\/learn\/system-design\/chatgpt-ads-reporting#application-result$/);
-    const section = page.getByRole("region", { name: "Show what your report is missing" });
+    const section = page.getByRole("region", { name: "Recovery requires more than saving a cursor" });
     await expect(section.getByRole("heading", { level: 2 })).toBeInViewport();
     await section.getByRole("link", { name: "Explore Software & production" }).click();
     await expect(page).toHaveURL(/\/learn\/software-production$/);
@@ -136,7 +136,7 @@ test("the new starting paths lead to working references on a phone", async ({ pa
   await expect(page.getByRole("table").getByRole("cell", { name: "2.0%", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Interpret credited conversions in the reporting case" }).click();
   await expect(page).toHaveURL(/chatgpt-ads-reporting#interpret-metrics$/);
-  await expect(page.getByRole("heading", { name: "Interpret credited conversions", exact: true })).toBeInViewport();
+  await expect(page.getByRole("heading", { name: "What the reported conversions actually mean", exact: true })).toBeInViewport();
 
   await page.goto("/learn/ai-engineering");
   await expect(start.getByText("Use an agent to build software.", { exact: true })).toBeVisible();
