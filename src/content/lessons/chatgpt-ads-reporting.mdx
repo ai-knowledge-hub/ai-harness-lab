@@ -1,18 +1,18 @@
 ---
 id: "chatgpt-ads-reporting"
-title: "How to collect ChatGPT Ads reports"
-shortTitle: "Reporting example"
-description: "Request campaign results, check which data you received and show readers what is missing."
+title: "How Advertising Reporting Systems Work"
+shortTitle: "Advertising reporting"
+description: "Follow a coffee-grinder campaign from distributed events to reporting rows, late conversions, complete retrieval and evidence an agent can use."
 trackId: "system-design"
 kind: "case"
 publicationStatus: "draft"
-format: "Worked example"
-readingMinutes: 11
-updatedAt: "2026-11-09"
+format: "System-design case study"
+readingMinutes: 19
+updatedAt: "2026-11-23"
 objectives:
-  - "Turn a question about daily campaign spend into an Insights request."
-  - "Collect the result in batches and show which rows, dates, or metrics are missing."
-  - "Decide whether the result is ready for a decision or safe to pass to an agent."
+  - "Trace how event identity, attribution and aggregation define a reporting row."
+  - "Distinguish source-data maturity from API retrieval completeness and scope coverage."
+  - "Separate attributed conversions, causal evidence and permission to act."
 prerequisiteConceptIds:
   - "http-basics"
 conceptIds:
@@ -35,129 +35,371 @@ relatedGuideIds:
   - "chatgpt-ads-apis"
   - "chatgpt-ads"
   - "advertising-platforms"
-introduction: "Build a read-only report of daily spend by campaign. Return the rows you received, their totals, and enough detail to tell whether the report is complete and current. Try the collector locally with fictional data. Live setup is in development and requires verified advertiser API access."
+introduction: "From distributed events to decisions you can trust."
 sectionIds:
   - scope-the-operation
-  - provider-request
+  - event-to-reporting-row
+  - why-yesterday-changes
+  - event-and-snapshot-identity
   - complete-retrieval
   - application-result
-  - report-outcomes
   - interpret-metrics
   - bounded-agent-tool
+  - test-your-understanding
+  - report-guarantees
+  - report-outcomes
   - reference-downloads
+  - sources-and-scope
 ---
 
 import { ReferenceDownloads } from "../../components/AdsReference.jsx";
 import { AdsReportingReference } from "../../components/AdsReportingReference.jsx";
 import CaseTrackReturn from "../../components/CaseTrackReturn.astro";
+import { ReportingDiagram } from "../../components/ReportingDiagram";
+import "../../styles/marketplace-diagrams.css";
+import "../../styles/reporting-diagrams.css";
 
-## Decide what the report should cover
+## Twelve conversions. Then fifteen. Then fourteen.
 
-Start with results by campaign and day for one ad account you have permission to use. Choose the dates and metrics, then keep the account’s time zone, currency and the time you collected the data with the report. A live request needs separate Advertiser API access. [Reporting definitions and data updates](https://developers.openai.com/ads/reporting)
+At 9 a.m., an advertising report says yesterday's campaign generated 12 conversions. At 3 p.m., it says 15. The following morning, it says 14.
 
-<figure class="lesson-flow">
-<figcaption>Harness example of how to collect and save a report</figcaption>
-<ol>
-<li><span class="track-number">01</span><span>Request data from your server</span></li>
-<li><span class="track-number">02</span><span>Collect results in batches</span></li>
-<li><span class="track-number">03</span><span>Save data and progress</span></li>
-<li><span class="track-number">04</span><span>Show results and gaps</span></li>
-</ol>
-</figure>
+Each number may be a valid observation made at a different time. Advertising reports combine records that can arrive late, out of order or more than once. Understanding the result requires knowing what the platform counted and what the client retrieved.
 
-Reports show totals for the campaigns or ads you ask about. Individual conversations, the ads considered for them and their ranking scores stay inside the platform. Keep the Ads API key, a secret your software uses to sign in, on your server. [Authentication and account scope](https://developers.openai.com/ads/api-reference/authentication)
-
-Define the result before choosing the interface. Return the requested scope, the scope actually covered, and a status with the reason collection stopped. A subtotal should identify the rows it covers so the caller can tell whether it answers the original question.
+We will follow a fictional retailer advertising a coffee grinder on 21 November 2026. The example uses UTC reporting dates and GBP. **The task is to establish what the report tells us, what may still change, and which decisions the evidence supports.**
 
 <CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="scope-the-operation" />
 
-## Ask Insights for daily campaign results
+## Where the numbers come from
 
-Insights is the part of the Ads API that returns performance reports. This request asks for one row per campaign per day, with the campaign ID, date, impressions, clicks and spend. [Insights request reference](https://developers.openai.com/ads/api-reference/insights)
+A customer sees an advertisement, clicks it and purchases the grinder that afternoon. The advertising platform records an impression, a tracking service records a click, and the retailer records an order. A browser integration or server-side conversion API then notifies the advertising platform about the purchase.
 
-```http title="Example API request · sample dates"
-GET https://api.ads.openai.com/v1/ad_account/insights
+These systems may have different clocks, identifiers and delivery guarantees. The platform must validate the records, determine which belong together and decide whether the purchase qualifies for attribution. Some purchases may be unobservable or impossible to match.
 
-aggregation_level=campaign
-time_granularity=daily
-fields[]=metadata.readable_time
-fields[]=campaign.id
-fields[]=campaign.impressions
-fields[]=campaign.clicks
-fields[]=campaign.spend
-time_ranges[]={"type":"unix_range","start":1793491200,"end":1793577600}
+A conceptual model is:
 
-# Query values must be URL-encoded.
-# Authorisation is supplied by your server, never this page.
-```
+**Event collection → Validation and identity resolution → Attribution → Aggregation → Reporting API**
 
-This request covers 1 November 2026 in UTC, the time standard used for the example. The end time is midnight at the start of 2 November, so the request excludes that day. Check the account’s reporting time zone if you want a local calendar day. The download labels OpenAI’s request fields and our own report fields separately.
+These are processing responsibilities, not necessarily separate services. The model does not describe any advertising company's private infrastructure.
 
-<CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="provider-request" />
+### From individual events to reporting rows
 
-## Check that you have every batch
+An event describes an occurrence; a reporting row contains calculations over a group of events. Our retailer requests daily campaign performance and receives:
 
-| Interface | How to get the full result |
-| --- | --- |
-| General Insights | Insights sends results in batches called pages. Save first\_id, last\_id and has\_more. If has\_more is true, send the same request with after set to the last\_id from that page. Stop when has\_more is false. |
-| Dedicated conversion report | A request to POST /conversions/insights can return error 413 if the report is too large. In that case you get no rows or marker for a next page. Split the request by campaign or other ID, or use shorter date ranges that do not overlap. |
-| Local sample collector | Track the page markers already seen and the campaign and date pairs already accepted. Stop on a repeated marker or duplicate row and retain the earlier valid batches. |
+| Metric | Reported value |
+|---|---:|
+| Impressions | 8,000 |
+| Clicks | 320 |
+| Spend | £160 |
+| Attributed conversions | 12 |
 
-Pagination means asking for the next page of the same result. Splitting an oversized conversion report means making several smaller requests and combining their results. Use the rules for the report you asked for. [Reporting limits](https://developers.openai.com/ads/reporting)
+*All figures, identifiers and campaign events in this article are hypothetical.*
+
+The account is `retailer-uk`, the campaign is `coffee-grinder`, and the reporting date is 21 November 2026.
+
+<ReportingDiagram kind="event-to-row" />
+
+For this report, the **aggregation key** consists of account, campaign and reporting date. Adding country as a dimension adds country to the key. Two rows for the same campaign and date but different countries are legitimate groups, not duplicates.
+
+Keep three concepts distinct:
+
+- The aggregation key identifies a group within a report.
+- The report definition specifies scope, dimensions, metrics and calculation rules, including attribution settings.
+- The snapshot identity distinguishes observations collected at different times.
+
+Matching row keys do not make reports comparable if their definitions differ. Ignoring either distinction can overwrite legitimate rows or combine incompatible observations.
+
+### Even a date is a calculation rule
+
+A purchase at 00:30 UTC on 22 November belongs to that date in a UTC account, but may belong to 21 November in an account reporting farther west. Some systems assign conversions to the advertising interaction's date rather than the purchase date. The API contract must establish which rule applies.
+
+Currency also constrains aggregation: combining spend across currencies requires an explicit conversion policy and exchange-rate basis. **Correct arithmetic cannot compensate for an incorrectly defined measurement.**
+
+## Why yesterday's report changes
+
+Assume three additional eligible purchase notifications are processed between our first and second observations. The purchases happened during the relevant period, but the information needed to credit them arrived later.
+
+**Event time** is when the purchase happened. **Processing time** is when a system handles its notification. Consider three purchases:
+
+| Purchase | Event time | Processing time |
+|---|---|---|
+| A | 21 Nov, 18:10 | 21 Nov, 18:11 |
+| B | 21 Nov, 20:15 | 22 Nov, 11:40 |
+| C | 21 Nov, 19:05 | 22 Nov, 13:20 |
+
+C happened before B but was processed after it. Network delays, scheduled uploads and integration failures can all make processing order differ from event order.
+
+### The problem with closing a reporting window
+
+At midnight, a system counting purchases by event date can publish immediately or wait for more notifications. Waiting may improve coverage, but delays useful information and does not, without an external guarantee, prove that every event has arrived.
+
+Stream-processing systems manage this trade-off explicitly. In Apache Beam, a *window* groups events into a time interval, a *watermark* estimates progress through event time, and a *trigger* determines when an aggregation result is emitted. Depending on configuration, later information can update a provisional result.
+
+*Source: [Apache Beam: Windowing, watermarks and triggers](https://beam.apache.org/documentation/programming-guide/#windowing).*
+
+### Watch the aggregate change
+
+Our simplified processor counts 12 eligible purchases at 09:00, then processes three more for the same reporting date:
+
+`12 + 3 = 15`
+
+The new aggregate supersedes the earlier observation. This illustrates the temporal problem; it does not establish that an advertising platform uses Beam or this update mechanism.
+
+### Freshness is not finality
+
+Metrics can mature at different rates. Impressions and clicks may become reportable relatively quickly, spend may need reconciliation, and conversions depend on event delivery, matching and attribution. OpenAI's Ads reporting documentation describes distinct update schedules for these metrics.
+
+*Source: [OpenAI: Ads reporting documentation](https://developers.openai.com/ads/reporting).*
+
+A report collected five minutes ago can still contain provisional conversion data. An attribution window defines which outcomes qualify for credit after an interaction; it does not necessarily guarantee that all eligible records have arrived or become immutable. Claim finality only when the platform documents that guarantee.
+
+Later information has raised our count to 15. The next morning, it falls to 14.
+
+## When one purchase becomes two events
+
+The retailer sends browser-side and server-side notifications for the same order. Treating them as independent purchases can count one business event twice. Correct counting therefore depends on identity.
+
+### Messages are not purchases
+
+Retries create a similar problem. If a sender receives no acknowledgement, it cannot tell whether the notification was lost or processed. Retrying improves delivery but may produce a second copy.
+
+A stable business-event identifier can help recognise repeated submissions:
+
+`purchase_id = O-1042`
+
+Two notifications with that identity may describe one purchase. A second purchase, `O-1043`, must remain distinct even if the customer, amount and approximate time match. Deduplicating by those attributes alone could erase legitimate activity.
+
+Meta's recommended browser/server deduplication method matches both event identifier and event name. Those rules belong to Meta's contract; they are not universal matching rules for advertising platforms.
+
+*Source: [Meta: Handling Duplicate Pixel and Conversions API Events](https://developers.facebook.com/documentation/ads-commerce/conversions-api/deduplicate-pixel-and-server-events).*
+
+### Why exactly-once processing is not enough
+
+A framework may replay an event after failure while committing its effect on managed state exactly once. Flink documents this guarantee through checkpoint recovery; end-to-end guarantees also depend on the sources and output systems.
+
+*Source: [Apache Flink: Fault tolerance](https://nightlies.apache.org/flink/flink-docs-stable/docs/learn-flink/fault_tolerance/).*
+
+But two different event identifiers can describe the same purchase. Applying each exactly once still counts two conversions. Processing guarantees cannot repair an incorrect business identity.
+
+Three reconciliation problems therefore need different identities. **Event deduplication** recognises records for the same occurrence. **Reporting-row reconciliation** recognises the same aggregate group within one report definition. **Snapshot reconciliation** determines when a newer observation replaces an earlier one.
+
+### Why our report falls from 15 to 14
+
+Assume a duplicate purchase notification was initially counted and later removed:
+
+`15 − 1 = 14`
+
+This correction is hypothetical, not a claim about any provider's production deduplication schedule.
+
+A client collecting both snapshots must not add them. If they describe the same aggregate under the same definition, 14 is the newer observation. Preserve 15 for audit history if useful, but distinguish it from an additional fact to sum. Reconciliation requires the report definition, full aggregation key and observation identity; the latest value still need not be final.
+
+## When the API returns only part of the answer
+
+Our analyst requests campaign performance. The client receives a first page and continuation token, then loses the connection while requesting page two. Its accepted rows can be valid while the requested report remains incomplete. This failure is independent of late source events.
+
+### Pagination does not automatically provide a snapshot
+
+Pagination divides a result into retrievable pieces. A client follows continuation tokens until the API says no pages remain. Whether those pages form a consistent snapshot depends on the documented contract.
+
+Google Ads `Search`, for example, documents cached query results and page tokens; `SearchStream` returns results through a streaming response. Consistency within a cached retrieval does not make the metrics immutable across later queries.
+
+*Sources: [Google Ads API: Page through results](https://developers.google.com/google-ads/api/docs/reporting/paging), [Search and SearchStream](https://developers.google.com/google-ads/api/docs/reporting/overview).*
+
+### Retries must preserve the original question
+
+A timeout alone may not reveal whether a request reached the server or its response was lost. A read-only retry may be appropriate under the API's limits and token rules, but it must preserve the original account, dates, dimensions and attribution configuration.
+
+Use bounded retries, backoff and explicit failure states. If a required page cannot be retrieved, retain accepted rows and mark collection incomplete.
+
+### Pagination and partitioning solve different problems
+
+Pagination divides one query result; partitioning divides a task into smaller queries. A monthly report might use one query per day, each with its own pages. The collector must finish those pages and verify that its partitions cover the intended scope without unintended overlap.
+
+Every submitted query can succeed while a day that was never requested remains missing. Successful API calls alone cannot prove scope coverage.
 
 <CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="complete-retrieval" />
 
-## Show what your report is missing
+## Recovery requires more than saving a cursor
 
-```json title="Sample report from Harness · made-up data"
-{
-  "reference_kind": "illustrative-reporting-envelope",
-  "account_ref": "sample-account",
-  "status": "partial",
-  "coverage": {"completed_partitions": 2, "expected_partitions": 3},
-  "missing_partitions": ["campaign-group-c"],
-  "stop_reason": "retry_budget_exhausted"
-}
-```
+After a crash, a useful checkpoint identifies the original query, completed partitions, accepted pages and continuation state. Tokens remain usable only under the API's rules. If one expires or cannot be resumed safely, restart the affected partition and reconcile its replacement observations without double-counting.
 
-In this example, two of three batches are ready and the remaining batch is named. Give temporary failures a bounded retry budget. If access is denied or the results cannot be validated, stop and return the batches you already accepted with the reason the report is incomplete.
+<ReportingDiagram kind="two-clocks" />
 
-To resume across runs in production, save the original request, accepted batches, and the next cursor. Use the campaign and date to avoid counting a row twice within this report. When figures arrive late, reconcile the newer snapshot for the same scope instead of adding both snapshots together.
+### Four properties, not one status
 
-<aside class="lesson-note">
+Validate a report against four questions:
 
-### Try a retry or a partial run
+| Property | Question |
+|---|---|
+| Retrieval completeness | Did the client retrieve every required page and partition? |
+| Scope coverage | Does the result cover the requested accounts, dates, dimensions and metrics? |
+| Data maturity | Have the underlying metrics reached a suitable processing state for this use? |
+| Decision suitability | Does the evidence support the intended interpretation or action? |
 
-The local collector can retry a simulated temporary failure and return accepted rows when it stops early. Each invocation starts a fresh run. Durable checkpoints and live deployment are in development.
-
-</aside>
+These properties are related, but none guarantees the others. If nine of ten pages contain £900 in compatible, non-overlapping spend rows, £900 is their subtotal, not a verified total for the request. Receiving the final page resolves that retrieval gap without establishing conversion finality or causal impact.
 
 <CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="application-result" />
 
-## Can you use this report?
+## What the reported conversions actually mean
 
-<AdsReportingReference id="chatgpt-ads-reporting-report-outcomes-0" />
+The collector now holds the complete available report: 14 attributed conversions. Whether advertising caused 14 additional purchases is a different question.
 
-<CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="report-outcomes" />
+### Attribution assigns credit
 
-## Interpret credited conversions
+Attribution rules determine which observed conversions receive credit for ad interactions. They may specify eligible clicks or impressions, windows, matching information, reporting dates and attribution models.
 
-Before comparing reports, check that the account, dates, time zone, currency, and attribution settings match. Check coverage and freshness too. An unavailable conversion count represents missing information. A newer snapshot may have a different count for the same dates.
+A customer already planning to buy the grinder might see an ad, click and purchase. The purchase can qualify for attribution even if it would have happened anyway. The report cannot directly observe that alternative outcome.
 
-An attributed conversion is an action the platform credits to an ad under its reporting rules. To estimate how many additional sales the campaign caused, define the outcome and compare it with a credible estimate of what would have happened without the campaign. A suitable holdout can provide that comparison.
+### Incrementality requires a counterfactual
+
+The causal question is: **how many purchases happened because of the advertising that would not otherwise have happened?** A controlled experiment helps estimate the outcome without the campaign.
+
+Suppose eligible customers are randomly assigned to treatment and control groups. Treatment customers are eligible for the advertising intervention; control customers are withheld from it under the experiment's design. We compare their outcomes:
+
+| Group | Customers | Purchases |
+|---|---:|---:|
+| Treatment | 10,000 | 120 |
+| Control | 10,000 | 100 |
+
+The purchase rates are 1.2% and 1.0%, a difference of 0.2 percentage points. Under appropriate randomisation and measurement assumptions, this difference helps estimate the intervention's incremental effect. It does not mean advertising caused all 120 treatment purchases or that the observed difference is the exact effect. Sampling uncertainty, interference and implementation failures matter.
+
+Google's Conversion Lift documentation provides a production example of treatment/control comparisons for advertising impact.
+
+*Source: [Google Ads: Conversion Lift](https://support.google.com/google-ads/answer/12003020).*
+
+### A complete report can still support the wrong conclusion
+
+Suppose attributed conversions rise by 20% after a budget increase. Seasonal demand, a price reduction, inventory or competing campaigns could explain the change. The report has not isolated the budget increase's causal effect.
+
+Attributed reporting can support monitoring and operational decisions under explicit assumptions. Claims about additional sales require evidence that addresses the causal question. An agent recommending budget changes must preserve that distinction.
 
 <CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="interpret-metrics" />
 
-## Give an agent a bounded reporting tool
+## Building a report another system can safely use
 
-Give the tool one job: read a campaign report within an explicit scope. For a live design, the service should enforce account access and request limits. Return the scope, status, coverage, and freshness alongside the values so an agent can explain an incomplete result before recommending a decision.
+The retailer asks an agent: "Should we increase the coffee-grinder campaign budget tomorrow?" A successful reporting call does not establish that the evidence supports a recommendation. The reporting service needs to expose what it retrieved and the conditions under which the figures can be used.
 
-The local MCP tool reads the bundled fictional reports. Its inputs select a scenario and a page limit. Try the partial scenario and check whether the agent can explain which totals are available and why collection stopped. The collector and adapter run instructions are below.
+### Make the guarantees explicit
+
+A proposed consumer-side evidence envelope can include:
+
+- **Scope:** account, period, time zone, currency, dimensions and metric definitions.
+- **Collection:** completed pages and partitions, failures and verified coverage.
+- **Maturity:** collection time, source freshness and known revision limitations.
+- **Provenance:** source API, query identity and observation identifier.
+- **Semantics:** attribution settings, reporting grain and missing-value definitions.
+- **Limitations:** uncertainty and unsupported conclusions.
+
+This is an application design, not an existing OpenAI Ads response schema. Its purpose is to make the report's properties machine-checkable.
+
+### The same report can be acceptable for one use and rejected for another
+
+A report with all requested pages and correct scope can still contain provisional conversions. A dashboard may display it with a freshness warning, while a budget-change workflow requires more mature metrics, a longer comparison period and additional performance evidence. Suitability depends on the intended use.
+
+<ReportingDiagram kind="decision-boundary" />
+
+### An enforceable decision boundary
+
+Before an agent submits a budget-change proposal, a policy might require:
+
+1. Scope matching the campaign and comparison period.
+2. Every required page and partition collected.
+3. Available metrics meeting the workflow's maturity policy.
+4. A specified decision model with explicit assumptions.
+5. Permission to propose the specific action.
+
+Enforce these checks in application logic. A failed condition returns a limitation or requests more evidence. The agent cannot override the policy by producing a persuasive paragraph.
+
+### Recommendation is not execution
+
+Keep four operations distinct:
+
+**Recommendation:** The agent proposes a specific budget change.
+
+**Approval:** An authorised person or policy approves it before execution, with human approval where required.
+
+**Execution:** A separately authorised operation submits the change.
+
+**Verification:** The system checks whether the intended platform state was reached.
+
+A proposal does not establish that the budget changed. A confirmed budget change does not establish that sales improved or that advertising caused the improvement.
 
 <CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="bounded-agent-tool" />
 
-## Reference downloads
+## Test your understanding
+
+Apply the distinctions to three situations before opening the answers.
+
+### Case A: The missing page
+
+Nine of ten pages contain £900 in spend. The final page repeatedly fails. Can the collector report £900 as total campaign spend?
+
+<details className="reporting-answer">
+<summary>Read the answer</summary>
+
+**Answer:** No. It is the subtotal of compatible, non-overlapping received rows. A required page remains missing, so the complete requested total is unknown.
+
+</details>
+
+### Case B: The late conversion
+
+Every page arrives, but the platform documents that recent conversion metrics may change. Is the report complete?
+
+<details className="reporting-answer">
+<summary>Read the answer</summary>
+
+**Answer:** Retrieval and scope may be complete while conversions remain provisional. Preserve both facts.
+
+</details>
+
+### Case C: The budget recommendation
+
+Attributed conversions rise by 20% after a budget increase. An agent recommends another increase because the first "caused more sales." What is missing?
+
+<details className="reporting-answer">
+<summary>Read the answer</summary>
+
+**Answer:** Causal evidence. A recommendation may be defensible under an explicit operational policy, but attributed growth alone does not prove incremental sales. A causal claim needs stronger evidence, such as a well-designed experiment.
+
+</details>
+
+## What a trustworthy report actually guarantees
+
+<span id="preserve-uncertainty-rather-than-disguising-it" className="guide-legacy-anchor" aria-hidden="true" />
+
+Our 12 → 15 → 14 sequence exposes several independent guarantees: event identity determines what counts; processing determines when information arrives; report definitions determine what rows mean; and collection validation establishes what the client received. Measurement assumptions then constrain the conclusions.
+
+A useful report carries those boundaries forward. Keep accepted rows with missing coverage, provisional figures with their collection time and revision limits, and unavailable metrics as missing values. A null conversion count must not silently become zero, and an attributed count must not become a claim of incremental sales.
+
+This discipline applies to financial dashboards, marketplace analytics and operational monitoring as well as advertising. **The result should make clear what is known, what may still change, and what the evidence permits us to do next.**
+
+## Can you use this report?
+
+Optional practice: compare five prepared outcomes from a separate fictional UK account. Open the examples to inspect complete, empty, partial, stale and rejected collections.
+
+<AdsReportingReference id="chatgpt-ads-reporting-report-outcomes-0" />
+
+## Try the collector and keep the evidence
+
+<span id="provider-request" className="guide-legacy-anchor" aria-hidden="true" />
+<span id="provider-request-title" className="guide-legacy-anchor" aria-hidden="true" />
+
+Optional implementation: the [local reporting collector](https://github.com/ai-knowledge-hub/ai-harness-lab/blob/fbddf8b079578848adc943b85b34d925c870ca34/docs/chatgpt-ads-reporting-collector.md) exercises pagination, bounded retries and partial results using separate fictional fixtures. Each invocation starts a fresh run. Durable checkpoints and live collection remain design work; samples need no advertiser account.
+
+For live requests, use the [OpenAI Insights API reference](https://developers.openai.com/ads/api-reference/insights). General Insights is paginated. Oversized dedicated conversion reports return HTTP 413 without rows or a cursor, requiring smaller entity lists or non-overlapping date ranges. [OpenAI reporting limits](https://developers.openai.com/ads/reporting)
+
+Keep advertiser credentials on the server and enforce account access. The downloads below are illustrative application references.
 
 <ReferenceDownloads collection="reporting" />
 
-<CaseTrackReturn guideId="chatgpt-ads-reporting" sectionId="reference-downloads" />
+## Sources and scope
+
+The diagrams and coffee-grinder campaign are teaching models. The 12 → 15 → 14 sequence does not establish any provider's update schedule or reconciliation mechanism. Production examples support only the contracts described in their sources, not a reconstruction of private infrastructure.
+
+1. [Apache Beam programming guide](https://beam.apache.org/documentation/programming-guide/#windowing): event-time windows, watermarks and triggers.
+2. [Apache Flink fault tolerance](https://nightlies.apache.org/flink/flink-docs-stable/docs/learn-flink/fault_tolerance/): exactly-once managed state and end-to-end conditions.
+3. [Meta event deduplication](https://developers.facebook.com/documentation/ads-commerce/conversions-api/deduplicate-pixel-and-server-events): browser/server event matching.
+4. [OpenAI Ads reporting](https://developers.openai.com/ads/reporting): aggregation, attribution, missing values, update cadence and limits.
+5. [Google Ads API pagination](https://developers.google.com/google-ads/api/docs/reporting/paging) and [reporting overview](https://developers.google.com/google-ads/api/docs/reporting/overview): cached queries, expiring tokens and streaming retrieval.
+6. [Google Ads Conversion Lift](https://support.google.com/google-ads/answer/12003020): treatment/control comparisons for incremental impact.
+
+Continue with [attribution and lift](/learn/measurement-ml/attribution-and-lift) for measurement, or [marketplace consistency](/learn/system-design/when-an-agent-checkout-times-out) for another system in which observations and outcomes can disagree.

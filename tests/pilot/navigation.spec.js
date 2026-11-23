@@ -53,7 +53,7 @@ for (const javaScriptEnabled of [false, true]) {
         ["/", /Build and operate AI products/i],
         ["/learn/system-design", "System design"],
         ["/learn/system-design/chatgpt-ads-apis", "ChatGPT Ads APIs for advertisers"],
-        ["/learn/system-design/chatgpt-ads-reporting", "How to collect ChatGPT Ads reports"],
+        ["/learn/system-design/chatgpt-ads-reporting", "How Advertising Reporting Systems Work"],
         ["/learn/system-design/api-design", "API design principles"],
         ["/learn/system-design/advertising-platforms", "How advertising platforms work"],
       ]) {
