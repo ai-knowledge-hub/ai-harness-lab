@@ -1,0 +1,93 @@
+.platform-visual { margin: 40px 0; padding-block: 24px; border-block: 1px solid var(--line); min-inline-size: 0; scroll-margin-block-start: calc(var(--header-height) + 20px); }
+.platform-visual figcaption { color: var(--text); font-size: 1.375rem; line-height: 1.45; font-weight: 500; }
+.platform-visual h3 { font-size: 1.125rem; margin-block: 28px 12px; }
+.platform-provenance, .platform-note { font-size: .875rem; color: var(--muted); line-height: 1.7; margin-block: 12px 20px; }
+.platform-result { font-size: 1rem; line-height: 1.8; color: var(--text); margin-block: 20px; }
+.platform-stages { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 20px; list-style: none; margin: 28px 0; padding: 0; }
+.platform-stages li { border-block-start: 1px solid var(--text); padding-block-start: 14px; }
+.platform-stages strong, .platform-stages span { display: block; }
+.platform-stages strong { font-size: 1rem; font-weight: 500; margin-block-end: 8px; }
+.platform-stages span { color: var(--muted); font-size: .875rem; line-height: 1.7; }
+.platform-scores { list-style: none; padding: 0; margin-block: 24px; }
+.platform-scores li { margin-block: 20px; }
+.platform-scores li > div:first-child { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; font-size: 1rem; line-height: 1.7; }
+.platform-scores strong { font-weight: 500; }
+.platform-scores [data-score-label] { color: var(--muted); font-variant-numeric: tabular-nums; }
+.platform-bar-track { block-size: 8px; margin-block: 12px; background: var(--line); }
+.platform-bar-track > span { display: block; block-size: 100%; background: var(--text); }
+.platform-controls { margin-block: 24px; }
+.platform-controls summary, .platform-explanation summary { min-block-size: 48px; padding-block: 12px; cursor: pointer; font-size: .9375rem; line-height: 1.7; }
+.platform-controls form { padding-block: 12px; }
+.platform-controls fieldset { min-inline-size: 0; padding: 16px 0; margin: 0; border: 0; }
+.platform-controls legend { font-size: 1rem; color: var(--text); font-weight: 500; }
+.platform-controls label { display: block; font-size: .9375rem; line-height: 1.7; color: var(--text); }
+.platform-controls input[type=number] { display: block; inline-size: 100%; min-block-size: 48px; margin-block: 6px 16px; padding: 10px 12px; border: 1px solid var(--text); border-radius: 0; background: var(--bg); color: var(--text); font: inherit; font-size: max(1rem, 1em); }
+.platform-controls .platform-choice { display: flex; align-items: center; gap: 12px; min-block-size: 48px; padding-block: 8px; }
+.platform-choice input { flex: 0 0 auto; inline-size: 20px; block-size: 20px; accent-color: var(--text); }
+.platform-bid-inputs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+.platform-input-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.platform-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-block: 16px; }
+.platform-actions button { min-block-size: 48px; padding: 10px 18px; border: 1px solid var(--text); background: var(--bg); color: var(--text); font: inherit; font-size: .9375rem; cursor: pointer; }
+.platform-actions button[type=submit] { background: var(--text); color: var(--bg); }
+.platform-feedback { scroll-margin-block-start: calc(var(--header-height) + 20px); }
+.platform-feedback > .platform-result:empty { margin: 0; }
+.platform-visual :is(input, button, summary):focus-visible, .platform-table-scroll:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+.platform-explanation p, .platform-explanation li { color: var(--muted); font-size: .9375rem; line-height: 1.8; margin-block: 12px; }
+.platform-explanation ol, .platform-explanation ul { padding-inline-start: 24px; }
+.platform-table-scroll { overflow-x: auto; max-inline-size: 100%; margin-block: 24px; }
+.platform-table-scroll table { min-inline-size: 560px; }
+.platform-table-scroll caption { text-align: start; font-size: .9375rem; color: var(--text); margin-block-end: 12px; }
+.platform-table-scroll th { font-size: .875rem; }
+.platform-table-scroll td { font-variant-numeric: tabular-nums; }
+.platform-visual .marketplace-node > :is(span, p) { font-size: .875rem; }
+.platform-visual .marketplace-lane { font-size: .75rem; }
+/* Rows and connectors follow content height, including enlarged root text. */
+.platform-visual .platform-delivery-map { inline-size: max(100%, 50rem); padding: 1.5rem; }
+.platform-delivery-map .marketplace-lane { position: static; margin: 0 0 1.5rem; }
+.platform-delivery-map .marketplace-nodes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas: "bid win creative" "viewability impression render" "billing billing billing";
+  gap: 4.5rem 3rem;
+}
+.platform-delivery-map .marketplace-node { position: relative; min-block-size: 9.375rem; padding: .875rem 1rem; gap: .5rem; }
+.platform-delivery-map .marketplace-node > strong { font-size: 1.0625rem; }
+.platform-delivery-map [data-node="billing"] { min-block-size: 0; border-style: dashed; }
+.platform-delivery-map :is([data-node="bid"], [data-node="win"], [data-node="creative"], [data-node="render"], [data-node="impression"])::after,
+.platform-delivery-map :is([data-node="bid"], [data-node="win"], [data-node="creative"], [data-node="render"], [data-node="impression"])::before { content: ""; position: absolute; pointer-events: none; }
+.platform-delivery-map :is([data-node="bid"], [data-node="win"])::after { inset-inline-start: 100%; inset-block-start: 50%; inline-size: 3rem; border-block-start: 1px dashed currentColor; }
+.platform-delivery-map :is([data-node="render"], [data-node="impression"])::after { inset-inline-end: 100%; inset-block-start: 50%; inline-size: 3rem; border-block-start: 1px dashed currentColor; }
+.platform-delivery-map :is([data-node="bid"], [data-node="win"], [data-node="render"], [data-node="impression"])::before { inset-block-start: 50%; inline-size: .4rem; block-size: .4rem; border-block-start: 1px solid currentColor; border-inline-end: 1px solid currentColor; }
+.platform-delivery-map :is([data-node="bid"], [data-node="win"])::before { inset-inline-start: calc(100% + 3rem - .4rem); transform: translateY(-50%) rotate(45deg); }
+.platform-delivery-map :is([data-node="render"], [data-node="impression"])::before { inset-inline-end: calc(100% + 3rem - .4rem); transform: translateY(-50%) rotate(225deg); }
+.platform-delivery-map [data-node="creative"]::after { inset-inline-start: 50%; inset-block-start: 100%; block-size: 4.5rem; border-inline-start: 1px dashed currentColor; }
+.platform-delivery-map [data-node="creative"]::before { inset-inline-start: 50%; inset-block-start: calc(100% + 4.5rem - .4rem); inline-size: .4rem; block-size: .4rem; border-block-start: 1px solid currentColor; border-inline-end: 1px solid currentColor; transform: translateX(-50%) rotate(135deg); }
+.platform-clock-events { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); list-style: none; padding: 0; margin-block: 24px; gap: 24px; }
+.platform-clock-events li { border-block-start: 2px solid var(--text); padding-block-start: 18px; }
+.platform-clock-events span, .platform-clock-events strong { display: block; }
+.platform-clock-events span { font-size: .875rem; color: var(--muted); margin-block-end: 10px; }
+.platform-clock-events strong { font-size: 1rem; line-height: 1.6; font-weight: 500; }
+.platform-clock-events p { font-size: .875rem; line-height: 1.7; color: var(--muted); }
+.platform-assignment { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin-block: 28px; }
+.platform-assignment span, .platform-assignment strong { display: block; }
+.platform-assignment span { font-size: .875rem; line-height: 1.7; color: var(--muted); }
+.platform-assignment strong { font-weight: 500; font-size: 1.125rem; line-height: 1.6; margin-block: 8px; }
+.platform-assignment p { font-size: .875rem; line-height: 1.7; color: var(--muted); }
+.platform-interval { margin-block: 24px; font-size: .875rem; color: var(--text); }
+.platform-interval > svg { display: block; inline-size: 100%; height: auto; }
+.platform-axis { fill: none; stroke: var(--muted); stroke-width: 1; }
+.platform-ci { fill: none; stroke: currentColor; stroke-width: 4; }
+.platform-interval-labels { display: flex; justify-content: space-between; padding-inline: 6%; }
+.lesson-equation { margin-block: 28px; padding-block: 18px; border-block: 1px solid var(--line); overflow-x: auto; font-size: 1.35rem; color: var(--text); }
+.lesson-equation math { margin: 0; }
+.lesson-equation:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+.platform-sources a { overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 620px) {
+  .platform-bid-inputs, .platform-input-pair, .platform-clock-events, .platform-assignment { grid-template-columns: 1fr; gap: 16px; }
+  .platform-visual { margin-block: 32px; }
+  .platform-visual figcaption { font-size: 1.2rem; }
+}
+@media (forced-colors: active) {
+  .platform-bar-track > span { background: CanvasText; }
+  .platform-actions button { border-color: ButtonText; }
+}

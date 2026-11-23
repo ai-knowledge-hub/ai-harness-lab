@@ -1,0 +1,27 @@
+[
+  {
+    "reason": "The auction table and visual already establish the winner and the higher losing bid.",
+    "before": "Our retailer wins despite offering less than Competitor A. The example demonstrates why the highest bid need not win. It is not a reproduction of a vendor's actual ranking formula.",
+    "after": "This simplified ranking is not a reproduction of a vendor's actual ranking formula."
+  },
+  {
+    "reason": "The preceding table, equation and pricing explanation already give these quantities.",
+    "before": "It bid £2, won with a score of 1.80, and would pay according to the invented rule and its tie-breaking conditions. ",
+    "after": ""
+  },
+  {
+    "reason": "Section 3 already explains the OpenRTB notices; retain the section 4 qualification and citation.",
+    "before": "The distinction between winning and billing is explicit in OpenRTB. The specification defines separate notification mechanisms because an auction win does not necessarily establish a billable event. ",
+    "after": ""
+  },
+  {
+    "reason": "The delivery table and diagram already distinguish delivery, counting, viewability and attention. Keep the conclusion with the preceding paragraph.",
+    "before": "\n\nA creative can therefore be delivered without producing a qualifying impression. An impression can be counted without being viewable. And a viewable impression does not guarantee attention.",
+    "after": ""
+  },
+  {
+    "reason": "Introduce the distinction briefly here; section 7 retains the pagination and retry example.",
+    "before": "It should also distinguish completing a request from completing the dataset. Retrieving the first page of a five-page report is not complete collection. Retrieving all five pages does not prove that the reporting period is final.",
+    "after": "A complete download does not establish that the reporting period is final."
+  }
+]

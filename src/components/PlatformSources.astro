@@ -1,0 +1,6 @@
+---
+import { platformSources } from "../content/advertising-platform-sources";
+---
+<ol class="lesson-list platform-sources">
+  {Object.values(platformSources).map(source => <li><a href={source.url}>{source.title}</a><span class="reference-provenance">{source.label}</span></li>)}
+</ol>

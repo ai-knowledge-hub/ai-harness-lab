@@ -7,13 +7,14 @@ import { codeFenceExamples, ordinaryCodeFences } from "../fixtures/ordinary-code
 const baseline = JSON.parse(await readFile(new URL("../fixtures/markdown-migration-baseline.json", import.meta.url), "utf8"));
 const marketplaceArticle = JSON.parse(await readFile(new URL("../fixtures/marketplace-systems-article.json", import.meta.url), "utf8"));
 const reportingArticle = JSON.parse(await readFile(new URL("../fixtures/advertising-reporting-article.json", import.meta.url), "utf8"));
+const platformArticle = JSON.parse(await readFile(new URL("../fixtures/advertising-platforms-article.json", import.meta.url), "utf8"));
 
 for (const width of [390, 1440]) {
   test(`all migrated guides retain reading and accessible code without JavaScript at ${width}px`, async ({ browser, baseURL }, testInfo) => {
     const context = await browser.newContext({ baseURL, javaScriptEnabled: false, viewport: { width, height: 1000 } });
     try {
       const page = await context.newPage();
-      for (const [path, expected] of Object.entries({ ...baseline.routes, ...marketplaceArticle.routes, ...reportingArticle.routes })) {
+      for (const [path, expected] of Object.entries({ ...baseline.routes, ...marketplaceArticle.routes, ...reportingArticle.routes, ...platformArticle.routes })) {
         const response = await page.goto(path);
         expect(response.status()).toBe(200);
         await expect(page.locator("h1")).toBeVisible();
