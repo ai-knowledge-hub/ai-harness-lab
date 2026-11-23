@@ -12,9 +12,11 @@ const marketplaceArticle = JSON.parse(await readFile("tests/fixtures/marketplace
 // The author-supplied reporting rewrite has its own editorial snapshot. Keep
 // #42 and the Markdown-migration fixtures frozen, including their old copy.
 const reportingArticle = JSON.parse(await readFile("tests/fixtures/advertising-reporting-article.json", "utf8"));
-const reportingPath = "/learn/system-design/chatgpt-ads-reporting";
-function historicalReportingReferences(value) {
+const platformArticle = JSON.parse(await readFile("tests/fixtures/advertising-platforms-article.json", "utf8"));
+const replacementArticles = { ...reportingArticle.routes, ...platformArticle.routes };
+function historicalEditorialReferences(value) {
   return value
+    .replaceAll("How Advertising Platforms Work", "How advertising platforms work")
     .replaceAll("System-design case study · Preview How Advertising Reporting Systems Work", "Worked example · Preview How to collect ChatGPT Ads reports")
     .replaceAll("How Advertising Reporting Systems Work", "How to collect ChatGPT Ads reports")
     .replaceAll("Follow a coffee-grinder campaign from distributed events to reporting rows, late conversions, complete retrieval and evidence an agent can use.", "Request campaign results, check which data you received and show readers what is missing.")
@@ -31,7 +33,7 @@ const companionCopy = [
   ['#references a[href="https://skills.ai-knowledge-hub.org/plugins/agentops/harness-governance-plugin"]', "Inspect the harness review package in Skills", "Run the harness review example in Skills"],
 ];
 for (const [path, historical] of Object.entries(baseline.routes)) {
-  const expected = reportingArticle.routes[path] ?? historical;
+  const expected = replacementArticles[path] ?? historical;
   const file = path === "/" ? "dist/index.html" : `dist${path}/index.html`;
   const html = await readFile(file, "utf8");
   if (path !== "/") assert.equal(await readFile(`dist${path}.html`, "utf8"), html, `${path}: flat HTML alias`);
@@ -80,16 +82,16 @@ for (const [path, historical] of Object.entries(baseline.routes)) {
     draft.remove();
   }
   main.querySelectorAll("script,style,template").forEach((element) => element.remove());
-  const actualText = historicalReportingReferences(readingText(main));
+  const actualText = historicalEditorialReferences(readingText(main));
   // The full replacement article is checked against its editorial snapshot
   // below; this pass still checks its infrastructure and historical anchors.
-  if (path !== reportingPath && actualText !== expected.text) {
+  if (!replacementArticles[path] && actualText !== expected.text) {
     const index = [...actualText].findIndex((character, index) => character !== expected.text[index]);
     assert.fail(`${path}: no-JavaScript reading text differs at ${index}: expected ${JSON.stringify(expected.text.slice(index - 30, index + 100))}; received ${JSON.stringify(actualText.slice(index - 30, index + 100))}`);
   }
   const ids = new Set([...main.querySelectorAll("[id]")].map((element) => element.id));
   for (const id of historical.ids) assert.ok(ids.has(id), `${path}: missing anchor ${id}`);
-  if (path !== reportingPath) assert.deepEqual([...main.querySelectorAll("a[href]")].map((element) => element.getAttribute("href")), expected.hrefs, `${path}: reading links`);
+  if (!replacementArticles[path]) assert.deepEqual([...main.querySelectorAll("a[href]")].map((element) => element.getAttribute("href")), expected.hrefs, `${path}: reading links`);
 }
 const sitemap = await readFile("dist/sitemap.xml", "utf8");
 const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
@@ -102,15 +104,16 @@ for (const [file, expected] of Object.entries(baseline.downloads)) {
 }
 console.log(`Astro preserves infrastructure and historical anchors across ${Object.keys(baseline.routes).length} baseline routes. Retained copy, approved editorial replacements and all five download hashes are checked. Sitemap contains ${urls.length} eligible URLs.`);
 
-for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...marketplaceArticle.routes, ...reportingArticle.routes })) {
+for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...marketplaceArticle.routes, ...replacementArticles })) {
   const document = new JSDOM(await readFile(`dist${path}/index.html`, "utf8")).window.document;
   const main = document.querySelector("main");
   assert.equal(document.title, expected.title, `${path}: migrated title`);
   assert.equal(document.querySelector('meta[name="description"]').content, expected.description, `${path}: migrated description`);
   assert.equal(document.querySelector('link[rel="canonical"]').href, expected.canonical, `${path}: migrated canonical`);
   assert.equal(document.querySelector('meta[name="robots"]').content, expected.robots, `${path}: migrated indexing`);
-  const actualText = path === reportingPath ? readingText(main) : historicalReportingReferences(readingText(main));
-  assert.equal(actualText, expected.text, `${path}: complete approved reading text`);
+  // A prior editorial snapshot can contain a link title subsequently updated
+  // by another article. Compare those bounded reference labels consistently.
+  assert.equal(historicalEditorialReferences(readingText(main)), historicalEditorialReferences(expected.text), `${path}: complete approved reading text`);
   assert.deepEqual([...main.querySelectorAll("a[href]")].map((link) => link.getAttribute("href")), expected.hrefs, `${path}: approved reading links`);
   for (const id of expected.ids) assert.ok(document.getElementById(id), `${path}: approved anchor ${id}`);
   for (const id of markdownBaseline.routes[path].ids) assert.ok(document.getElementById(id), `${path}: retained migration anchor ${id}`);
@@ -121,4 +124,4 @@ for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...m
   }
   if (expected.robots.startsWith("noindex")) assert.ok(!urls.includes(expected.canonical), `${path}: draft sitemap exclusion`);
 }
-console.log("Migrated guides retain their original content; marketplace and reporting rewrites match their editorial snapshots and retain historical anchors and draft indexing.");
+console.log("Migrated guides retain their original content; marketplace, reporting and platform rewrites match their editorial snapshots and retain historical anchors and indexing.");

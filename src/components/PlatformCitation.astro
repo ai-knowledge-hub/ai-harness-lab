@@ -1,0 +1,7 @@
+---
+import { platformSources, type PlatformSourceId } from "../content/advertising-platform-sources";
+interface Props { source: PlatformSourceId }
+const { source } = Astro.props;
+const reference = platformSources[source];
+---
+<a class="source-citation" href={reference.url}>{reference.label}</a>

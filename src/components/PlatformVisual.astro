@@ -1,0 +1,176 @@
+---
+import { allocate, exampleBidders, pace, pacingNames, pacingPolicies, reserveBudget, estimateLift, pounds } from "../content/advertising-platform-models";
+interface Props { kind: "auction" | "budget" | "delivery" | "clocks" | "incrementality" }
+const { kind } = Astro.props;
+const id = `platform-${kind}`;
+const titles = { auction: "Eligibility, ranking, pricing and billing", budget: "Pacing and budget enforcement solve different problems", delivery: "A selected ad still has to reach the person", clocks: "One purchase, three clocks", incrementality: "Credit for a purchase and evidence of an effect" };
+const auction = allocate(exampleBidders);
+const lift = estimateLift();
+const deliveryNodes = [
+  { id: "bid", label: "Participation", title: "Bid submitted", detail: "An offer enters the selection process." },
+  { id: "win", label: "Allocation", title: "Auction won", detail: "Selection does not establish delivery or billing." },
+  { id: "creative", label: "Creative delivery", title: "Material supplied", detail: "The browser may still fail to render it." },
+  { id: "render", label: "Client", title: "Rendering attempted", detail: "Failure or a lost acknowledgement can leave the outcome uncertain." },
+  { id: "impression", label: "Measurement", title: "Impression counted", detail: "The applicable counting rule must be satisfied." },
+  { id: "viewability", label: "Additional measurement", title: "Viewability assessed", detail: "A counted impression can be non-viewable. Attention remains unproven." },
+  { id: "billing", label: "A separate contract", title: "Billing event recognised", detail: "OpenRTB's billing notice follows exchange-specific policy; a win notice alone does not establish a charge." },
+];
+---
+<figure id={id} class="platform-visual" data-platform-visual={kind}>
+  <figcaption id={`${id}-caption`}>{titles[kind]}</figcaption>
+  <p class="platform-provenance">Hypothetical teaching example</p>
+
+  {kind === "auction" && <>
+    <ol class="platform-stages" role="list">
+      <li><strong>Eligibility</strong><span>Which candidates may compete?</span></li>
+      <li><strong>Ranking</strong><span>Which eligible score wins?</span></li>
+      <li><strong>Pricing</strong><span>Which threshold applies?</span></li>
+      <li><strong>Billing</strong><span>Has a billable event occurred?</span></li>
+    </ol>
+    <div data-controls-slot>
+      <template data-platform-controls>
+        <details class="platform-controls"><summary>Change the auction inputs</summary>
+          <form action={`/learn/system-design/advertising-platforms#${id}`} method="get" data-simulator="auction" aria-labelledby={`${id}-caption`}>
+            <div class="platform-bid-inputs">
+              {exampleBidders.map((b, i) => <fieldset><legend>{b.name}</legend>
+                <label for={`${id}-bid-${i}`}>Bid (£ per hypothetical click)</label>
+                <input id={`${id}-bid-${i}`} name={`bid-${i}`} type="number" min="0" max="100" step="0.01" value={b.bidPence / 100} required />
+                <label for={`${id}-quality-${i}`}>Quality factor (0 to 1)</label>
+                <input id={`${id}-quality-${i}`} name={`quality-${i}`} type="number" min="0" max="1" step="0.01" value={b.qualityPercent / 100} required />
+                <label class="platform-choice"><input name={`eligible-${i}`} type="checkbox" checked /> Eligible</label>
+              </fieldset>)}
+            </div>
+            <div class="platform-actions"><button type="submit">Update auction</button><button type="reset">Reset auction</button></div>
+          </form>
+        </details>
+      </template>
+    </div>
+    <ol class="platform-scores" role="list">
+      {auction.rows.map((row, i) => <li data-bidder={i}>
+        <div><strong>{row.name}</strong><span data-score-label>Eligible · Score {(row.scoreUnits / 10000).toFixed(2)}</span></div>
+        <div class="platform-bar-track" aria-hidden="true"><span data-score-bar style={`width:${row.scoreUnits / 180}%`}></span></div>
+      </li>)}
+    </ol>
+    <p class="platform-result" role="status" data-auction-result>Our retailer wins with a score of 1.80, ahead of the higher £3 bid from Competitor A.</p>
+    <details class="platform-explanation"><summary>Separate the pricing threshold from the winner</summary>
+      <p data-auction-pricing>The next-highest score is 1.50. Dividing by the retailer's 0.9 quality gives a matching threshold of £1.6667, approximately £1.67. A bid of £1.67 wins at penny precision in this model.</p>
+      <p>For this simulator only, equal scores go to the earliest listed eligible advertiser. Candidates need a positive eligible score to win. With one candidate, no competitive threshold can be inferred. A calculated threshold is not evidence of a billable event.</p>
+    </details>
+    <p class="platform-note">This invented bid × quality rule is not Google Ad Rank. Its per-click pounds are not OpenRTB CPM price fields.</p>
+  </>}
+
+  {kind === "budget" && <>
+    <h3 id={`${id}-pacing`}>Experiment A: allocate £1,000 across the day</h3>
+    <p class="platform-note">Separate toy assumptions: 800 opportunities per period, £1 reserved per opportunity, and assumed incremental purchase probabilities of 2% in the morning and 5% in the evening. These are forecasts, not observed conversion rates or billable charges.</p>
+    <div data-controls-slot><template data-platform-controls>
+      <details class="platform-controls"><summary>Change the pacing assumptions</summary>
+        <form action={`/learn/system-design/advertising-platforms#${id}`} method="get" data-simulator="pacing" aria-labelledby={`${id}-pacing`}>
+          <div class="platform-input-pair">
+            <div><label for={`${id}-morning`}>Assumed morning incremental purchase probability (%)</label><input id={`${id}-morning`} name="morning" type="number" min="0" max="100" step="0.1" value="2" required /></div>
+            <div><label for={`${id}-evening`}>Assumed evening incremental purchase probability (%)</label><input id={`${id}-evening`} name="evening" type="number" min="0" max="100" step="0.1" value="5" required /></div>
+          </div>
+          <fieldset><legend>Pacing policy</legend>{pacingPolicies.map(policy => <label class="platform-choice"><input type="radio" name="policy" value={policy} checked={policy === "even"} /> {pacingNames[policy]}</label>)}</fieldset>
+          <div class="platform-actions"><button type="submit">Compare pacing policies</button><button type="reset">Reset pacing</button></div>
+        </form>
+      </details>
+    </template></div>
+    <div class="platform-table-scroll" tabindex="0" role="region" aria-labelledby={`${id}-pacing`}>
+      <table class="lesson-table"><caption>Same £1,000 envelope, different participation decisions</caption><thead><tr><th scope="col">Policy</th><th scope="col">Morning reservation</th><th scope="col">Evening reservation</th><th scope="col">Expected incremental purchases</th></tr></thead>
+        <tbody>{pacingPolicies.map(policy => { const result = pace(policy); return <tr data-pacing-policy={policy}><th scope="row">{pacingNames[policy]}</th><td data-morning>{pounds(result.morning * 100)}</td><td data-evening>{pounds(result.evening * 100)}</td><td data-expected>{result.expectedPurchases.toFixed(1)}</td></tr>; })}</tbody>
+      </table>
+    </div>
+    <p class="platform-result" role="status" data-pacing-result>Even split reserves £500 per period: 35.0 expected incremental purchases under the toy assumptions. Following the forecast reserves £200 in the morning and £800 in the evening, for an expectation of 44.0.</p>
+
+    <h3 id={`${id}-concurrency`}>Experiment B: protect the last £10</h3>
+    <div data-controls-slot><template data-platform-controls>
+      <details class="platform-controls"><summary>Compare reservation strategies and a worker failure</summary>
+        <form action={`/learn/system-design/advertising-platforms#${id}`} method="get" data-simulator="budget" aria-labelledby={`${id}-concurrency`}>
+          <fieldset><legend>Reservation strategy</legend>
+            <label class="platform-choice"><input type="radio" name="strategy" value="independent" checked /> Independent reads</label>
+            <label class="platform-choice"><input type="radio" name="strategy" value="atomic" /> Atomic reservation</label>
+            <label class="platform-choice"><input type="radio" name="strategy" value="allowances" /> £5 preallocated allowances</label>
+          </fieldset>
+          <label class="platform-choice"><input type="checkbox" name="failure" /> Worker A fails before reconciliation</label>
+          <div class="platform-actions"><button type="submit">Run reservation example</button><button type="reset">Reset reservations</button></div>
+        </form>
+      </details>
+    </template></div>
+    <div class="platform-table-scroll" tabindex="0" role="region" aria-labelledby={`${id}-concurrency`}>
+      <table class="lesson-table"><caption>Each worker requests an £8 commitment</caption><thead><tr><th scope="col">Worker</th><th scope="col">Balance or allowance observed</th><th scope="col">Commitment approved</th></tr></thead>
+        <tbody>{reserveBudget("independent").workers.map((worker, i) => <tr data-worker={i}><th scope="row">{worker.name}</th><td data-observed>{pounds(worker.observedPence)}</td><td data-committed>{pounds(worker.committedPence)}</td></tr>)}</tbody>
+      </table>
+    </div>
+    <p class="platform-result" role="status" data-budget-result>{reserveBudget("independent").explanation}</p>
+    <details class="platform-explanation"><summary>Read the other strategies and failure limits</summary><ul>
+      <li>{reserveBudget("atomic", true).explanation}</li>
+      <li>{reserveBudget("allowances", true).explanation}</li>
+    </ul></details>
+    <p class="platform-note">Commitments are shown separately from charges. No billing evidence is supplied in this example; a worker failure does not automatically release funds.</p>
+  </>}
+
+  {kind === "delivery" && <>
+    <p class="platform-note" id={`${id}-hint`}>Follow the conditional arrows across the diagram. Billing takes a separate path under the applicable contract. Scroll horizontally on a narrow screen.</p>
+    <div class="marketplace-diagram-scroll" tabindex="0" role="region" aria-labelledby={`${id}-caption`} aria-describedby={`${id}-hint`}>
+      <div class="marketplace-diagram-map platform-delivery-map">
+        <p class="marketplace-lane">CONDITIONAL TEACHING MODEL · NOT A MANDATORY PIPELINE</p>
+        <ul class="marketplace-nodes" role="list" aria-label="Delivery and measurement responsibilities">{deliveryNodes.map(node => <li data-node={node.id} class="marketplace-node" style={`grid-area:${node.id}`}><span>{node.label}</span><strong>{node.title}</strong><p>{node.detail}</p></li>)}</ul>
+      </div>
+    </div>
+    <details class="platform-explanation"><summary>Read the diagram and three failure cases as text</summary><ol>
+      <li>A submitted bid may win, and a selected creative may be supplied. Neither establishes that it rendered.</li>
+      <li>A won bid can be followed by a render failure. Keep the allocation outcome distinct from impression evidence.</li>
+      <li>A creative may arrive while its acknowledgement is lost. Preserve uncertainty about the outcome rather than treating the lost response as proof of non-delivery.</li>
+      <li>A counted impression may fail the viewability criteria. Viewability itself does not establish attention.</li>
+      <li>For an OpenRTB transaction, win and billing notices are distinct. Billing depends on exchange-specific policy, not on traversing every box in this illustration.</li>
+    </ol></details>
+  </>}
+
+  {kind === "clocks" && <>
+    <ol class="platform-clock-events" role="list">
+      <li><span>Monday · 10:02</span><strong>Advertising interaction</strong><p>Customer clicks the grinder ad.</p></li>
+      <li><span>Tuesday · 18:00</span><strong>Conversion</strong><p>Customer purchases the grinder.</p></li>
+      <li><span>Wednesday · 02:00</span><strong>Ingestion</strong><p>The purchase record arrives.</p></li>
+    </ol>
+    <div data-controls-slot><template data-platform-controls>
+      <details class="platform-controls"><summary>Inspect reporting dates and observations</summary>
+        <form action={`/learn/system-design/advertising-platforms#${id}`} method="get" data-simulator="clocks" aria-labelledby={`${id}-caption`}>
+          <fieldset><legend>Reporting date for the illustrated purchase</legend>
+            <label class="platform-choice"><input type="radio" name="basis" value="interaction" checked /> Advertising-interaction date</label>
+            <label class="platform-choice"><input type="radio" name="basis" value="conversion" /> Conversion date</label>
+          </fieldset>
+          <fieldset><legend>Observation time</legend>
+            <label class="platform-choice"><input type="radio" name="snapshot" value="tuesday" checked /> Tuesday morning</label>
+            <label class="platform-choice"><input type="radio" name="snapshot" value="wednesday" /> Wednesday after ingestion</label>
+          </fieldset>
+          <label class="platform-choice"><input type="checkbox" name="correction" /> Include a separate hypothetical later correction of one purchase</label>
+          <div class="platform-actions"><button type="submit">Inspect observation</button><button type="reset">Reset clocks</button></div>
+        </form>
+      </details>
+    </template></div>
+    <div class="platform-table-scroll" tabindex="0" role="region" aria-labelledby={`${id}-caption`}>
+      <table class="lesson-table"><caption>The same Monday interaction-date report, observed twice</caption><thead><tr><th scope="col">Observation</th><th scope="col">Attributed purchases</th><th scope="col">Illustrated purchase</th></tr></thead><tbody>
+        <tr><th scope="row">Tuesday morning</th><td>8</td><td>Has not happened yet</td></tr>
+        <tr><th scope="row">Wednesday after ingestion</th><td>11</td><td>Record is now available</td></tr>
+      </tbody></table>
+    </div>
+    <p class="platform-result" role="status" data-clocks-result>The illustrated event would use Monday under an interaction-date rule or Tuesday under a conversion-date rule. As of Tuesday morning, this purchase has not happened. The Monday report shows 8 attributed purchases.</p>
+    <p class="platform-note">The aggregate's other purchase dates are not specified, so this example does not invent conversion-date totals for the entire report. A late outcome, delayed ingestion and a later correction are separate causes. Actual reporting-date rules depend on the platform and metric.</p>
+  </>}
+
+  {kind === "incrementality" && <>
+    <ol class="platform-stages" role="list"><li><strong>Monday</strong><span>Search ad clicked</span></li><li><strong>Tuesday</strong><span>Social ad seen</span></li><li><strong>Wednesday</strong><span>Purchase recorded</span></li></ol>
+    <p class="platform-note">First-touch and last-touch rules can assign different credit to this same journey. Neither observes the customer's counterfactual.</p>
+    <div class="platform-assignment">
+      <div><span>10,000 assigned to treatment</span><strong>300 purchases · 3.0%</strong><div class="platform-bar-track" aria-hidden="true"><span style="width:60%"></span></div><p>Actual exposure may vary within the assigned group.</p></div>
+      <div><span>10,000 assigned to control</span><strong>250 purchases · 2.5%</strong><div class="platform-bar-track" aria-hidden="true"><span style="width:50%"></span></div><p>The group is held out under the experiment's design.</p></div>
+    </div>
+    <p class="platform-note">Purchase-rate bars use the same 0% to 5% scale.</p>
+    <p class="platform-result">Assignment-based difference: {(lift.difference * 100).toFixed(1)} percentage points. Relative lift: {(lift.relativeLift! * 100).toFixed(0)}%.</p>
+    <div class="platform-interval" role="img" aria-label="Estimated intention-to-treat difference: 0.5 percentage points; approximate 95% confidence interval: 0.05 to 0.95 percentage points.">
+      <span>Approximate 95% confidence interval</span>
+      <svg viewBox="0 0 800 90" aria-hidden="true" focusable="false"><path d="M50 65H750M50 58V72M400 58V72M750 58V72" class="platform-axis" /><path d={`M${50 + lift.low * 70000} 30H${50 + lift.high * 70000}`} class="platform-ci" /><circle cx="400" cy="30" r="7" fill="currentColor" /></svg>
+      <div class="platform-interval-labels"><span>0 pp</span><span>0.5 pp</span><span>1 pp</span></div>
+    </div>
+    <details class="platform-explanation"><summary>Interpret the estimate and uncertainty</summary><p>The point estimate is 0.5 percentage points, with an approximate 95% interval from 0.05 to 0.95 percentage points under the simplified independent-observations model. It estimates assignment to the treatment under randomisation assumptions, not the causal effect of every observed impression. Exposure-based comparisons require further assumptions or design.</p></details>
+  </>}
+</figure>

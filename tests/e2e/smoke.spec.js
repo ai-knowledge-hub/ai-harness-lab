@@ -325,7 +325,7 @@ test("the guide is readable as static HTML without JavaScript", async ({
     expect(sitemapText).not.toContain("/learn/system-design/chatgpt-ads-reporting");
     expect(sitemapText).not.toContain("/examples");
     for (const [slug, title] of [
-      ["advertising-platforms", "How advertising platforms work"],
+      ["advertising-platforms", "How Advertising Platforms Work"],
       ["chatgpt-ads", "How ChatGPT Ads works"],
       ["chatgpt-ads-apis", "ChatGPT Ads APIs for advertisers"],
     ]) {
@@ -435,7 +435,7 @@ test("guide navigation, hydration, saved theme and metadata stay coherent", asyn
       exact: true,
     })
     .click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("How advertising platforms work");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("How Advertising Platforms Work");
   await page.getByRole("link", { name: "How ChatGPT Ads works", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("How ChatGPT Ads works");
   await page.getByRole("link", { name: "API design principles", exact: true }).click();

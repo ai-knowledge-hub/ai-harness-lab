@@ -55,7 +55,7 @@ for (const javaScriptEnabled of [false, true]) {
         ["/learn/system-design/chatgpt-ads-apis", "ChatGPT Ads APIs for advertisers"],
         ["/learn/system-design/chatgpt-ads-reporting", "How Advertising Reporting Systems Work"],
         ["/learn/system-design/api-design", "API design principles"],
-        ["/learn/system-design/advertising-platforms", "How advertising platforms work"],
+        ["/learn/system-design/advertising-platforms", "How Advertising Platforms Work"],
       ]) {
         await page.goto(pilotPath);
         await expectPilot(page);
