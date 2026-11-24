@@ -1,0 +1,109 @@
+---
+import { intentStates, orchestrationSteps, orchestrationScenarios, independentStates, diagnosticStates, deliveryOutcome } from "../content/chatgpt-ads-models";
+interface Props { kind: "intent" | "orchestration" | "independence" | "delivery" | "diagnostics" }
+const { kind } = Astro.props;
+const id = `chatgpt-${kind}`;
+const titles = { intent: "V1 · Relevant history can become stale context", orchestration: "V2 · Flexible orchestration, separate serving authority", independence: "V3 · An answer path that does not wait for advertising", delivery: "V4 · A selected ad has two delivery boundaries", diagnostics: "V5 · Diagnose the missing ad before choosing a remedy" };
+const initialIntent = intentStates[3];
+const initialDelivery = deliveryOutcome({ server: "ready", context: "pass", arrival: "on-time" });
+---
+<figure class="cg-visual" data-chatgpt-visual={kind} id={id}>
+  <figcaption id={`${id}-caption`}>{titles[kind]}</figcaption>
+  <p class="cg-provenance">Hypothetical Harness teaching model · not a provider schema or captured production trace</p>
+
+  {kind === "intent" && <>
+    <div data-controls-slot><template data-cg-controls>
+      <details class="cg-controls"><summary>Explore changing intent</summary>
+        <form action={`/learn/system-design/chatgpt-ads#${id}`} method="get" aria-labelledby={`${id}-caption`}>
+          <label for={`${id}-turn`}>Conversation moment</label>
+          <select id={`${id}-turn`} name="turn">{intentStates.map(state => <option value={state.id} selected={state.id === "price"}>{state.label}</option>)}</select>
+          <p class="cg-feedback" data-feedback role="status" aria-atomic="true"></p>
+        </form>
+      </details>
+    </template></div>
+    <ol class="cg-sequence" role="list">{intentStates.slice(0, 4).map(state => <li data-intent-step={state.id}><span>{state.label}</span><p>{state.message}</p></li>)}</ol>
+    <div class="cg-state">
+      <p class="cg-kicker">Illustrative state fields</p>
+      <dl><dt>Current message</dt><dd data-intent-message>{initialIntent.message}</dd><dt>Relevant history</dt><dd data-intent-history>{initialIntent.history}</dd><dt>Current objective</dt><dd data-intent-goal>{initialIntent.goal}</dd></dl>
+      <p data-result>{initialIntent.implication}</p>
+    </div>
+    <div class="cg-branches">{intentStates.slice(4).map(state => <details open><summary>{state.label}</summary><p>{state.message}</p><p>{state.history}</p><p>{state.implication}</p></details>)}</div>
+    <p class="cg-note">The withdrawal branch ends shoe shopping. Continuing the article's shopping example does not reactivate that abandoned branch or imply a persistent cross-conversation session object.</p>
+  </>}
+
+  {kind === "orchestration" && <>
+    <p class="cg-note">Responsibilities below can be revisited or skipped as appropriate. They are not six mandatory calls, a complete service map or private endpoint names.</p>
+    <div data-controls-slot><template data-cg-controls>
+      <details class="cg-controls"><summary>Trace a candidate through the responsibilities</summary>
+        <form action={`/learn/system-design/chatgpt-ads#${id}`} method="get" aria-labelledby={`${id}-caption`}>
+          <label for={`${id}-scenario`}>Candidate scenario</label>
+          <select id={`${id}-scenario`} name="scenario">{orchestrationScenarios.map(scenario => <option value={scenario.id}>{scenario.label}</option>)}</select>
+          <div class="cg-actions"><button type="button" data-previous>Previous responsibility</button><button type="button" data-next>Next responsibility</button></div>
+          <p class="cg-feedback" data-feedback role="status" aria-atomic="true"></p>
+        </form>
+      </details>
+    </template></div>
+    <div class="cg-orchestration-map">
+      <div class="cg-orchestrator"><span class="cg-kicker">LLM coordination</span><strong>Orchestrator</strong><p>Interprets current intent, prepares queries and nominates candidates.</p><span class="cg-call-arrow" aria-hidden="true">→</span><p>Calls specialised tools and uses their results to decide whether to revise its queries.</p></div>
+      <ol class="cg-tool-loop" role="list">{orchestrationSteps.map((step, index) => <li data-tool-step={step.id}>
+      <details open data-tool-detail><summary><span class="cg-step-number" aria-hidden="true">0{index + 1}</span>{step.title}</summary><p>{step.detail}</p></details>
+      </li>)}</ol>
+    </div>
+    <p class="cg-loop-return">↶ Changed intent can lead to revised queries and another retrieval.</p>
+    <p class="cg-result" data-result>{orchestrationScenarios[0].outcome}</p>
+    <details class="cg-explanation"><summary>Read all candidate branches</summary><ul>{orchestrationScenarios.map(scenario => <li><strong>{scenario.label}:</strong> {scenario.outcome}</li>)}</ul></details>
+  </>}
+
+  {kind === "independence" && <>
+    <div data-controls-slot><template data-cg-controls>
+      <details class="cg-controls"><summary>Change what happens on the advertising path</summary>
+        <form action={`/learn/system-design/chatgpt-ads#${id}`} method="get" aria-labelledby={`${id}-caption`}>
+          <fieldset><legend>Advertising condition</legend>{independentStates.map(state => <div class="cg-choice"><input id={`${id}-${state.id}`} type="radio" name="advertising" value={state.id} checked={state.id === "ready"} /><label for={`${id}-${state.id}`}>{state.label}</label></div>)}</fieldset>
+          <p class="cg-feedback" data-feedback role="status" aria-atomic="true"></p>
+        </form>
+      </details>
+    </template></div>
+    <div class="cg-paths">
+      <div class="cg-turn"><strong>Runner's conversation turn</strong><p>Context informs two separate paths.</p><span aria-hidden="true">↙　↘</span></div>
+      <div class="cg-organic"><span class="cg-kicker">Primary path</span><strong>Organic answer generation</strong><p>Respond to the runner's training question.</p><span aria-hidden="true">↓</span><div class="cg-path-output"><strong>Answer in the interface</strong><p data-organic-answer>Available independently of advertising.</p></div></div>
+      <div class="cg-advertising"><span class="cg-kicker">Secondary path</span><strong>Advertising selection</strong><p>Interpret intent, retrieve, enforce constraints and select.</p><span aria-hidden="true">↓</span><div class="cg-path-output"><strong>Optional sponsored placement</strong><p data-result>{independentStates[0].result}</p></div></div>
+    </div>
+    <p class="cg-note">Conceptual representation of OpenAI's reported separation, not a complete infrastructure diagram or an independently tested outage guarantee. The answer and optional advertisement return separately to the interface.</p>
+    <details class="cg-explanation"><summary>Read the advertising failure cases</summary><ul>{independentStates.map(state => <li><strong>{state.label}:</strong> {state.result}</li>)}</ul></details>
+  </>}
+
+  {kind === "delivery" && <>
+    <p class="cg-note">Server readiness, contextual approval and frontend timing are separate conditions. A failure upstream makes later conditions irrelevant.</p>
+    <div data-controls-slot><template data-cg-controls>
+      <details class="cg-controls" open><summary>Experiment with the two delivery boundaries</summary>
+        <form action={`/learn/system-design/chatgpt-ads#${id}`} method="get" aria-labelledby={`${id}-caption`}>
+          <fieldset><legend>Server readiness</legend><div class="cg-choice"><input id={`${id}-ready`} type="radio" name="server" value="ready" checked /><label for={`${id}-ready`}>Ready before server deadline</label></div><div class="cg-choice"><input id={`${id}-timeout`} type="radio" name="server" value="timeout" /><label for={`${id}-timeout`}>Server-side timeout</label></div></fieldset>
+          <fieldset data-context-controls aria-describedby={`${id}-context-note`}><legend>Contextual review</legend><div class="cg-choice"><input id={`${id}-pass`} type="radio" name="context" value="pass" checked /><label for={`${id}-pass`}>Pass</label></div><div class="cg-choice"><input id={`${id}-reject`} type="radio" name="context" value="reject" /><label for={`${id}-reject`}>Reject</label></div></fieldset>
+          <p class="cg-reached-note" id={`${id}-context-note`} data-context-note>Contextual review is reached.</p>
+          <fieldset data-arrival-controls aria-describedby={`${id}-arrival-note`}><legend>Frontend arrival</legend><div class="cg-choice"><input id={`${id}-on-time`} type="radio" name="arrival" value="on-time" checked /><label for={`${id}-on-time`}>Within the display window</label></div><div class="cg-choice"><input id={`${id}-late`} type="radio" name="arrival" value="late" /><label for={`${id}-late`}>After the display window</label></div></fieldset>
+          <p class="cg-reached-note" id={`${id}-arrival-note`} data-arrival-note>Frontend arrival is reached.</p>
+          <p class="cg-feedback" data-feedback role="status" aria-atomic="true"></p>
+        </form>
+      </details>
+    </template></div>
+    <ol class="cg-delivery-stages" role="list"><li><strong>Selection</strong><p>An auction winner still faces contextual review.</p></li><li><strong>Server-side sending</strong><p>The creative and neutral preamble leave for the frontend.</p></li><li><strong>Frontend display window</strong><p>A late bundle is not displayed for the turn.</p></li><li><strong>Display and acknowledgement</strong><p>These require separate evidence; sending is insufficient.</p></li></ol>
+    <p class="cg-result" data-result>{initialDelivery.title}. {initialDelivery.detail}</p>
+    <p class="cg-answer-state" data-organic-answer><strong>Organic answer:</strong> available independently in every experimental state.</p>
+    <p class="cg-note">This model does not define a production acknowledgement protocol, establish an impression, or infer billing.</p>
+  </>}
+
+  {kind === "diagnostics" && <>
+    <p class="cg-note">Combined teaching taxonomy, not an exhaustive OpenAI event enum. Evidence below is hypothetical and does not imply advertiser access to internal traces.</p>
+    <div data-controls-slot><template data-cg-controls>
+      <details class="cg-controls"><summary>Choose an outcome and an investigation</summary>
+        <form action={`/learn/system-design/chatgpt-ads#${id}`} method="get" aria-labelledby={`${id}-caption`}>
+          <label for={`${id}-outcome`}>Observed branch</label><select id={`${id}-outcome`} name="outcome">{diagnosticStates.map(state => <option value={state.id} selected={state.id === "empty"}>{state.label}</option>)}</select>
+          <fieldset><legend>Investigation lens</legend><div class="cg-choice"><input id={`${id}-operations`} type="radio" name="lens" value="operations" checked /><label for={`${id}-operations`}>Operational diagnosis</label></div><div class="cg-choice"><input id={`${id}-quality`} type="radio" name="lens" value="quality" /><label for={`${id}-quality`}>Quality evaluation</label></div><div class="cg-choice"><input id={`${id}-business`} type="radio" name="lens" value="business" /><label for={`${id}-business`}>Business reporting</label></div></fieldset>
+          <p class="cg-feedback" data-feedback role="status" aria-atomic="true"></p>
+        </form>
+      </details>
+    </template></div>
+    <div class="cg-state"><p class="cg-kicker">Current illustrative investigation</p><p data-diagnostic-evidence>{diagnosticStates[2].evidence}</p><p data-result>{diagnosticStates[2].operations}</p></div>
+    <ol class="cg-diagnostics">{diagnosticStates.map(state => <li><details><summary>{state.label}</summary><dl><dt>Distinguishing evidence</dt><dd>{state.evidence}</dd><dt>Operational diagnosis</dt><dd>{state.operations}</dd><dt>Quality evaluation</dt><dd>{state.quality}</dd><dt>Business reporting</dt><dd>{state.business}</dd></dl></details></li>)}</ol>
+  </>}
+</figure>

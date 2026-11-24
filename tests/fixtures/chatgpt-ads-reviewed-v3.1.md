@@ -1,0 +1,459 @@
+# How ChatGPT Ads Works
+
+*How conversational advertising interprets changing intent, coordinates specialised tools and selects advertisements without influencing the assistant's answer.*
+
+<!-- Reviewed v3.1, 24 November 2026. Publication approval pending. All running-example events and figures are hypothetical. -->
+
+A person opens ChatGPT and asks how to train for their first half-marathon.
+
+They discuss weekly mileage, recovery and running outdoors in wet weather. Several messages later, they mention that their shoes are worn out.
+
+Should an advertisement appear?
+
+In search advertising, a query provides a relatively discrete signal. The system can use it to retrieve and rank advertisements for that opportunity.
+
+A conversation is different. Its meaning develops across turns. A mention of running shoes might signal a purchase decision, a question about injury prevention or an entirely hypothetical example.
+
+The advertising system must distinguish those situations, find suitable candidates, enforce campaign constraints and deliver a placement before the opportunity disappears.
+
+Meanwhile, ChatGPT must answer the user's question independently of advertising.
+
+[OpenAI's October 2026 engineering account][stack] describes three architectural decisions that address these problems: stateful advertising sessions, an LLM orchestrator that invokes specialised tools, and an advertising path separate from organic answer generation.
+
+The first helps interpret changing intent. The second coordinates selection. The third protects the primary user experience.
+
+Following the runner's conversation reveals why each is necessary. The scenario is hypothetical; production descriptions below are attributed to OpenAI.
+
+## 1. A conversation is not a search query
+
+The runner begins with a training question:
+
+“How should I prepare for my first half-marathon?”
+
+The next message adds that most training will happen outdoors, including in rainy weather.
+
+Later:
+
+“My current shoes are worn out. What should I look for in a replacement?”
+
+And finally:
+
+“Preferably under £120.”
+
+That last sentence is almost meaningless alone. It could describe shoes, accommodation or something unrelated.
+
+Earlier context makes it useful: the person is exploring replacement running shoes for longer outdoor runs, with a price preference.
+
+But remembering context introduces another problem.
+
+Suppose the runner then says:
+
+“Actually, forget buying shoes. I want to understand how to avoid knee injuries.”
+
+The earlier context remains semantically related to running, yet the user's objective has changed. Continuing to retrieve footwear advertisements could produce a plausible match at the wrong moment.
+
+The information that made one message meaningful has become stale.
+
+### Topic similarity is not commercial intent
+
+Consider another variation:
+
+“My friend spends a fortune on running shoes. Do expensive shoes really prevent injuries?”
+
+The product category is relevant, but the user may be asking about training effectiveness rather than shopping.
+
+A keyword match can identify the topic without establishing the task.
+
+This is the first engineering problem: the system must interpret the user's current objective, decide which previous details still matter and determine whether an advertising opportunity exists at all.
+
+[OpenAI's engineering account][stack] describes the same difficulty. Single-turn interpretation can miss context, mistake hypothetical references for intent or trigger advertisements before a commercial need has emerged.
+
+Simply storing more conversation history does not solve it. The system needs context that can be updated as the conversation changes.
+
+## 2. Why the advertising system needs state
+
+Imagine treating every message as an independent advertising request.
+
+The training question might retrieve running accessories. The wet-weather message might retrieve waterproof clothing. The worn-out-shoes message might retrieve footwear.
+
+Each request would start again, potentially repeating work while losing the relationship between the messages.
+
+OpenAI describes a stateful advertising system that can interpret context as a conversation develops.
+
+But *stateful* does not mean one permanent session containing everything the user has ever said.
+
+Three different forms of context matter.
+
+[OpenAI describes][stack] an advertising session that runs during an eligible turn, maintaining working context as the operation develops. The system can also interpret relevant conversation history and, when the user enables advertising personalisation, consider available nonsensitive information from past conversations.
+
+These are different scopes of information. The engineering account does not establish that a single advertising-session object persists across conversations or disclose the underlying storage and retention mechanisms.
+
+### The eligible-turn session
+
+This provides continuity while the advertising system evaluates the current opportunity.
+
+### The current conversation
+
+Relevant history helps interpret incomplete messages.
+
+For our runner, “under £120” becomes a price constraint because the previous discussion concerned replacement shoes.
+
+But when the user abandons that objective, the old constraint should no longer drive the current selection.
+
+The system needs to distinguish current intent from context that is merely related.
+
+### Optional personalisation
+
+This is separate from the eligible-turn session and the current conversation.
+
+It does not imply unrestricted access to all historical messages or indefinite retention.
+
+For our example, the conceptual state evolves like this:
+
+| Turn | Relevant interpretation | Advertising implication |
+|---|---|---|
+| Training plan | Preparing for a half-marathon | No specific product need |
+| Wet-weather running | Outdoor conditions matter | Context for possible relevance |
+| Worn-out shoes | Potential replacement need | Footwear candidates may be useful |
+| Under £120 | Price-constrained exploration | More specific retrieval |
+| Forget the shoes | Purchase intent withdrawn | Previous footwear context becomes stale |
+
+This is an illustrative model, not OpenAI's session schema.
+
+State makes incomplete messages understandable. Updating state prevents earlier intentions from dominating later ones.
+
+Returning to the branch where the runner is still exploring replacements, the system now has a plausible commercial opportunity. It still needs an actual advertisement.
+
+## 3. An LLM coordinates the search, but does not make every decision
+
+The runner asks:
+
+“My shoes are worn out. What should I look for in a replacement for longer runs? Preferably under £120.”
+
+The system has a plausible advertising opportunity. It does not yet have an eligible advertisement.
+
+A keyword search for “running shoes” might retrieve racing shoes outside the user's budget, products unavailable in their country or campaigns that can no longer spend.
+
+Finding a suitable advertisement requires several different kinds of work.
+
+[OpenAI describes][stack] a custom post-trained LLM, called the *orchestrator*, that interprets the conversation and calls specialised advertising tools. The model coordinates the process; it does not replace the retrieval index, eligibility checks or auction.
+
+### From conversation to candidates
+
+The orchestrator prepares one or more queries representing the user's current commercial intent.
+
+For our runner, those queries might express “running shoes for longer training runs” and “comfortable running shoes for wet weather”.
+
+These are hypothetical examples, not captured OpenAI model outputs.
+
+The retrieval system converts the queries into embeddings—numerical representations of meaning—and searches specialised indices using approximate nearest-neighbour techniques.
+
+[OpenAI describes][stack] maintaining multiple indices optimised for different inventory characteristics. Approximate search helps retrieve a broad pool quickly without exhaustively comparing every advertisement.
+
+But retrieval answers only one question: *Which candidates might be relevant?*
+
+It does not establish which candidates are allowed to appear.
+
+### Eligibility and quality are different tests
+
+Suppose retrieval finds a waterproof running-shoe advertisement.
+
+The product fits the conversation, but the campaign targets another country.
+
+It is semantically relevant and operationally ineligible.
+
+Another candidate might have the correct targeting but insufficient budget. A third might be active and eligible but poorly suited to the user's training needs.
+
+[OpenAI describes][stack] filtering candidates using campaign and creative availability, targeting, policy, budget, pacing, placement compatibility and deduplication.
+
+Candidates that survive can be evaluated for semantic relevance, predicted engagement and historical performance.
+
+The public engineering account identifies these considerations but does not disclose the complete scoring formula.
+
+That distinction matters: a relevance score is not an eligibility guarantee, and neither determines the final auction price.
+
+### The auction has its own authority
+
+The orchestrator nominates plausible candidates for the auction.
+
+[OpenAI describes][stack] the auction tool as responsible for final admission, pacing, bid-related computation, quality-adjusted ranking, pricing and selection.
+
+The LLM does not independently set the price or choose the final winner.
+
+This separation allows natural-language interpretation to remain flexible while specialised systems enforce their own serving rules.
+
+### Why orchestration is iterative
+
+The process is not a fixed sequence of six tool calls.
+
+[OpenAI describes][stack] an agentic loop in which the orchestrator can revise queries and call tools again as the conversation changes.
+
+Suppose the runner clarifies:
+
+“I don't need racing shoes. I want something comfortable for easy training.”
+
+The system may need new candidates.
+
+Further retrieval can improve relevance, but it also consumes time. The user may change direction again before the result is ready.
+
+The orchestrator must therefore balance refinement against the time available for the current opportunity.
+
+Even after an auction winner is selected, a final contextual check can reject it if the advertisement is inappropriate for the immediate conversation.
+
+A valid auction result is not unconditional permission to appear.
+
+And none of these decisions should determine how ChatGPT answers the runner.
+
+## 4. Why the answer and advertisement take separate paths
+
+The runner asks whether cushioned shoes are better for long-distance training.
+
+ChatGPT begins generating an answer. Meanwhile, the advertising system evaluates whether there is a suitable sponsored placement.
+
+What if the advertising service is unavailable?
+
+The organic answer should still be generated.
+
+What if the auction takes too long?
+
+The user should not have to wait.
+
+And what if the winning advertiser would benefit from ChatGPT recommending a particular brand?
+
+The auction must not control the assistant's answer.
+
+[OpenAI reports][stack] that advertising selection runs through separate services, models and code. Organic answer generation has no dependency on the advertising service.
+
+This creates two boundaries.
+
+**The reliability boundary:** advertising delays or failures should not block the primary product.
+
+**The content boundary:** an advertiser's selection or bid does not determine the wording of the organic answer.
+
+The two paths may contribute to the same interface, but the answer generator does not wait for advertising to finish.
+
+This is a documented architectural design, not proof that the systems share no underlying infrastructure. OpenAI does not disclose every network, deployment or operational dependency.
+
+The useful engineering distinction is that independence applies to a specified boundary.
+
+For ChatGPT Ads, the published design separates the answer-generation path from the advertising-serving path.
+
+That separation creates another problem: the answer may finish before the advertisement is ready.
+
+## 5. The advertisement has a deadline
+
+The advertising system finds a suitable running-shoe advertisement.
+
+It passes eligibility checks, wins the auction and survives the final contextual review.
+
+Yet the runner may never see it.
+
+[OpenAI describes][stack] two timing boundaries that can prevent an advertisement from appearing.
+
+### The server-side request can time out
+
+ChatGPT may be ready to respond before the advertising system has prepared a placement.
+
+Rather than delay the organic answer, the advertising request can time out.
+
+The selection process may have performed useful work, but it has not produced a timely result to send to the frontend.
+
+### A sent advertisement can arrive too late
+
+Suppose the advertising system finishes and sends the placement to the frontend.
+
+[OpenAI describes][stack] returning the advertiser's creative together with a model-generated neutral preamble explaining its relevance to the conversation.
+
+The creative contains the advertiser's message, destination and any call to action. The preamble introduces the sponsored placement without replacing the advertiser's content.
+
+If the bundle arrives within the frontend's display window, the interface can show it below the organic answer.
+
+If it arrives too late, the advertisement is not displayed for that turn.
+
+The server-side operation may have succeeded in sending the result, but the user-facing opportunity has passed.
+
+### The same visible outcome can have different causes
+
+<!-- V4: insert delivery-boundary experiment here. Accessible fallback follows. -->
+
+| Outcome | Evidence in the illustrative model |
+|---|---|
+| Server-side timeout | No completed placement sent |
+| Contextual rejection | Candidate blocked before sending |
+| Late frontend arrival | Result sent but not displayed |
+| On-time arrival | Eligible for display; confirmation remains separate |
+
+All three unsuccessful outcomes can look identical to the user: no advertisement.
+
+But they require different diagnoses.
+
+A timeout concerns the server-side deadline. A contextual rejection concerns suitability. A late arrival concerns the frontend's display window.
+
+[OpenAI distinguishes][stack] an advertisement selected by the auction, a creative sent to the frontend, and a placement actually displayed to the user.
+
+The engineering account calls sending the creative and preamble to the frontend *server-side delivery*. It separately describes an acknowledged delivery after the placement is approved, displayed and acknowledged.
+
+These stages should not be treated as interchangeable. The public account does not specify the complete acknowledgement protocol, and sending a creative does not by itself establish a user-facing impression.
+
+The engineering lesson is that a correct selection can fail to produce a displayed advertisement without the auction itself malfunctioning.
+
+And because the answer path is independent, the user's task continues.
+
+## 6. What the system can observe after delivery
+
+Suppose the runner sees a sponsored running-shoe advertisement.
+
+They might click it, hide it or continue the conversation.
+
+The platform needs evidence about what happened. But observability begins before display.
+
+Consider two conversations that produce no advertisement.
+
+In one, the turn is ineligible for advertising. In the other, retrieval runs but returns no suitable candidates.
+
+The visible outcome is identical. The underlying behaviour is not.
+
+[OpenAI describes][stack] lifecycle logging that distinguishes ineligible turns, sessions without retrieval, empty candidate sets, candidates failing eligibility and subsequent interactions with delivered advertisements.
+
+These records support three different activities.
+
+### Operational diagnosis
+
+The first question is where an opportunity ended.
+
+If retrieval returned no candidates, changing auction pricing will not fix the missing inventory.
+
+If candidates failed eligibility, improving semantic retrieval may not address the targeting, policy or budget constraint.
+
+If the result arrived too late, the problem concerns timing rather than relevance.
+
+A useful diagnostic system records enough of the lifecycle to distinguish these cases.
+
+### Quality evaluation
+
+[OpenAI also describes][stack] using stronger models and human feedback to evaluate and improve advertising selection.
+
+Such feedback can help identify irrelevant candidates, unsuitable placements and opportunities for better retrieval or scoring.
+
+But a quality score is a proxy.
+
+A model's judgement that an advertisement is relevant does not prove the user found it useful. A higher click-through rate does not establish incremental advertiser value.
+
+The engineering publication describes evaluation and feedback mechanisms, but not every dataset, training procedure or causal evaluation method.
+
+### Business measurement
+
+Advertisers need a different view.
+
+They want to know how many impressions and clicks occurred, what expenditure was recognised and which conversions were attributed to their campaigns.
+
+These are commercial reporting metrics, not a complete record of the orchestrator's internal decisions.
+
+The [public advertiser reporting documentation][reporting] does not expose a complete trace of the orchestrator's retrieval, scoring and auction decisions. It documents campaign performance metrics and supported aggregations. We should not infer from that documentation either the full contents of OpenAI's internal logs or every possible access arrangement outside the published advertiser API.
+
+That boundary matters because the information needed for internal diagnosis is not necessarily information an advertiser is entitled to receive.
+
+A reporting API should be understood by its published contract, not by assuming it exposes everything the platform observes.
+
+## 7. What advertisers can actually control and verify
+
+A running-shoe company wants to advertise to people exploring training equipment.
+
+It can use [supported advertiser interfaces][api] to configure campaigns, provide creative material, choose available targeting and bidding settings, and retrieve performance reports.
+
+It cannot use those interfaces to rewrite ChatGPT's organic answer or directly control the orchestrator's private tool sequence.
+
+The public API and internal orchestration tools have different responsibilities.
+
+### Campaign settings are not serving guarantees
+
+An advertiser can configure an objective or bidding strategy, but that does not guarantee that every individual opportunity will produce the desired outcome or price.
+
+The available bidding products and their eligibility rules may also change.
+
+This article therefore concentrates on the durable distinction between campaign inputs, selection decisions, billing events and measured outcomes. Current configuration details belong in the dedicated advertiser API guide.
+
+### Reporting metrics have different clocks
+
+Suppose the shoe company retrieves these hypothetical results:
+
+| Metric | Value |
+|---|---:|
+| Impressions | 10,000 |
+| Clicks | 250 |
+| Spend | £300 |
+| Attributed conversions | 12 |
+
+The click-through rate is:
+
+$$CTR=\frac{250}{10,000}=2.5\%$$
+
+Dividing spend by clicks gives:
+
+$$\frac{£300}{250}=£1.20$$
+
+The hypothetical £1.20 figure is calculated by dividing the displayed £300 spend by 250 clicks. It is not necessarily the platform's returned `cpc`.
+
+[OpenAI documents][reporting] that impressions and clicks can become available before finalised spend and cost metrics. Conversion results may be updated through later processing. Recent metrics can therefore represent different stages of finality, even when retrieved in the same report.
+
+For performance evaluation, use the API's returned cost metrics and preserve the reporting period, metric definitions and retrieval timestamp.
+
+And the 12 attributed conversions do not establish that advertising caused 12 additional purchases.
+
+Attribution assigns credit under a defined rule. Incrementality requires evidence about what would have happened without the advertising.
+
+The general mechanisms are explained in [How Advertising Platforms Work](https://harness.ai-knowledge-hub.org/learn/system-design/advertising-platforms).
+
+### The boundary of the public architecture
+
+OpenAI's engineering publication describes stateful sessions, an LLM orchestrator, specialised retrieval and serving tools, separate answer generation, contextual checks, delivery timing and lifecycle feedback.
+
+It does not disclose every model prompt, ranking coefficient, storage system, service dependency or latency threshold.
+
+Those unknowns do not prevent us from understanding the documented design.
+
+They prevent us from claiming that the public description is a complete map of production infrastructure.
+
+The lesson is to distinguish the responsibility a component is documented to perform from the internal implementation we might imagine.
+
+## The right answer can be no advertisement
+
+The runner came to ChatGPT for help preparing for a half-marathon.
+
+A running-shoe advertisement might become relevant as the conversation develops. But mentioning shoes does not automatically create a suitable advertising opportunity.
+
+The system must interpret changing intent, retrieve candidates, enforce constraints, run an auction and finish within the available time.
+
+Any stage may legitimately produce no advertisement.
+
+A conversation may be unsuitable for advertising. No candidate may qualify. A selected advertisement may fail the final contextual check. A valid creative may arrive after its display window has closed.
+
+OpenAI's documented architecture allows the organic answer to continue independently through those outcomes.
+
+This reveals a broader principle for systems that add recommendations, commercial actions or automated interventions to an existing user workflow.
+
+**Successful operation must include the ability to decline participation.**
+
+A secondary system should not manufacture an opportunity merely because it has something available to offer.
+
+In conversational advertising, one of the most important architectural decisions is the boundary that allows the system to do nothing.
+
+## Optional implementation lab
+
+The existing Harness v1.0.0 reference files use a separate hiking scenario to illustrate architecture contracts and lifecycle records. They are hypothetical teaching artefacts, not OpenAI API schemas, actual traces or production timing measurements. The examples are not exhaustive and do not define a complete auction pricing rule.
+
+- [Illustrative architecture contracts — JSON Schema](https://harness.ai-knowledge-hub.org/references/chatgpt-ads/v1/architecture-contracts.schema.json)
+- [Illustrative selection records — JSON](https://harness.ai-knowledge-hub.org/references/chatgpt-ads/v1/architecture-examples.json)
+- [Agent reference notes](https://harness.ai-knowledge-hub.org/references/chatgpt-ads/v1/README.md)
+
+## Sources and further reading
+
+- [OpenAI — How we built ChatGPT's novel ad stack for user trust and relevance][stack] (21 October 2026). Vendor-described production architecture, not an independent operational audit.
+- [OpenAI Developers — Advertiser reporting][reporting]. Changing product contract.
+- [OpenAI Developers — Advertiser API overview][api]. Changing product contract.
+- [Harness — How Advertising Platforms Work](https://harness.ai-knowledge-hub.org/learn/system-design/advertising-platforms).
+- [Harness — Advertising Reporting](https://harness.ai-knowledge-hub.org/learn/system-design/chatgpt-ads-reporting).
+
+[stack]: https://openai.com/index/building-chatgpt-ad-stack/
+[reporting]: https://developers.openai.com/ads/reporting
+[api]: https://developers.openai.com/ads/api-overview

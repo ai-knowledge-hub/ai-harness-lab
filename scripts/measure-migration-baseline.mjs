@@ -32,10 +32,10 @@ const routes = [
   },
   {
     path: "/learn/system-design/chatgpt-ads",
-    heading: "How ChatGPT Ads works",
-    controls: "#visual-deep-dive .ads-deep-dive",
+    heading: /^How ChatGPT Ads [Ww]orks$/,
+    controls: "#chatgpt-orchestration, #visual-deep-dive .ads-deep-dive",
     step: (controls, number) => controls.getByRole("status").filter({
-      hasText: new RegExp(`^Stage ${number} of 5$`),
+      hasText: new RegExp(`^(Stage|Responsibility) ${number} of 5`),
     }),
   },
   {
@@ -170,8 +170,10 @@ async function measureScripts(browser, route) {
     if (route.controls) {
       const controls = page.locator(route.controls);
       await controls.scrollIntoViewIfNeeded();
+      const disclosure = controls.locator(".cg-controls > summary");
+      if (await disclosure.count()) await disclosure.click();
       await route.step(controls, 1).waitFor();
-      await controls.getByRole("button", { name: "Next", exact: true }).click();
+      await controls.getByRole("button", { name: /^(Next|Next responsibility)$/ }).click();
       await route.step(controls, 2).waitFor();
       jsGzipBytesThroughNext = await scriptBytes(page, responses);
     }
