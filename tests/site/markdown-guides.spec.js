@@ -9,13 +9,15 @@ const marketplaceArticle = JSON.parse(await readFile(new URL("../fixtures/market
 const reportingArticle = JSON.parse(await readFile(new URL("../fixtures/advertising-reporting-article.json", import.meta.url), "utf8"));
 const platformArticle = JSON.parse(await readFile(new URL("../fixtures/advertising-platforms-article.json", import.meta.url), "utf8"));
 const chatgptArticle = JSON.parse(await readFile(new URL("../fixtures/chatgpt-ads-article.json", import.meta.url), "utf8"));
+const retirement = JSON.parse(await readFile(new URL("../fixtures/api-guide-retirement.json", import.meta.url), "utf8"));
 
 for (const width of [390, 1440]) {
   test(`all migrated guides retain reading and accessible code without JavaScript at ${width}px`, async ({ browser, baseURL }, testInfo) => {
     const context = await browser.newContext({ baseURL, javaScriptEnabled: false, viewport: { width, height: 1000 } });
     try {
       const page = await context.newPage();
-      for (const [path, expected] of Object.entries({ ...baseline.routes, ...marketplaceArticle.routes, ...reportingArticle.routes, ...platformArticle.routes, ...chatgptArticle.routes })) {
+      for (const [path, expected] of Object.entries({ ...baseline.routes, ...marketplaceArticle.routes, ...reportingArticle.routes, ...platformArticle.routes, ...chatgptArticle.routes, ...retirement.routes })) {
+        if (path === retirement.retiredRoute) continue;
         const response = await page.goto(path);
         expect(response.status()).toBe(200);
         await expect(page.locator("h1")).toBeVisible();

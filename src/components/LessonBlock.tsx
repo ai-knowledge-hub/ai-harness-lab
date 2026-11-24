@@ -1,6 +1,6 @@
 import type { GuideBlock } from "../content/guide-types";
 import { ChatGPTAdsArchitecture } from "./ChatGPTAdsArchitecture";
-import { AdsCapabilities, ReferenceDownloads } from "./AdsReference";
+import { ReferenceDownloads } from "./AdsReference";
 import { AdsOrchestrator } from "./AdsOrchestrator";
 import { AdsReportingReference } from "./AdsReportingReference";
 
@@ -10,7 +10,6 @@ export function LessonBlock({ block, blockId }: {
   block: GuideBlock;
   blockId: string;
 }) {
-  if (block.type === "ads-capabilities") return <AdsCapabilities />;
   if (block.type === "ads-orchestrator") return <AdsOrchestrator />;
   if (block.type === "ads-reporting-reference") return <AdsReportingReference id={blockId} />;
   if (block.type === "reference-downloads") return <ReferenceDownloads collection={block.collection} />;

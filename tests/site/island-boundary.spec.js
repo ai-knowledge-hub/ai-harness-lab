@@ -1,13 +1,14 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
 const { routes } = JSON.parse(readFileSync(new URL("../fixtures/reading-baseline.json", import.meta.url)));
+const { retiredRoute } = JSON.parse(readFileSync(new URL("../fixtures/api-guide-retirement.json", import.meta.url)));
 
 test("reading pages do not request the lab island", async ({ page, request }) => {
   const labHtml = await (await request.get("/learn/algorithms/visualizers")).text();
   const labEntry = labHtml.match(/component-url="([^"]+)"/)[1];
   const scripts = [];
   page.on("request", (request) => { if (request.resourceType() === "script") scripts.push(new URL(request.url()).pathname); });
-  for (const route of Object.keys(routes).filter(path => path !== "/learn/algorithms/visualizers")) {
+  for (const route of Object.keys(routes).filter(path => path !== "/learn/algorithms/visualizers" && path !== retiredRoute)) {
     await page.goto(route);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.locator("astro-island")).toHaveCount(0);

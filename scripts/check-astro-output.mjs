@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, access, readdir } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { JSDOM } from "jsdom";
 import { readingText } from "./reading-text.mjs";
@@ -15,7 +15,8 @@ const marketplaceArticle = JSON.parse(await readFile("tests/fixtures/marketplace
 const reportingArticle = JSON.parse(await readFile("tests/fixtures/advertising-reporting-article.json", "utf8"));
 const platformArticle = JSON.parse(await readFile("tests/fixtures/advertising-platforms-article.json", "utf8"));
 const chatgptArticle = JSON.parse(await readFile("tests/fixtures/chatgpt-ads-article.json", "utf8"));
-const replacementArticles = { ...reportingArticle.routes, ...platformArticle.routes, ...chatgptArticle.routes };
+const retirement = JSON.parse(await readFile("tests/fixtures/api-guide-retirement.json", "utf8"));
+const replacementArticles = { ...reportingArticle.routes, ...platformArticle.routes, ...chatgptArticle.routes, ...retirement.routes };
 function historicalEditorialReferences(value) {
   return value
     .replaceAll("Production case study How ChatGPT Ads Works", "Platform introduction How ChatGPT Ads works")
@@ -37,6 +38,7 @@ const companionCopy = [
   ['#references a[href="https://skills.ai-knowledge-hub.org/plugins/agentops/harness-governance-plugin"]', "Inspect the harness review package in Skills", "Run the harness review example in Skills"],
 ];
 for (const [path, historical] of Object.entries(baseline.routes)) {
+  if (path === retirement.retiredRoute) continue;
   const expected = replacementArticles[path] ?? historical;
   const file = path === "/" ? "dist/index.html" : `dist${path}/index.html`;
   const html = await readFile(file, "utf8");
@@ -94,21 +96,46 @@ for (const [path, historical] of Object.entries(baseline.routes)) {
     assert.fail(`${path}: no-JavaScript reading text differs at ${index}: expected ${JSON.stringify(expected.text.slice(index - 30, index + 100))}; received ${JSON.stringify(actualText.slice(index - 30, index + 100))}`);
   }
   const ids = new Set([...main.querySelectorAll("[id]")].map((element) => element.id));
-  for (const id of historical.ids) assert.ok(ids.has(id), `${path}: missing anchor ${id}`);
+  // Removing the sole related guide also removes its now-empty wrapper.
+  for (const id of historical.ids.filter(id => !retirement.removedAnchors[path]?.includes(id))) assert.ok(ids.has(id), `${path}: missing anchor ${id}`);
   if (!replacementArticles[path]) assert.deepEqual([...main.querySelectorAll("a[href]")].map((element) => element.getAttribute("href")), expected.hrefs, `${path}: reading links`);
 }
 const sitemap = await readFile("dist/sitemap.xml", "utf8");
 const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
-for (const url of baseline.sitemap) assert.ok(urls.includes(url), `Sitemap omitted ${url}`);
+for (const url of baseline.sitemap.filter(url => new URL(url).pathname !== retirement.retiredRoute)) assert.ok(urls.includes(url), `Sitemap omitted ${url}`);
+assert.ok(!urls.some(url => new URL(url).pathname === retirement.retiredRoute), "Retired guide must not be indexed");
 for (const path of ["/examples", "/learn/system-design/chatgpt-ads-reporting", "/algorithms", "/patterns"])
   assert.ok(!urls.includes(`https://harness.ai-knowledge-hub.org${path}`), `Sitemap indexed ${path}`);
 for (const [file, expected] of Object.entries(baseline.downloads)) {
   const hash = createHash("sha256").update(await readFile(`dist/${file}`)).digest("hex");
   assert.equal(hash, expected, `${file}: versioned download changed`);
 }
-console.log(`Astro preserves infrastructure and historical anchors across ${Object.keys(baseline.routes).length} baseline routes. Retained copy, approved editorial replacements and all five download hashes are checked. Sitemap contains ${urls.length} eligible URLs.`);
+for (const file of [`dist${retirement.retiredRoute}/index.html`, `dist${retirement.retiredRoute}.html`]) {
+  await assert.rejects(access(file), { code: "ENOENT" }, `${file}: retired output must be absent`);
+}
+const redirects = JSON.parse(await readFile("vercel.json", "utf8")).redirects;
+for (const source of [retirement.retiredRoute, `${retirement.retiredRoute}/`, `${retirement.retiredRoute}.html`]) {
+  const matching = redirects.filter(redirect => redirect.source === source);
+  assert.equal(matching.length, 1, `${source}: exactly one retirement redirect`);
+  assert.equal(matching[0].destination, retirement.redirectDestination);
+  assert.equal(matching[0].permanent, true);
+}
+const [redirectPath, fragment] = retirement.redirectDestination.split("#");
+const redirectDocument = new JSDOM(await readFile(`dist${redirectPath}/index.html`, "utf8")).window.document;
+assert.ok(redirectDocument.getElementById(fragment), "Retirement redirect must land on an existing section");
+for (const file of (await readdir("dist", { recursive: true })).filter(file => file.endsWith(".html"))) {
+  const document = new JSDOM(await readFile(`dist/${file}`, "utf8")).window.document;
+  for (const link of document.querySelectorAll("a[href]")) {
+    const target = new URL(link.getAttribute("href"), `https://harness.ai-knowledge-hub.org/${file}`);
+    if (target.origin !== "https://harness.ai-knowledge-hub.org") continue;
+    assert.notEqual(target.pathname.replace(/\.html$|\/$/g, ""), retirement.retiredRoute, `${file}: link to retired guide`);
+    assert.notEqual(target.pathname, "/references/chatgpt-ads/v1/capabilities.json", `${file}: archived API map must not rejoin the curriculum`);
+  }
+}
+console.log(`Astro preserves infrastructure and historical anchors across ${Object.keys(baseline.routes).length - 1} retained baseline routes. The retired guide is absent; permanent redirects, all five original download hashes and curriculum links are checked. Sitemap contains ${urls.length} eligible URLs.`);
 
 for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...marketplaceArticle.routes, ...replacementArticles })) {
+  if (path === retirement.retiredRoute) continue;
   const document = new JSDOM(await readFile(`dist${path}/index.html`, "utf8")).window.document;
   const main = document.querySelector("main");
   assert.equal(document.title, expected.title, `${path}: migrated title`);
@@ -120,7 +147,7 @@ for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...m
   assert.equal(historicalEditorialReferences(readingText(main)), historicalEditorialReferences(expected.text), `${path}: complete approved reading text`);
   assert.deepEqual([...main.querySelectorAll("a[href]")].map((link) => link.getAttribute("href")), expected.hrefs, `${path}: approved reading links`);
   for (const id of expected.ids) assert.ok(document.getElementById(id), `${path}: approved anchor ${id}`);
-  for (const id of (markdownBaseline.routes[path] ?? baseline.routes[path]).ids) assert.ok(document.getElementById(id), `${path}: retained migration anchor ${id}`);
+  for (const id of (markdownBaseline.routes[path] ?? baseline.routes[path]).ids.filter(id => !retirement.removedAnchors[path]?.includes(id))) assert.ok(document.getElementById(id), `${path}: retained migration anchor ${id}`);
   assert.deepEqual([...main.querySelectorAll("pre code")].map((code) => code.textContent.trimEnd()), expected.code, `${path}: approved code`);
   for (const pre of main.querySelectorAll("pre")) {
     assert.equal(pre.tabIndex, 0, `${path}: keyboard-accessible code`);

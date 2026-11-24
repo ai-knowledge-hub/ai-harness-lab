@@ -39,7 +39,6 @@ The [local adapter guide](docs/chatgpt-ads-reporting-adapters.md) shows how to r
 | `/learn/system-design/advertising-platforms` | Advertising-platform overview |
 | `/learn/system-design/chatgpt-ads` | ChatGPT Ads system introduction |
 | `/learn/system-design/api-design` | Reusable API-design principles |
-| `/learn/system-design/chatgpt-ads-apis` | Source-linked public capability map |
 | `/learn/system-design/chatgpt-ads-reporting` | Reporting implementation case (preview) |
 | `/learn/algorithms` | Algorithms & Data, including the full visualizer index |
 | `/learn/software-production` | Software & production |

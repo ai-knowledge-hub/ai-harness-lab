@@ -7,7 +7,8 @@ import { readingText } from "./reading-text.mjs";
 // Compare rendered editorial text with the independent author-supplied source,
 // excluding only implementation figures, the retained opening heading and
 // the equivalent MathML syntax. Apply only the three editorial trims approved
-// by the user on 24 November 2026; preserve the independent source fixture.
+// by the user on 24 November 2026 and the subsequent API-guide retirement link
+// change; preserve the independent source fixture.
 export async function checkChatGPTReviewedCopy() {
   let reviewed = await readFile("tests/fixtures/chatgpt-ads-reviewed-v3.1.md", "utf8");
   const approvedCuts = [
@@ -19,6 +20,9 @@ export async function checkChatGPTReviewedCopy() {
     assert.equal(reviewed.split(cut).length - 1, 1, `Approved editorial cut must occur exactly once in source: ${cut}`);
     reviewed = reviewed.replace(cut, "");
   }
+  const retiredGuideReference = "Current configuration details belong in the dedicated advertiser API guide.";
+  assert.equal(reviewed.split(retiredGuideReference).length - 1, 1);
+  reviewed = reviewed.replace(retiredGuideReference, "Current configuration details belong in the official advertiser API documentation.");
   reviewed = reviewed.replace(/<!--[\s\S]*?-->/g, "")
     .replace("$$CTR=\\frac{250}{10,000}=2.5\\%$$", "CG-EQUATION-CTR")
     .replace("$$\\frac{£300}{250}=£1.20$$", "CG-EQUATION-AVERAGE");
@@ -41,7 +45,7 @@ export async function checkChatGPTReviewedCopy() {
   assert.ok(actualText === expectedText, `Reviewed-copy mismatch at ${mismatch}: actual ${JSON.stringify(actualText.slice(mismatch - 60, mismatch + 120))}; expected ${JSON.stringify(expectedText.slice(mismatch - 60, mismatch + 120))}`);
   const hrefs = new Set([...reading.querySelectorAll("a")].map(link => link.href));
   for (const link of expected.querySelectorAll("a")) assert.ok(hrefs.has(link.href), `Missing reviewed source/resource link: ${link.href}`);
-  assert.ok(hrefs.has("https://harness.ai-knowledge-hub.org/learn/system-design/chatgpt-ads-apis"));
+  assert.ok(hrefs.has("https://developers.openai.com/ads/api-overview"));
   assert.equal(built.querySelectorAll("[data-chatgpt-visual]").length, 5);
   assert.equal(built.querySelectorAll("[data-cg-equation] math").length, 2);
   assert.equal(built.querySelector('[data-cg-equation="ctr"] math').textContent, "CTR=25010,000=2.5%");
@@ -49,7 +53,7 @@ export async function checkChatGPTReviewedCopy() {
   assert.equal(built.querySelectorAll(".lesson-section h2").length, 11);
   assert.equal(250 / 10_000 * 100, 2.5);
   assert.equal(300 / 250, 1.2);
-  console.log("ChatGPT Ads rendered prose matches reviewed v3.1 with three approved editorial trims; all reviewed links, five figures and both equations are retained.");
+  console.log("ChatGPT Ads rendered prose matches reviewed v3.1 with three approved editorial trims and the retired-guide reference replaced by official documentation; source/resource links, five figures and both equations are retained.");
 }
 
 if (process.argv[1]?.endsWith("check-chatgpt-reviewed-copy.mjs")) await checkChatGPTReviewedCopy();
