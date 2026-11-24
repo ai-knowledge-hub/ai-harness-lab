@@ -1,0 +1,9 @@
+---
+interface Props { kind: "ctr" | "spend-per-click" }
+const { kind } = Astro.props;
+const label = kind === "ctr" ? "CTR equals 250 clicks divided by 10,000 impressions, or 2.5 percent" : "300 pounds divided by 250 clicks equals 1 pound 20 pence per click";
+const markup = kind === "ctr"
+  ? "<mrow><mi>CTR</mi><mo>=</mo><mfrac><mn>250</mn><mn>10,000</mn></mfrac><mo>=</mo><mn>2.5</mn><mo>%</mo></mrow>"
+  : "<mrow><mfrac><mn>£300</mn><mn>250</mn></mfrac><mo>=</mo><mn>£1.20</mn></mrow>";
+---
+<div class="cg-equation" data-cg-equation={kind} role="region" aria-label={label} tabindex="0"><math display="block" aria-label={label} set:html={markup} /></div>

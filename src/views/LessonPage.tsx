@@ -43,7 +43,7 @@ function Contents({ sections }: { sections: GuideHeading[] }) {
               <span aria-hidden="true">
                 {String(index + 1).padStart(2, "0")}
               </span>
-              {section.title}
+              {section.title.replace(/^\d+\.\s+/, "")}
             </a>
           </li>
         ))}

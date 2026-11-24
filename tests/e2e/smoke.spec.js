@@ -326,7 +326,7 @@ test("the guide is readable as static HTML without JavaScript", async ({
     expect(sitemapText).not.toContain("/examples");
     for (const [slug, title] of [
       ["advertising-platforms", "How Advertising Platforms Work"],
-      ["chatgpt-ads", "How ChatGPT Ads works"],
+      ["chatgpt-ads", "How ChatGPT Ads Works"],
       ["chatgpt-ads-apis", "ChatGPT Ads APIs for advertisers"],
     ]) {
       await page.goto(`http://127.0.0.1:4173/learn/system-design/${slug}`);
@@ -340,12 +340,10 @@ test("the guide is readable as static HTML without JavaScript", async ({
         await expect(page.locator("#across-five-tracks")).toHaveCount(1);
         await expect(page.getByRole("link", { name: "Read the reporting case" }))
           .toHaveAttribute("href", "/learn/system-design/chatgpt-ads-reporting");
-        await expect(page.getByRole("region", { name: "Architecture diagram" })).toBeVisible();
-        await expect(page.locator('.ads-node[data-node="worker"]')).toContainText("Harness · proposed");
-        await expect(page.locator(".ads-stage-copy")).toHaveCount(5);
-        await page.locator(".orchestrator-views summary").first().click();
-        await expect(page.locator(".orchestrator-flow").first()).toBeVisible();
-        await expect(page.getByRole("button", { name: "Show complete diagram" })).toHaveCount(0);
+        await expect(page.locator("[data-chatgpt-visual]")).toHaveCount(5);
+        await expect(page.locator("[data-cg-equation] math")).toHaveCount(2);
+        await expect(page.locator(".cg-controls")).toHaveCount(0);
+        await expect(page.locator("#delivery-boundaries")).toContainText("Late frontend arrival");
       }
     }
   } finally {
@@ -353,62 +351,23 @@ test("the guide is readable as static HTML without JavaScript", async ({
   }
 });
 
-test("the architecture walkthrough preserves stages, evidence labels and delivery outcomes", async ({ page }) => {
-  await page.goto("/learn/system-design/chatgpt-ads#visual-deep-dive");
-  const walkthrough = page.locator(".ads-deep-dive");
-  const worker = walkthrough.locator('[data-node="worker"]');
-  await expect(walkthrough.getByRole("button", { name: "Previous", exact: true })).toBeDisabled();
-  await expect(walkthrough.getByRole("status")).toHaveText("Stage 1 of 5");
-  await expect(worker).toBeHidden();
-  for (let stage = 2; stage <= 5; stage++) {
-    await walkthrough.getByRole("button", { name: "Next", exact: true }).click();
-    await expect(walkthrough.locator(".ads-step-actions [role=status]")).toHaveText(`Stage ${stage} of 5`);
-    if (stage === 3) {
-      const edge = (from, to) => walkthrough.locator(`path[data-from="${from}"][data-to="${to}"]`);
-      await expect(edge("display", "client")).toHaveCSS("opacity", "1");
-      await expect(edge("display", "late")).toHaveCSS("opacity", "0.18");
-      await walkthrough.getByLabel("Example ad outcome").selectOption("late");
-      await expect(walkthrough.locator(".ads-delivery-example [role=status]")).toContainText("No ad is shown");
-      await expect(edge("checks", "bundle")).toHaveCSS("opacity", "1");
-      await expect(edge("bundle", "display")).toHaveCSS("opacity", "1");
-      await expect(edge("display", "late")).toHaveCSS("opacity", "1");
-      await expect(edge("checks", "no-ad")).toHaveCSS("opacity", "0.18");
-      await expect(edge("display", "client")).toHaveCSS("opacity", "0.18");
-      await walkthrough.getByLabel("Example ad outcome").selectOption("ineligible");
-      await expect(walkthrough.locator(".ads-delivery-example [role=status]")).toContainText("final check rejects");
-      await expect(edge("checks", "no-ad")).toHaveCSS("opacity", "1");
-      await expect(edge("checks", "bundle")).toHaveCSS("opacity", "0.18");
-      await expect(edge("bundle", "display")).toHaveCSS("opacity", "0.18");
-      await expect(edge("display", "late")).toHaveCSS("opacity", "0.18");
-    }
-    if (stage < 5) await expect(worker).toBeHidden();
-  }
-  await expect(worker).toContainText("Harness · proposed");
-  await expect(worker).toHaveCSS("border-top-style", "dashed");
-  await expect(walkthrough.getByRole("button", { name: "Next", exact: true })).toBeDisabled();
-  await walkthrough.getByRole("button", { name: "Previous", exact: true }).click();
-  await expect(worker).toBeHidden();
-  const tools = walkthrough.getByRole("button", { name: /Stage 2:/ });
-  await tools.focus();
-  await page.keyboard.press("Enter");
-  await expect(tools).toHaveAttribute("aria-current", "step");
-  await walkthrough.getByRole("button", { name: "Show complete diagram" }).click();
-  await expect(walkthrough.locator(".ads-stage-copy")).toHaveCount(5);
-  await expect(worker).toBeVisible();
-  expect(await walkthrough.locator(".ads-connection").evaluateAll((paths) =>
-    paths.every((path) => ["marker-start", "marker-end"].every((name) => {
-      const reference = path.getAttribute(name);
-      return !reference || Boolean(document.getElementById(reference.slice(5, -1)));
-    })),
-  )).toBe(true);
+test("the advertising experiment separates timeout, rejection, late arrival and display eligibility", async ({ page }) => {
+  await page.goto("/learn/system-design/chatgpt-ads#chatgpt-delivery");
+  const figure = page.locator('[data-chatgpt-visual="delivery"]');
+  await expect(figure).toHaveAttribute("data-outcome", "on-time");
+  await figure.locator('[name="arrival"][value="late"]').check();
+  await expect(figure).toHaveAttribute("data-outcome", "late");
+  await figure.locator('[name="context"][value="reject"]').check();
+  await expect(figure).toHaveAttribute("data-outcome", "rejected");
+  await expect(figure.locator("[data-arrival-controls] input").first()).toBeDisabled();
+  await figure.locator('[name="server"][value="timeout"]').check();
+  await expect(figure).toHaveAttribute("data-outcome", "timeout");
+  await expect(figure.getByRole("status")).toContainText("No completed placement is sent");
+  await expect(figure.locator("[data-organic-answer]")).toContainText("available independently");
   await page.setViewportSize({ width: 320, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(worker).toHaveCSS("animation-name", "none");
-  await expect(walkthrough.getByRole("region", { name: "Architecture diagram" })).toHaveAttribute("tabindex", "0");
+  await expect(figure.locator(".cg-feedback")).toHaveCSS("animation-name", "none");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-  await walkthrough.getByRole("button", { name: "Return to staged view" }).click();
-  await expect(tools).toHaveAttribute("aria-current", "step");
-  await expect(worker).toBeHidden();
 });
 
 test("guide navigation, hydration, saved theme and metadata stay coherent", async ({
@@ -436,8 +395,8 @@ test("guide navigation, hydration, saved theme and metadata stay coherent", asyn
     })
     .click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("How Advertising Platforms Work");
-  await page.getByRole("link", { name: "How ChatGPT Ads works", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("How ChatGPT Ads works");
+  await page.getByRole("link", { name: "How ChatGPT Ads Works", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("How ChatGPT Ads Works");
   await page.getByRole("link", { name: "API design principles", exact: true }).click();
   await expect(page).toHaveURL(/\/learn\/system-design\/api-design$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(

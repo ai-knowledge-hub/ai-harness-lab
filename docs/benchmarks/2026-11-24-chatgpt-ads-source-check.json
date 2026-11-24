@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-11-24T07:04:19.954299+00:00",
+  "scope": "Public source URL availability; claim checks are documented separately. No account or live Ads API operation.",
+  "sources": [
+    {
+      "requested": "https://openai.com/index/building-chatgpt-ad-stack/",
+      "status": 200,
+      "finalUrl": "https://openai.com/index/building-chatgpt-ad-stack/",
+      "title": "How we built ChatGPT\u2019s novel ad stack for user trust and relevance | OpenAI"
+    },
+    {
+      "requested": "https://developers.openai.com/ads/reporting",
+      "status": 200,
+      "finalUrl": "https://developers.openai.com/ads/reporting",
+      "title": "Reporting \u2013 Ads | OpenAI Developers"
+    },
+    {
+      "requested": "https://developers.openai.com/ads/api-overview",
+      "status": 200,
+      "finalUrl": "https://developers.openai.com/ads/api-overview",
+      "title": "Overview \u2013 Ads | OpenAI Developers"
+    }
+  ]
+}

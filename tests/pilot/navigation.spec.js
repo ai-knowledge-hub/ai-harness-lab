@@ -11,7 +11,7 @@ function navigationTo(page, path) {
 }
 
 async function expectPilot(page) {
-  await expect(page.locator("[data-ads-walkthrough]")).toHaveCount(1);
+  await expect(page.locator("[data-chatgpt-visual]")).toHaveCount(5);
   await expect(page.locator('script[src^="/assets/"]')).toHaveCount(0);
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "index, follow");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://harness.ai-knowledge-hub.org" + pilotPath);
@@ -19,7 +19,7 @@ async function expectPilot(page) {
 
 for (const [source, route, link] of [
   ["track entry", "/learn/system-design", (page) => page.getByRole("link", { name: "Explore ad delivery", exact: true })],
-  ["related guide", "/learn/system-design/advertising-platforms", (page) => page.getByRole("link", { name: "How ChatGPT Ads works", exact: true })],
+  ["related guide", "/learn/system-design/advertising-platforms", (page) => page.getByRole("link", { name: "How ChatGPT Ads Works", exact: true })],
   ["reference context", "/learn/system-design/api-design", (page) => page.getByRole("navigation", { name: "Reference context" }).getByRole("link", { name: /How ads work/ })],
 ]) {
   test(`${source} requests its Astro document`, async ({ page }) => {
@@ -31,11 +31,11 @@ for (const [source, route, link] of [
     expect(response.status()).toBe(200);
     await expectPilot(page);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-    await page.locator(".ads-deep-dive").scrollIntoViewIfNeeded();
-    const status = page.locator(".ads-step-actions [role=status]");
-    await expect(status).toHaveText("Stage 1 of 5");
-    await page.getByRole("button", { name: "Next", exact: true }).click();
-    await expect(status).toHaveText("Stage 2 of 5");
+    const figure = page.locator('[data-chatgpt-visual="orchestration"]');
+    await figure.locator(".cg-controls > summary").click();
+    await expect(figure.getByRole("status")).toContainText("Responsibility 1 of 5");
+    await figure.getByRole("button", { name: "Next responsibility", exact: true }).click();
+    await expect(figure.getByRole("status")).toContainText("Responsibility 2 of 5");
     await page.reload();
     await expectPilot(page);
     await page.goBack();

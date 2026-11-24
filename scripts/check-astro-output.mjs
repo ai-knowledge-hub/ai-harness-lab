@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { JSDOM } from "jsdom";
 import { readingText } from "./reading-text.mjs";
+import { checkChatGPTReviewedCopy } from "./check-chatgpt-reviewed-copy.mjs";
 
 const baseline = JSON.parse(await readFile("tests/fixtures/reading-baseline.json", "utf8"));
 const markdownBaseline = JSON.parse(await readFile("tests/fixtures/markdown-migration-baseline.json", "utf8"));
@@ -13,9 +14,12 @@ const marketplaceArticle = JSON.parse(await readFile("tests/fixtures/marketplace
 // #42 and the Markdown-migration fixtures frozen, including their old copy.
 const reportingArticle = JSON.parse(await readFile("tests/fixtures/advertising-reporting-article.json", "utf8"));
 const platformArticle = JSON.parse(await readFile("tests/fixtures/advertising-platforms-article.json", "utf8"));
-const replacementArticles = { ...reportingArticle.routes, ...platformArticle.routes };
+const chatgptArticle = JSON.parse(await readFile("tests/fixtures/chatgpt-ads-article.json", "utf8"));
+const replacementArticles = { ...reportingArticle.routes, ...platformArticle.routes, ...chatgptArticle.routes };
 function historicalEditorialReferences(value) {
   return value
+    .replaceAll("Production case study How ChatGPT Ads Works", "Platform introduction How ChatGPT Ads works")
+    .replaceAll("How ChatGPT Ads Works", "How ChatGPT Ads works")
     .replaceAll("How Advertising Platforms Work", "How advertising platforms work")
     .replaceAll("System-design case study · Preview How Advertising Reporting Systems Work", "Worked example · Preview How to collect ChatGPT Ads reports")
     .replaceAll("How Advertising Reporting Systems Work", "How to collect ChatGPT Ads reports")
@@ -116,7 +120,7 @@ for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...m
   assert.equal(historicalEditorialReferences(readingText(main)), historicalEditorialReferences(expected.text), `${path}: complete approved reading text`);
   assert.deepEqual([...main.querySelectorAll("a[href]")].map((link) => link.getAttribute("href")), expected.hrefs, `${path}: approved reading links`);
   for (const id of expected.ids) assert.ok(document.getElementById(id), `${path}: approved anchor ${id}`);
-  for (const id of markdownBaseline.routes[path].ids) assert.ok(document.getElementById(id), `${path}: retained migration anchor ${id}`);
+  for (const id of (markdownBaseline.routes[path] ?? baseline.routes[path]).ids) assert.ok(document.getElementById(id), `${path}: retained migration anchor ${id}`);
   assert.deepEqual([...main.querySelectorAll("pre code")].map((code) => code.textContent.trimEnd()), expected.code, `${path}: approved code`);
   for (const pre of main.querySelectorAll("pre")) {
     assert.equal(pre.tabIndex, 0, `${path}: keyboard-accessible code`);
@@ -124,4 +128,5 @@ for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...m
   }
   if (expected.robots.startsWith("noindex")) assert.ok(!urls.includes(expected.canonical), `${path}: draft sitemap exclusion`);
 }
-console.log("Migrated guides retain their original content; marketplace, reporting and platform rewrites match their editorial snapshots and retain historical anchors and indexing.");
+console.log("Migrated guides retain their original content; marketplace, reporting, platform and ChatGPT Ads rewrites match their editorial snapshots and retain historical anchors and indexing.");
+await checkChatGPTReviewedCopy();
