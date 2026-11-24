@@ -176,7 +176,7 @@ export function ChatGPTAdsArchitecture({ id: diagramId, GuideLink = "a" }) {
             </dl>
             <a className="source-citation" href={architectureSources[item.source].href}>{architectureSources[item.source].title}</a>
             {index === 1 && <p><a className="text-link" href="#orchestrator-detail">See six steps involved in choosing an ad</a></p>}
-            {index === 3 && <p><GuideLink className="text-link" href="/learn/system-design/chatgpt-ads-apis">See what advertisers can do with the APIs</GuideLink></p>}
+            {index === 3 && <p><GuideLink className="text-link" href="https://developers.openai.com/ads/api-overview">Read the official advertiser API documentation</GuideLink></p>}
             {index === 3 && <> · <a className="source-citation" href={architectureSources.engineering.href}>How OpenAI records events and feedback</a></>}
             {item.proposal && <p><GuideLink className="text-link" href="/learn/system-design/chatgpt-ads-reporting">Open the reporting example</GuideLink></p>}
           </section>

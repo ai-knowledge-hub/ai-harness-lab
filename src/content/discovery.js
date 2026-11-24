@@ -75,7 +75,6 @@ export const discovery = {
       references: [
         { kind: "guide", id: "advertising-platforms", action: "Read the platform overview" },
         { kind: "guide", id: "chatgpt-ads", action: "Explore ad delivery" },
-        { kind: "guide", id: "chatgpt-ads-apis", action: "Find an advertiser API" },
       ],
     },
     algorithms: {

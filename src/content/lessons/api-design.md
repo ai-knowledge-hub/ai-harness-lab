@@ -20,7 +20,6 @@ conceptIds:
 publicationIds:
   - "tool-layer"
 relatedGuideIds:
-  - "chatgpt-ads-apis"
   - "chatgpt-ads-reporting"
 introduction: "An API (application programming interface) gives software a way to ask another system for data or to take an action. A good API tells you what you can ask for, what will change and what the result actually shows."
 sectionIds:
@@ -88,8 +87,8 @@ The ChatGPT Ads reporting case shows how these rules work in practice. You choos
 
 <aside class="lesson-note">
 
-### Find the API you need
+### Explore the reporting example
 
-Use the advertiser API guide to find the right tool. Open the reporting example for a sample request. The platform guide explains how ads are chosen, shown and measured.
+Open the reporting example for a sample request. The platform guide explains how ads are chosen, shown and measured.
 
 </aside>

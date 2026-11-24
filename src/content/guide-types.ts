@@ -13,7 +13,6 @@ type BlockWithoutSource =
   | { type: "table"; columns: string[]; rows: string[][] }
   | { type: "ads-architecture" }
   | { type: "ads-orchestrator" }
-  | { type: "ads-capabilities" }
   | { type: "ads-reporting-reference" }
   | { type: "reference-downloads"; collection: keyof typeof referenceDownloads };
 

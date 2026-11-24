@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { expectShellOrientation } from "../support/shell-orientation";
+
+const baseline = JSON.parse(await readFile(new URL("../fixtures/reading-baseline.json", import.meta.url), "utf8"));
 
 test("homepage and algorithms route load", async ({ page }) => {
   await page.goto("/");
@@ -323,11 +327,20 @@ test("the guide is readable as static HTML without JavaScript", async ({
     );
     expect(sitemapText).toContain("/learn/system-design/api-design");
     expect(sitemapText).not.toContain("/learn/system-design/chatgpt-ads-reporting");
+    expect(sitemapText).not.toContain("/learn/system-design/chatgpt-ads-apis");
+    // Astro preview serves only the retained static output; Vercel owns the
+    // permanent old-URL redirects, whose destinations check:routes validates.
+    expect((await request.get("/learn/system-design/chatgpt-ads-apis")).status()).toBe(404);
+    // Published v1 downloads remain available even after the guide is retired.
+    for (const [file, expectedHash] of Object.entries(baseline.downloads)) {
+      const response = await request.get(`/${file}`);
+      expect(response.status()).toBe(200);
+      expect(createHash("sha256").update(await response.body()).digest("hex")).toBe(expectedHash);
+    }
     expect(sitemapText).not.toContain("/examples");
     for (const [slug, title] of [
       ["advertising-platforms", "How Advertising Platforms Work"],
       ["chatgpt-ads", "How ChatGPT Ads Works"],
-      ["chatgpt-ads-apis", "ChatGPT Ads APIs for advertisers"],
     ]) {
       await page.goto(`http://127.0.0.1:4173/learn/system-design/${slug}`);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
@@ -439,12 +452,8 @@ test("guide navigation, hydration, saved theme and metadata stay coherent", asyn
       exact: true,
     }),
   ).toBeInViewport();
-  await page.getByRole("navigation", { name: "Reference context" }).getByRole("link", { name: /Advertiser APIs/ }).click();
-  await expect(page.locator(".capability-entry")).toHaveCount(3);
-  await expect(page.locator(".capability-entry").last()).toContainText("GET /ad_account/insights");
-  await expect(page.getByRole("link", { name: /OpenAI Ads OpenAPI specification/ })).toHaveAttribute("href", "https://developers.openai.com/ads/openapi.json");
   // Follow every local download from the real rendered pages; inspect the deployed artifact.
-  for (const slug of ["chatgpt-ads-apis", "chatgpt-ads", "chatgpt-ads-reporting"]) {
+  for (const slug of ["chatgpt-ads", "chatgpt-ads-reporting"]) {
     await page.goto(`/learn/system-design/${slug}`);
     for (const anchor of await page.locator(".reference-downloads a[download]").all()) {
       const response = await page.request.get(await anchor.getAttribute("href"));
@@ -463,7 +472,7 @@ test("guide content reflows in both themes with usable mobile contents", async (
 }) => {
   const routes = ["system-design", "algorithms", "software-production", "measurement-ml", "ai-engineering"]
     .map((track) => `/learn/${track}`)
-    .concat(["advertising-platforms", "chatgpt-ads", "chatgpt-ads-apis", "chatgpt-ads-reporting", "api-design"].map((slug) => `/learn/system-design/${slug}`));
+    .concat(["advertising-platforms", "chatgpt-ads", "chatgpt-ads-reporting", "api-design"].map((slug) => `/learn/system-design/${slug}`));
   await page.goto(routes[0]);
   for (const theme of ["dark", "light"]) {
     if (theme === "light")

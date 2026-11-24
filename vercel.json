@@ -13,5 +13,22 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/learn/system-design/chatgpt-ads-apis",
+      "destination": "/learn/system-design/chatgpt-ads#advertiser-controls",
+      "permanent": true
+    },
+    {
+      "source": "/learn/system-design/chatgpt-ads-apis/",
+      "destination": "/learn/system-design/chatgpt-ads#advertiser-controls",
+      "permanent": true
+    },
+    {
+      "source": "/learn/system-design/chatgpt-ads-apis.html",
+      "destination": "/learn/system-design/chatgpt-ads#advertiser-controls",
+      "permanent": true
+    }
   ]
 }
