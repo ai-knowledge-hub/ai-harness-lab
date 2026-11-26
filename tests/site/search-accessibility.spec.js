@@ -34,6 +34,27 @@ test("browser search reaches the reviewed explanation without activating control
   await expect(page.locator("#orchestrator-detail")).toContainText("The LLM does not independently set the price");
 });
 
+test("Binary Search keeps its counterexample and static Context usable on a small screen", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/learn/algorithms/visualizers?algorithm=binary#visualizer");
+  await page.getByRole("combobox", { name: "Experiment", exact: true }).selectOption("counterexample");
+  const next = page.getByRole("button", { name: "Next", exact: true });
+  await next.press("Enter");
+  await next.press("Enter");
+  await expect(next).toBeFocused();
+  await expect(page.getByRole("status")).toContainText("Day 2");
+  await expect(page.locator('.visualization [data-record="1"]')).toHaveAttribute("data-state", "Assumed F");
+  await page.getByRole("button", { name: "Context", exact: true }).click();
+  await expect(page.locator(".binary-solution > summary")).toBeVisible();
+  await page.locator(".binary-solution > summary").press("Enter");
+  await expect(page.locator(".binary-solution > summary")).toBeFocused();
+  await expect(page.locator(".binary-solution pre")).toBeVisible();
+  await page.getByRole("link", { name: "Try it in Run: Scale the search", exact: true }).click();
+  await expect(page.locator(".binary-growth")).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth === document.documentElement.clientWidth)).toBe(true);
+});
+
 test("the Markdown guide keeps its reading layout, fragment and table without JavaScript", async ({ browser, baseURL }) => {
   const context = await browser.newContext({
     baseURL,

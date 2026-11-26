@@ -1,0 +1,89 @@
+/* Long static Context disclosures must not compete with a smooth fragment
+   scroll when native controls move focus into newly opened content. */
+html:has(.binary-context) { scroll-behavior: auto; }
+.binary-introduction p { margin-block: .75rem 0; }
+.binary-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  align-items: end;
+  padding-block: 1.25rem;
+  border-block: 1px solid var(--line);
+  margin-block: 1.5rem;
+}
+.binary-settings label { display: grid; gap: .45rem; font-size: .9rem; }
+.binary-field { display: grid; gap: .45rem; }
+.binary-settings form { display: flex; flex-wrap: wrap; gap: .6rem; align-items: end; }
+.binary-settings input[type="number"] { inline-size: 8rem; }
+.binary-settings input[type="number"], .binary-settings select {
+  min-block-size: 2.75rem;
+  max-inline-size: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  padding: .5rem .75rem;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+}
+.binary-settings .binary-reveal { display: flex; gap: .6rem; align-items: center; min-block-size: 2.75rem; }
+.binary-reveal input { inline-size: 1.15rem; block-size: 1.15rem; }
+.binary-settings .binary-dataset-label { flex-basis: 100%; margin: 0; font-size: .9rem; color: var(--muted); }
+.visualization svg.binary-sequence, .binary-figure svg.binary-sequence {
+  inline-size: max(100%, 54.375rem);
+  min-inline-size: 54.375rem;
+  max-inline-size: none;
+}
+.binary-state { max-inline-size: 65ch; font-size: .95rem; }
+.binary-state p { margin-block: .75rem; }
+.binary-instrumentation { font-size: .9rem; line-height: 1.6; color: var(--muted); margin-block: 1rem 0; }
+.binary-reading-key, .binary-code-values { font-size: .95rem; line-height: 1.6; margin-block: 0 1rem; }
+.binary-code-values { overflow-wrap: anywhere; }
+.binary-state[data-invariant="violated"] { border-inline-start: 3px solid var(--viz-danger); padding-inline-start: 1rem; }
+.binary-prediction { margin: 1.5rem 0 0; border: 1px solid var(--line); padding: 1rem; }
+.binary-prediction legend { padding-inline: .5rem; font-size: .95rem; }
+.binary-prediction p { font-size: 1rem; }
+.binary-prediction button { margin-inline-end: .6rem; }
+.binary-prediction button[aria-pressed="true"] { outline: 2px solid var(--text); outline-offset: 2px; }
+.binary-context { margin-block-start: 2rem; border-block-start: 1px solid var(--line-strong); }
+.binary-context > summary, .binary-context-copy summary {
+  cursor: pointer;
+  padding-block: 1rem;
+  min-block-size: 2.75rem;
+  font-size: 1rem;
+}
+.binary-context-copy { inline-size: 100%; max-inline-size: none; margin-inline: 0; padding-block: 1.5rem 3rem; }
+.binary-context-copy h3 { font-size: clamp(1.6rem, 3vw, 2.25rem); line-height: 1.2; margin: 0 0 1.5rem; }
+.binary-context-copy h4 { font-size: 1.4rem; line-height: 1.3; margin: 3rem 0 1.25rem; }
+.binary-context-copy h5 { font-size: 1.15rem; line-height: 1.4; margin-block-start: 2rem; }
+.binary-context-copy p { font-size: 1.05rem; line-height: 1.75; margin-block: 1.1rem; }
+.binary-context-copy :where(pre, .binary-equation) {
+  overflow-x: auto;
+  padding: 1rem;
+  background: var(--surface);
+  font-size: .95rem;
+  line-height: 1.7;
+}
+.binary-context-copy pre { border: 1px solid var(--line); border-radius: 0; }
+.binary-context-copy :not(pre) > code { overflow-wrap: anywhere; }
+.binary-figure { margin: 2rem 0; min-inline-size: 0; }
+.binary-figure-scroll, .binary-table-scroll { overflow-x: auto; background: var(--surface); padding: 1rem; }
+.binary-figure figcaption { font-size: .9rem; line-height: 1.6; margin-block-start: .8rem; color: var(--muted); }
+.binary-context-copy :where(table), .binary-growth table { border-collapse: collapse; inline-size: 100%; font-size: .9rem; margin-block: 1rem; }
+.binary-context-copy :where(th, td), .binary-growth :where(th, td) { text-align: start; border-block-end: 1px solid var(--line); padding: .65rem .5rem; }
+.binary-context-copy caption, .binary-growth caption { text-align: start; font-size: .9rem; padding-block-end: .75rem; color: var(--muted); }
+.binary-context-copy details { border-block: 1px solid var(--line); margin-block: 2rem; }
+.binary-equation { font-family: var(--font-code); }
+.binary-growth { max-inline-size: 70ch; }
+.binary-growth h3 { font-size: 1.5rem; }
+.binary-growth p { font-size: 1rem; }
+.binary-growth > input { inline-size: 100%; margin-block: 1rem 2rem; }
+.binary-growth-bars p { display: flex; justify-content: space-between; gap: 1rem; margin-block: 1rem .5rem; }
+.binary-growth-track { block-size: .75rem; border: 1px solid var(--line); }
+.binary-growth-track span { display: block; block-size: 100%; background: var(--viz-info); }
+.binary-related { border-block-start: 1px solid var(--line); padding-block-start: 1.5rem; }
+@media (max-width: 640px) {
+  .binary-settings { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .binary-settings form { gap: .75rem; }
+  .binary-context-copy { padding-inline: 0; }
+  .binary-figure-scroll, .binary-table-scroll { padding: .5rem; }
+}

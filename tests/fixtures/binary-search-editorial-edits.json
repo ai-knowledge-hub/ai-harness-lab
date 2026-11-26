@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-25",
+  "scope": "User-requested Copywriting Studio review; original reviewed v2 source remains frozen. Spaced em dashes become colons after these bounded revisions.",
+  "revisions": [
+    {
+      "reason": "Identify monotonicity as a property of the sequence without repeating the preceding explanation of inference.",
+      "before": "This property is called **monotonicity**. Our cumulative expenditure sequence is monotonically non-decreasing: each value is at least as large as its predecessor.",
+      "after": "The sequence has a property called **monotonicity**: each cumulative value is at least as large as the previous one."
+    },
+    {
+      "reason": "Define the term directly without an em dash.",
+      "before": "This is an **invariant** — a property preserved throughout execution.",
+      "after": "An **invariant** is a property preserved throughout execution."
+    },
+    {
+      "reason": "Explain the mistaken elimination once, in the order it occurs.",
+      "before": "Inspecting Day 4 does not justify excluding earlier records. Day 2 already satisfies the threshold.\n\nBinary search inspects Day 4, finds a CPA of £4 and discards the earlier region. In doing so, it eliminates the correct answer on Day 2.",
+      "after": "Binary search inspects Day 4, finds a CPA of £4 and discards the earlier region. But Day 2 already meets the £6 threshold, so that update removes the correct answer."
+    },
+    {
+      "reason": "Locate the error in the unjustified bound update, rather than in reading or comparing a value.",
+      "before": "The failure occurred during the first comparison. Chronological ordering tells us nothing about whether earlier CPA values were above or below the threshold.",
+      "after": "The error lies in the first update: a low CPA on Day 4 does not tell us whether earlier values were above or below the threshold."
+    }
+  ]
+}

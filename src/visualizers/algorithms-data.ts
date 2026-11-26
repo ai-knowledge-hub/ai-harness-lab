@@ -153,10 +153,10 @@ const code = {
 
 const algorithmContext = {
   binary: {
-    why: "Binary search exists because ordered data should not be scanned one row at a time. Once the data is sorted, each comparison can discard half of the remaining search space.",
-    optimizes: "Fast lookup and boundary detection over sorted records.",
-    stillUsed: "Database indexes, log search, time-series thresholds, autocomplete, feature flags, and range queries.",
-    remember: "If the data is sorted and you need a target or crossing point, halve the search space instead of scanning.",
+    why: "A stable false–true predicate lets each comparison eliminate a region that cannot contain the first match.",
+    optimizes: "Boundary search with logarithmically many predicate evaluations.",
+    stillUsed: "Sorted-sequence bisection and monotonic-predicate search; see the documented Python and Go examples in Binary Search Context.",
+    remember: "Establish monotonicity and stable input first. The returned end sentinel is a position, not an element.",
   },
   bfs: {
     why: "Breadth-first search was built for exploring graphs level by level. It is useful when the nearest or highest-priority layer matters before deeper detail.",

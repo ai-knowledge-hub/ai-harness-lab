@@ -1,0 +1,12 @@
+---
+interface Props { kind: "predicate" | "invariant" | "width" | "evaluations" | "lower-bound" }
+const { kind } = Astro.props;
+const equations = {
+  predicate: ["P of i is true when spend at i is at least 650", "P(i) = [spend[i] ≥ 650]"],
+  invariant: ["Zero is less than or equal to lo, which is less than or equal to boundary b, which is less than or equal to hi, which is less than or equal to n", "0 ≤ lo ≤ b ≤ hi ≤ n"],
+  width: ["Floor of n divided by two to the power k", "⌊n / 2ᵏ⌋"],
+  evaluations: ["Ceiling of log base two of n plus one", "⌈log₂(n + 1)⌉"],
+  "lower-bound": ["Two to the power k is at least n plus one, so k is at least the ceiling of log base two of n plus one", "2ᵏ ≥ n + 1, so k ≥ ⌈log₂(n + 1)⌉"],
+} as const;
+---
+<p class="binary-equation" data-binary-equation={kind} role="math" aria-label={equations[kind][0]}>{equations[kind][1]}</p>

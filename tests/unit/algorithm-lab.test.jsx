@@ -25,6 +25,8 @@ describe("AlgorithmLabPage", () => {
       </MemoryRouter>,
     );
 
+    expect(screen.getByRole("button", { name: "Context", exact: true })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("link", { name: "Try the algorithm", exact: true }));
     const note = container.querySelector(".explain-row article p");
     const initialNote = note.textContent;
 

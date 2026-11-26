@@ -1,0 +1,657 @@
+# **Phase 4.3.1 — Binary Search: final editorial compression**
+
+Harness Editorial · Pilot 1 of 3 · Context v2.0 · Final approval candidate
+
+This revision incorporates the approved technical and educational review. The narrative is consolidated into six sections, with greater emphasis on the distinction between observation and inference, the cost of preparing data, and the constructive transfer exercise.
+
+I have separated the deliverable into three parts:
+
+- **Reader-facing Context:** the complete replacement copy, including mathematical reasoning and implementation references.
+- **Visual and interaction specification:** the requirements for the existing Run workbench and supporting Context diagrams.
+- **Implementation handoff:** technical contracts, acceptance tests, evidence boundaries and outstanding verification requirements.
+
+The central investigation remains unchanged. The reader begins by searching an ordered sequence and finishes by understanding how to transform an unsuitable problem into a searchable one.
+
+# **Part I — Reader-facing Context**
+
+Proposed publication copy
+
+# **Binary Search: How Much Can One Comparison Tell Us?**
+
+*How the structure of information allows computers to avoid unnecessary work.*
+
+## **1. What one comparison reveals**
+
+An advertising analyst wants to find the first day on which a campaign's cumulative expenditure reached £650.
+
+There are eight records. Which would you inspect first?
+
+We know the expenditure cannot decrease in this hypothetical dataset, but we have inspected only one record.
+
+We could begin with Day 1 and examine each subsequent record until we reach the threshold. This is a linear search: reliable, but potentially expensive when the dataset grows.
+
+Instead, suppose we inspect Day 5 and discover that cumulative spending is £650.
+
+If expenditure never decreases, every subsequent day must also satisfy the threshold. None can be the first qualifying day. We can exclude them without inspecting their values.
+
+Now suppose we inspect Day 3 and find that spending is £400. Every earlier value must be less than or equal to £400. None can satisfy the condition.
+
+Each observation reveals something about records we have not examined.
+
+This property is called **monotonicity**. Our cumulative expenditure sequence is monotonically non-decreasing: each value is at least as large as its predecessor.
+
+We can express the search condition as a predicate — a function returning true or false.
+
+\\[ P(i)=[\operatorname{spend}[i]\geq650] \\]
+
+The threshold converts the expenditure sequence into a false region followed by a true region.
+
+The predicate can change from false to true, but never back again.
+
+That is the condition binary search needs. Ordered numerical values are one way to obtain it, but ordering alone is insufficient: the particular predicate being searched must be monotonic.
+
+## **2. Finding the boundary**
+
+Rather than searching for an isolated value, we are looking for the boundary between two regions.
+
+We maintain two markers, `lo` and `hi`, between which that boundary must lie.
+
+Initially, there are nine possible boundary positions for eight records, including the position beyond the final record if the threshold was never reached.
+
+We inspect the middle element.
+
+If it satisfies the predicate, the boundary must be at that position or earlier. We move the upper marker to the midpoint.
+
+If it fails, the boundary must be later. We move the lower marker to the position immediately after the midpoint.
+
+We repeat until the markers meet.
+
+```
+def first_true(n, predicate):    lo = 0    hi = n    while lo < hi:        mid = lo + (hi - lo) // 2        if predicate(mid):            hi = mid        else:            lo = mid + 1    return lo
+```
+
+The algorithm accumulates knowledge as it executes. Every valid position before `lo` is known to be false. Every valid position at or after `hi` is known to be true.
+
+The correct boundary, \\(b\\), remains between the markers:
+
+\\[ 0\leq lo\leq b\leq hi\leq n \\]
+
+This is an **invariant** — a property preserved throughout execution.
+
+After two comparisons, only one element remains eligible for inspection, but two boundary positions remain possible. Dashed outlines indicate inferred rather than directly inspected information.
+
+Notice the distinction: the remaining elements to inspect occupy the half-open interval \\([lo,hi)\\), while the possible boundary positions occupy the inclusive interval \\([lo,hi]\\).
+
+Every update preserves the true boundary. Every iteration reduces the interval. When the markers meet, exactly one possible boundary remains.
+
+That establishes correctness. Watching the algorithm succeed illustrates the reasoning; it does not replace it.
+
+For our expenditure dataset, the algorithm returns index 3, corresponding to Day 4. If no element satisfies the condition, it returns \\(n\\), the position beyond the final element.
+
+**Try it in Run — Locate the boundary**
+
+Predict which marker should move before advancing each comparison. Notice that the algorithm establishes the relationship of several values to the threshold without reading those values individually.
+
+## **3. The cost of finding an answer**
+
+Each comparison reduces the remaining interval to at most half its previous width.
+
+Starting with \\(n\\) elements, after \\(k\\) comparisons the remaining width is at most:
+
+\\[ \left\lfloor\frac{n}{2^k}\right\rfloor \\]
+
+For this implementation, the worst-case number of predicate evaluations is:
+
+\\[ \lceil\log_2(n+1)\rceil \\]
+
+The additional position accounts for the boundary beyond the final element.
+
+| Records   | Linear search | Binary search |
+| --------- | ------------- | ------------- |
+| 100       | 100           | 7             |
+| 1,000     | 1,000         | 10            |
+| 10,000    | 10,000        | 14            |
+| 100,000   | 100,000       | 17            |
+| 1,000,000 | 1,000,000     | 20            |
+
+Worst-case predicate evaluations, not measured execution times.
+
+A million timestamped expenditure records require at most twenty evaluations rather than a million.
+
+This is logarithmic growth, written \\(O(\log n)\\). The iterative algorithm also requires \\(O(1)\\) auxiliary space.
+
+Logarithmic execution time assumes that accessing a position and evaluating its predicate take constant time. A predicate involving a network request or expensive computation changes the cost of each evaluation.
+
+There is another cost to consider: preparing the data.
+
+If cumulative expenditure has not already been calculated, constructing that sequence requires \\(O(n)\\) work. For a single threshold query, scanning the original expenditure records may be preferable. For repeated queries, maintaining cumulative totals can make subsequent searches considerably cheaper.
+
+Efficiency depends on the representation, the operation and how frequently it is performed.
+
+**Try it in Run — Scale the search**
+
+Double the number of records. The linear scan's worst-case evaluation count doubles; binary search requires only one additional evaluation.
+
+## **4. When the reasoning breaks**
+
+Suppose the analyst now wants to find the first day on which cost per acquisition (CPA) reached £6.
+
+CPA measures expenditure per attributed acquisition. Unlike our simplified cumulative expenditure series, it can rise and fall.
+
+The records remain chronologically ordered, but the predicate no longer has a monotonic boundary.
+
+Inspecting Day 4 does not justify excluding earlier records. Day 2 already satisfies the threshold.
+
+Binary search inspects Day 4, finds a CPA of £4 and discards the earlier region. In doing so, it eliminates the correct answer on Day 2.
+
+The algorithm continues normally and eventually returns Day 5. That day satisfies the condition, but it is not the first one.
+
+The failure occurred during the first comparison. Chronological ordering tells us nothing about whether earlier CPA values were above or below the threshold.
+
+Even cumulative expenditure requires care in a production reporting system: credits and corrections may invalidate the monotonicity of our simplified model, while concurrent revisions can invalidate deductions already made during a search.
+
+A correctly implemented algorithm can return an incorrect answer when applied outside its assumptions.
+
+**Try it in Run — Break the assumption**
+
+Execute the same algorithm against the fluctuating CPA values. Identify the first update that excludes the actual boundary.
+
+## **5. Ordering as an engineering resource**
+
+Python's standard library exposes binary search through its `bisect` module. Rather than finding an arbitrary matching element, it locates an insertion boundary in an ordered sequence.
+
+Consider a sequence containing duplicate values:
+
+```
+from bisect import bisect_left, bisect_rightvalues = [10, 20, 30, 30, 30, 40, 50]left = bisect_left(values, 30)    # 2right = bisect_right(values, 30)  # 5
+```
+
+Two boundary searches identify the entire region containing the target value. Their difference gives the number of occurrences.
+
+The same mechanism supports exact membership tests:
+
+```
+def contains(values, target):    i = bisect_left(values, target)    return i < len(values) and values[i] == target
+```
+
+The bounds check matters: the returned position may lie beyond the final element.
+
+Python's documentation also highlights a trade-off. Finding an insertion position takes logarithmic time, but inserting into an ordinary list may require shifting subsequent elements. The insertion therefore remains \\(O(n)\\) in the worst case.
+
+If exact membership is the only required operation, a hash-based representation may be more suitable. Ordered representations become particularly valuable when we also need boundaries, ranges or neighbouring values.
+
+*Implementation reference: [Python — Array bisection algorithm](https://docs.python.org/3/library/bisect.html?utm_source=chatgpt.com).*
+
+This principle extends to database systems.
+
+Suppose we want to retrieve transactions recorded during January:
+
+```
+SELECT *
+FROM transactions
+WHERE recorded_at >= '2026-01-01'
+  AND recorded_at <  '2026-02-01';
+```
+
+An appropriate PostgreSQL B-tree index on `recorded_at` provides an ordered access path that the query planner may choose instead of scanning the entire table.
+
+A B-tree is not binary search over an enormous array. It is a different data structure, designed around hierarchical navigation and storage costs. Nevertheless, both mechanisms exploit ordering to avoid examining irrelevant information.
+
+Maintaining an index requires storage and additional work when records change. Retrieving matching records also has a cost.
+
+The work has not disappeared. Some of it has moved from answering queries to maintaining a representation that makes those queries cheaper.
+
+*System reference: [PostgreSQL — Index types](https://www.postgresql.org/docs/current/indexes-types.html?utm_source=chatgpt.com).*
+
+## **6. Changing the representation**
+
+Binary search does not require a stored array.
+
+Imagine determining the smallest processing capacity sufficient to complete a workload before a deadline. If our model guarantees that every larger capacity remains feasible whenever a smaller one is feasible, we can search the ordered range of possible capacities.
+
+Go's standard library expresses this generalisation through `sort.Search`: the caller supplies an indexed domain and a monotonic Boolean function.
+
+The mechanism is unchanged. Only the meaning of the search space differs.
+
+*Implementation reference: [Go — sort.Search](https://pkg.go.dev/sort?utm_source=chatgpt.com#Search).*
+
+But what if the problem does not initially possess the structure we need?
+
+Consider the following challenge.
+
+### **Engineering challenge — Make the problem searchable**
+
+A monitoring service records server latency in chronological order.
+
+Latency measurements in milliseconds.
+
+The service frequently needs to find the first measurement that reached a specified threshold.
+
+Binary search cannot reliably answer this question using the raw measurements.
+
+**Can you construct an additional sequence that makes binary search valid without changing the original chronological order?**
+
+Reveal suggested solution
+
+The power of binary search comes not from dividing a collection in half, but from knowing that half of it cannot contain the answer.
+
+Sometimes the necessary structure already exists. Sometimes we must construct and maintain it ourselves.
+
+Recognising the difference is where algorithmic knowledge becomes an engineering capability.
+
+End of reader-facing Context v2.0.
+
+# **Part II — Visual and interaction specification**
+
+Production brief · Not part of the published article
+
+The final lesson should use the existing Harness workbench rather than embed a second workbench inside the Context tab.
+
+The primary educational experiments belong in Run. Context contains the explanation, selected static diagrams and instructions directing readers towards the relevant experiment.
+
+## **1. Consolidated visual asset register**
+
+| Asset                         | Surface       | Learning objective                                          |
+| ----------------------------- | ------------- | ----------------------------------------------------------- |
+| BS-V01 — Initial observation  | Context       | Discover what one strategically selected comparison reveals |
+| BS-V02 — Predicate boundary   | Context       | Understand the false–true partition                         |
+| BS-V03 — Invariant snapshot   | Context / Run | Distinguish remaining elements from possible boundaries     |
+| BS-V04 — Boundary search      | Run           | Observe and predict correct execution                       |
+| BS-V05 — Computational growth | Run           | Compare logarithmic and linear evaluation counts            |
+| BS-V06 — Invalid elimination  | Context / Run | Identify the first failure of the invariant                 |
+| BS-V07 — Duplicate boundaries | Context       | Understand lower and upper bounds                           |
+| BS-V08 — Prefix maximum       | Assessment    | Construct a representation that restores monotonicity       |
+
+The standalone cumulative expenditure chart, shrinking-interval chart and B-tree diagram from the earlier draft are no longer necessary as separate Context assets.
+
+Several of the retained illustrations can reuse the same sequence renderer.
+
+## **2. Run workbench specification**
+
+The Binary Search workbench should support three scenarios.
+
+### **Final interaction reference**
+
+Editorial prototype demonstrating the required behaviour, not the deployed Harness workbench.Locate the boundary
+
+Threshold: £650
+
+Evaluations completed: 0
+
+Reveal all dataset values
+
+lo
+
+# **0**
+
+mid
+
+# **4**
+
+hi
+
+# **8**
+
+Boundary invariant preserved
+
+Inspect index 4. Its value satisfies the predicate. Predict which bound will move.
+
+Reset
+
+BackNext step
+
+The prototype consolidates the successful and unsuccessful executions into a common visual representation and generates both traces from the same search procedure.
+
+The production implementation should additionally support adjustable thresholds, prediction prompts, existing playback controls and accessible state announcements.
+
+## **3. Required visual semantics**
+
+| State               | Meaning                                    | Suggested treatment              |
+| ------------------- | ------------------------------------------ | -------------------------------- |
+| Unresolved          | Predicate result not yet established       | Neutral blue                     |
+| Active              | Current midpoint under examination         | Amber highlight                  |
+| Directly observed   | Value inspected by the search              | Solid outline and visible value  |
+| Inferred true       | Predicate established through monotonicity | Green, dashed outline            |
+| Inferred false      | Predicate established through monotonicity | Grey, dashed outline             |
+| Invalid elimination | Actual boundary excluded                   | Red outline and explicit warning |
+
+In the non-monotonic scenario, inferred states must be described as algorithmic assumptions rather than established facts. Once the verifier detects a contradiction, the interface must not continue presenting those deductions as valid knowledge.
+
+Colours are illustrative. Production should use the existing Harness design system, with labels and other non-colour indicators.
+
+## **4. Animation requirements**
+
+Each comparison should communicate four distinct events:
+
+1
+
+**Inspect**
+
+Calculate the midpoint and access its value.
+
+2
+
+**Infer**
+
+Explain what the predicate result implies under monotonicity.
+
+3
+
+**Update**
+
+Move the appropriate bound.
+
+4
+
+**Verify**
+
+Independently evaluate whether the actual boundary remains possible.
+
+These do not necessarily require four separate animation frames. They are four pieces of information the reader must be able to distinguish.
+
+The independent verification operation is educational instrumentation, not part of binary search.
+
+# **Part III — Implementation handoff**
+
+For the separate Harness repository implementation workflow
+
+## **1. Scope and change boundaries**
+
+The implementation should update the existing Binary Search lab without redesigning the entire Algorithms & Data track.
+
+| In scope                                 | Out of scope                            |
+| ---------------------------------------- | --------------------------------------- |
+| Replace Binary Search Context copy       | Redesign global navigation              |
+| Correct the primary dataset              | Rewrite other algorithm lessons         |
+| Introduce the CPA counterexample         | Introduce new algorithm labs            |
+| Align reference code and execution trace | Build the full foundations module       |
+| Add the scaling experiment               | Implement all proposed learning paths   |
+| Add the constructive assessment          | Change unrelated system design articles |
+| Verify accessibility and correctness     | Publish without final approval          |
+
+Preserve existing URLs, workbench conventions and shared components wherever possible.
+
+## **2. Technical contract**
+
+```
+lesson:
+  id: binary-search
+  classification: algorithm
+  curriculum_group: structure-and-elimination
+  context_version: "2.0"
+
+algorithm:
+  variant: first-true-boundary-search
+  input_domain: "[0, n)"
+  boundary_domain: "[0, n]"
+  initial_bounds:
+    lo: 0
+    hi: n
+  midpoint: "lo + floor((hi - lo) / 2)"
+  predicate_true: "hi = mid"
+  predicate_false: "lo = mid + 1"
+  termination: "lo == hi"
+  return_value: lo
+
+guarantees:
+  result: first satisfying index or n
+  auxiliary_space: "O(1)"
+  worst_case_evaluations: "ceil(log2(n + 1))"
+
+assumptions:
+  - Stable input during execution
+  - Monotonic false-to-true predicate
+  - Constant-time access and evaluation for logarithmic time
+
+scenarios:
+  - id: monotonic-boundary
+    values: [100, 250, 400, 650, 650, 850, 1100, 1250]
+    threshold: 650
+    expected_boundary: 3
+
+  - id: non-monotonic-counterexample
+    values: [4, 8, 5, 4, 7, 9, 10]
+    threshold: 6
+    expected_algorithm_output: 4
+    actual_boundary: 1
+    first_invalid_update: 1
+
+  - id: computational-growth
+    model: analytical-worst-case
+
+assessment:
+  id: prefix-maximum
+  values: [80, 120, 250, 90, 180, 300, 100]
+  expected_representation: [80, 120, 250, 250, 250, 300, 300]
+```
+
+The YAML is an editorial contract, not a mandatory repository schema. The implementation agent should adapt it to the existing application architecture.
+
+## **3. Independent algorithm verification**
+
+I executed the finite-domain verification again during this compression phase rather than relying solely on the previous review.
+
+Monotonic configurations tested
+
+# **33,153**
+
+Assertion failures
+
+# **0**
+
+Every possible boundary for input sizes from 0 to 256 was tested for correct output, valid midpoint access, invariant preservation, strict interval reduction and the worst-case evaluation bound.
+
+Executed against an independent Python implementation of the specified search procedure, not against the Harness repository.
+
+Both teaching datasets were also verified.
+
+| Scenario               | Returned index | Actual index | Evaluations |
+| ---------------------- | -------------- | ------------ | ----------- |
+| Cumulative expenditure | 3              | 3            | 3           |
+| Fluctuating CPA        | 4              | 1            | 3           |
+
+### **Production acceptance tests**
+
+The repository implementation must independently pass the following requirements.
+
+### **Repository acceptance gate**
+
+0/14
+
+Empty input returns zero, the end sentinel.
+
+Single-element inputs return the correct boundary.
+
+Duplicate values return the first qualifying index.
+
+All-true and all-false predicates are handled correctly.
+
+Midpoint access never exceeds the valid input domain.
+
+Every iteration strictly reduces the interval.
+
+The analytical worst-case evaluation bound is respected.
+
+Normal and counterexample traces use the same search semantics.
+
+The first invalid elimination is identified in the CPA scenario.
+
+Verification work is excluded from the search evaluation count.
+
+Displayed reference code agrees with visual execution.
+
+Reset, stepping and scenario changes produce consistent states.
+
+Keyboard navigation, reduced motion and narrow-screen layouts are verified.
+
+The approved Context remains understandable without animation.
+
+&#x20;Copy acceptance criteria
+
+## **4. Optional mathematical extension**
+
+The decision-tree lower bound introduced during the technical review is worth preserving, but it should not interrupt the main narrative.
+
+It can appear as an optional expandable mathematical note.
+
+**Could any Boolean-query search do better?**
+
+A sequence of \\(n\\) elements has \\(n+1\\) possible boundary positions.
+
+Each Boolean query has two possible outcomes. A decision tree of depth \\(k\\) can therefore distinguish at most \\(2^k\\) outcomes.
+
+To distinguish every possible boundary:
+
+\\[ 2^k\geq n+1 \\]
+
+Therefore:
+
+\\[ k\geq\lceil\log_2(n+1)\rceil \\]
+
+Binary search achieves this worst-case lower bound.
+
+This result applies to the Boolean-query model without additional information about the boundary. An auxiliary data structure or precomputed answer changes that model.
+
+This extension creates a future connection to comparison sorting, decision trees and information theory.
+
+## **5. Evidence register**
+
+| Source                                                                                                                  | Claim supported                                              |
+| ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [Python `bisect`](https://docs.python.org/3/library/bisect.html?utm_source=chatgpt.com)                                 | Boundary semantics, insertion costs and mutation constraints |
+| [Go `sort.Search`](https://pkg.go.dev/sort?utm_source=chatgpt.com#Search)                                               | Monotonic predicate search                                   |
+| [PostgreSQL index types](https://www.postgresql.org/docs/current/indexes-types.html?utm_source=chatgpt.com)             | Ordered equality and range access                            |
+| [PostgreSQL indexes and ordering](https://www.postgresql.org/docs/current/indexes-ordering.html?utm_source=chatgpt.com) | Query-dependent benefits of ordered index access             |
+| Independent mathematical derivation                                                                                     | Invariant, termination, complexity and lower bound           |
+| Executed finite-domain verification                                                                                     | Behaviour of the specified reference procedure               |
+
+The hypothetical advertising and latency datasets are original teaching constructions.
+
+The CPython source references from the research phase remain useful supporting material, but the final narrative does not depend on detailed C implementation claims. Consequently, pinning those source files is necessary only if they are included in the published supporting references.
+
+## **6. Cross-track integration**
+
+The strongest existing connection is the [Advertising Reporting Systems lesson](https://harness.ai-knowledge-hub.org/learn/system-design/chatgpt-ads-reporting?utm_source=chatgpt.com).
+
+The recommended placement is immediately after the discussion of credits, corrections and historical revisions.
+
+The link should help readers investigate why reported measurements change, rather than imply that advertising reporting systems necessarily implement the threshold search described here.
+
+Future connections to Computational Foundations, Heap and Database Indexing should be added when their corresponding lessons are approved and available.
+
+# **Part IV — Final editorial assessment**
+
+## **1. What changed between v1.0 and v2.0**
+
+| Dimension              | Improvement                                                      |
+| ---------------------- | ---------------------------------------------------------------- |
+| Opening                | Begins with a decision rather than an algorithm definition       |
+| Mathematical reasoning | Distinguishes monotonic predicates from ordered values           |
+| Correctness            | Connects the invariant to termination and the returned boundary  |
+| Complexity             | Includes representation preparation costs                        |
+| Failure                | Focuses on the first invalid inference                           |
+| Implementation         | Includes safe sentinel handling and a concrete database query    |
+| Visual architecture    | Reuses one renderer for successful and failing executions        |
+| Transferability        | Introduces constructive problem reformulation                    |
+| Narrative              | Removes repeated thesis statements and unnecessary illustrations |
+
+The constructive assessment is the most substantial educational improvement. It resolves the earlier failure without pretending that the original algorithm was universally applicable.
+
+## **2. Revision register outcome**
+
+| Review requirement                                 | Status                                         |
+| -------------------------------------------------- | ---------------------------------------------- |
+| BS-R01–R05: technical and mathematical corrections | Incorporated                                   |
+| BS-R06–R09: visual semantics and trace consistency | Specified; production verification outstanding |
+| BS-R10: editorial consolidation                    | Incorporated                                   |
+| BS-R11: constructive transfer exercise             | Incorporated                                   |
+| BS-R12: concrete PostgreSQL example                | Incorporated                                   |
+| BS-R13: Boolean-query lower bound                  | Preserved as optional material                 |
+| BS-R14: existing Harness source inspection         | Outstanding                                    |
+| BS-R15: source revisions and final cross-links     | Partially resolved                             |
+
+## **3. Lessons for the remaining algorithm modules**
+
+The Binary Search pilot has refined our original editorial architecture.
+
+The most productive teaching progression is now:
+
+**Encounter a problem**
+
+Establish why the obvious approach is insufficient.
+
+**Discover useful structure**
+
+Identify the property that makes a better mechanism possible.
+
+**Construct the mechanism**
+
+Derive its operations and invariant.
+
+**Account for the cost**
+
+Include preparation, execution and maintenance.
+
+**Remove an assumption**
+
+Observe precisely where the reasoning fails.
+
+**Reconstruct the problem**
+
+Introduce a representation or complementary mechanism that restores the required guarantee.
+
+This progression should inform the next two pilots.
+
+For Bloom Filters, constructive recovery will involve combining approximate membership with an authoritative lookup.
+
+For Lease-Based Ownership, it will involve introducing fencing and examining which external resources can actually enforce ownership.
+
+In both cases, the reader should discover how the limitations of one mechanism motivate the introduction of another.
+
+That is how we can move naturally from algorithms towards system architecture.
+
+## **4. Approval status and remaining limitations**
+
+### **Binary Search pilot**
+
+Approval candidate
+
+Final Context copy
+
+Approved editorial revisions incorporated
+
+Independent reference algorithm verification
+
+Visual and interaction specification
+
+Implementation handoff
+
+Explicit final copy approval
+
+Repository implementation and verification
+
+Publication approval
+
+**Remaining limitations and editorial decisions:** I have not inspected or modified the existing Harness repository in this phase. The independent algorithm tests passed, but the actual workbench, visual rendering and accessibility remain unverified. External documentation references have been carried forward from the research and review phases rather than freshly retrieved here. The final word count has not been independently measured.
+
+I have also retained the decision-tree proof as optional material, removed the standalone B-tree illustration and consolidated the primary experiments into Run. These are editorial decisions intended to reduce cognitive load while preserving technical depth.
+
+The copy is ready for your approval and subsequent repository implementation, but not yet for unconditional publication.
+
+## **5. Next milestone — Phase 4.4**
+
+The next editorial pilot is Bloom Filters.
+
+Next lesson · Probabilistic data structures
+
+## **Bloom Filters: When Approximate Knowledge Is Good Enough**
+
+Investigate why systems deliberately sacrifice exact membership information, how probability becomes an engineering resource, and how approximate mechanisms can participate in systems that still require exact results.
+
+Research priorities
+
+Original Bloom paper, probability derivation, hash assumptions, saturation behaviour, RocksDB filter implementation and exact verification strategies.
+
+Approve Binary Search and begin Bloom Filter pilot
+
+We now have a complete editorial candidate for the first mechanism and a more mature methodology to test against the second. The next pilot will be particularly valuable because it introduces a different kind of computational reasoning: rather than preserving exactness while reducing work, we will investigate when deliberately accepting uncertainty produces a better engineering solution.

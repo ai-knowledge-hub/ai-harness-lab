@@ -6,6 +6,7 @@ import { visualState } from "../support/visual-state";
 // Independent #42 inventory, not calculated from the candidate registry.
 const { labs } = JSON.parse(readFileSync(new URL("../fixtures/labs.json", import.meta.url)));
 const { states } = JSON.parse(readFileSync(new URL("../fixtures/lab-visual-states.json", import.meta.url)));
+const binaryPilot = JSON.parse(readFileSync(new URL("../fixtures/binary-search-pilot.json", import.meta.url)));
 const labPath = "/learn/algorithms/visualizers";
 async function ready(page, title = "Binary Search") {
   await expect(page.locator("#visualizer h2")).toHaveText(title);
@@ -31,9 +32,11 @@ test("all 15 visualizers render every baseline step in both themes", async ({ pa
   const meter = page.locator(".step-meter span");
   for (const theme of ["dark", "light"]) {
     if (theme === "light") await page.getByRole("button", { name: "Switch to light mode" }).click();
-    for (const [id, title, , count] of labs) {
+    for (const [id, title, , baselineCount] of labs) {
+      const count = id === "binary" ? binaryPilot.steps.length : baselineCount;
       await page.locator(".algorithm-list").getByText(title, { exact: true }).click();
       await ready(page, title);
+      await page.getByRole("button", { name: "Run", exact: true }).click();
       // Keep two-dimensional diagrams readable inside their local scroller.
       // A document-width assertion alone passes when SVG labels shrink to 6px.
       const scales = await page.locator(".visualization svg text").evaluateAll(elements =>
@@ -41,16 +44,30 @@ test("all 15 visualizers render every baseline step in both themes", async ({ pa
       for (const scale of scales) expect(scale, `${id}: authored SVG label scale`).toBeGreaterThanOrEqual(1);
       await expect(page).toHaveURL(new RegExp(`algorithm=${id}(?:&|#|$)`));
       await expect(meter.last()).toHaveText(String(count));
-      expect(states[id]).toHaveLength(count);
+      if (id !== "binary") expect(states[id]).toHaveLength(count);
       for (let step = 1; step <= count; step++) {
-        const [label, expectedState] = states[id][step - 1];
+        const [label, expectedState] = id === "binary" ? [binaryPilot.steps[step - 1].label, null] : states[id][step - 1];
         await expect(meter.first()).toHaveText(String(step));
         await expect(status).toHaveAccessibleName(`${title}: step ${step} of ${count}, ${label}`);
         // Only the existing concise explanation is live, not SVG or code edits.
         expect(await status.locator("svg, pre, button").count()).toBe(0);
-        const rendered = await page.locator(".visualization").evaluate(visualState);
-        const actualState = createHash("sha256").update(rendered).digest("hex");
-        expect.soft(actualState, `${id} step ${step}: ${label} diagram state`).toBe(expectedState);
+        if (id === "binary") {
+          const expected = binaryPilot.steps[step - 1];
+          const activeLines = [3, 6, 7, 6, 9, 6, 7, 10];
+          await expect(page.locator(".code-line.active")).toHaveText(new RegExp(`^\\s*${activeLines[step - 1]}\\s`));
+          await expect(page.locator(".binary-code-values")).toContainText(`lo = ${expected.lo}; hi = ${expected.hi}`);
+          await expect(page.locator('.visualization .binary-state')).toContainText(`Search evaluations completed: ${expected.evaluations}`);
+          await expect(page.locator('.visualization .binary-state')).toContainText(`Remaining elements: [${expected.lo}, ${expected.hi})`);
+          const possible = await page.locator('.visualization [data-boundary][data-possible="true"]').evaluateAll(nodes => nodes.map(node => Number(node.dataset.boundary)));
+          expect(possible).toEqual(Array.from({ length: expected.hi - expected.lo + 1 }, (_, i) => i + expected.lo));
+          for (let index = 0; index < binaryPilot.values.length; index++) {
+            await expect(page.locator(`.visualization [data-record="${index}"] > text`).first()).toHaveText(expected.observed.includes(index) ? String(binaryPilot.values[index]) : "?");
+          }
+        } else {
+          const rendered = await page.locator(".visualization").evaluate(visualState);
+          const actualState = createHash("sha256").update(rendered).digest("hex");
+          expect.soft(actualState, `${id} step ${step}: ${label} diagram state`).toBe(expectedState);
+        }
         await expect(page.locator(".visual-panel .panel-title strong")).toHaveText(label);
         await expect(page.locator(".code-line.active")).toHaveCount(1);
         if (step < count) await page.getByRole("button", { name: "Next", exact: true }).click();
@@ -60,7 +77,8 @@ test("all 15 visualizers render every baseline step in both themes", async ({ pa
       await page.getByRole("button", { name: "Back", exact: true }).click();
       await expect(meter.first()).toHaveText(String(count - 1));
       await page.getByRole("button", { name: "Context", exact: true }).click();
-      await expect(page.getByText("Why it exists", { exact: true })).toBeVisible();
+      if (id === "binary") await expect(page.getByRole("heading", { name: "Binary Search: How Much Can One Comparison Tell Us?", exact: true })).toBeVisible();
+      else await expect(page.getByText("Why it exists", { exact: true })).toBeVisible();
       await page.getByRole("button", { name: "Run", exact: true }).click();
       await page.getByRole("button", { name: "Reset", exact: true }).click();
       await expect(meter.first()).toHaveText("1");
@@ -98,6 +116,119 @@ test("all 15 direct query links survive refresh and reveal the working area", as
     await expect(page.locator("#visualizer h2")).toBeInViewport();
     expect(new URL(page.url()).searchParams.get("source")).toBe("lab-audit");
   }
+});
+
+test("Binary Search tests assumptions, threshold changes, prediction and scaling", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(labPath + "?source=binary-pilot&algorithm=binary#visualizer");
+  await ready(page);
+  await expect(page.locator('.visualization [data-observed="true"]')).toHaveCount(0);
+  await page.getByRole("button", { name: "Next", exact: true }).press("Enter");
+  await expect(page.locator('.visualization [data-record="4"]')).toHaveAttribute("data-observed", "true");
+  await expect(page.locator(".binary-code-values")).toContainText("mid = 4; predicate(mid) = True");
+  await expect(page.getByRole("status")).toContainText("mid = 0 + (8 - 0) // 2 = 4");
+  await page.getByRole("button", { name: "Move hi", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Correct: the algorithm moves hi to mid");
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.locator(".binary-code-values")).toContainText("lo = 0; hi = 4; mid = 4");
+  await expect(page.getByRole("status")).toContainText("this position remains a possible answer");
+  await page.getByLabel("Threshold (£)", { exact: true }).fill("2000");
+  await page.getByRole("button", { name: "Apply threshold", exact: true }).press("Enter");
+  await expect(page.locator(".step-meter span").first()).toHaveText("1");
+  await expect(page.locator(".visualization")).toContainText("£2000");
+  for (let step = 1; step < 8; step++) await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("end sentinel");
+  await expect(page.locator('.visualization [data-result="8"]')).toContainText("search reports no match");
+  await page.getByLabel("Experiment", { exact: true }).selectOption("counterexample");
+  await expect(page.getByLabel("Threshold (£)", { exact: true })).toHaveValue("6");
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Day 2");
+  await expect(page.locator('.visualization .binary-state')).toHaveAttribute("data-invariant", "violated");
+  await expect(page.locator('.visualization [data-record="1"]')).toHaveAttribute("data-observed", "false");
+  await expect(page.locator('.visualization [data-record="1"]')).toContainText("Assumed F");
+  await expect(page.locator('.visualization [data-record="1"]')).toContainText("Verifier found");
+  for (let step = 3; step < 8; step++) await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Return index 4 (Day 5)");
+  await expect(page.getByRole("status")).toContainText("actual first match is index 1 (Day 2)");
+  await expect(page.locator('.visualization [data-result="4"]')).toContainText("Incorrect: first match is index 1 (Day 2)");
+  await page.getByRole("button", { name: "Reset", exact: true }).click();
+  await expect(page.locator('.visualization [data-record="1"] > text').first()).toHaveText("?");
+  await page.getByLabel("Reveal all dataset values", { exact: true }).check();
+  await expect(page.locator('.visualization [data-record="1"] > text').first()).toHaveText("8");
+  await expect(page.locator('.visualization [data-record="1"]')).toHaveAttribute("data-observed", "false");
+  await expect(page.locator(".binary-dataset-label")).toContainText("it does not add checks to the search");
+  await page.getByRole("button", { name: "Context", exact: true }).click();
+  await page.getByText("Reveal suggested solution", { exact: true }).click();
+  await expect(page.locator(".binary-solution")).toContainText("[80, 120, 250, 250, 250, 300, 300]");
+  await page.getByRole("link", { name: "Try it in Run: Scale the search", exact: true }).click();
+  await expect(page.locator(".binary-growth")).toBeVisible();
+  const scale = page.getByLabel("Records: 1,024", { exact: true });
+  await scale.press("End");
+  await expect(page.locator("#binary-scale")).toHaveValue("20");
+  await expect(page.locator(".binary-growth-bars")).toContainText("1,048,576");
+  await expect(page.locator(".binary-growth-bars")).toContainText("21");
+  await page.getByRole("button", { name: "Context", exact: true }).click();
+  await expect(page.locator(".binary-context-copy h3")).toBeVisible();
+  await expect(page.locator("#binary-scale")).toBeHidden();
+  await page.getByRole("button", { name: "Run", exact: true }).click();
+  await expect(page.locator("#binary-scale")).toHaveValue("20");
+  await expect(page.getByLabel("Records: 1,048,576", { exact: true })).toBeVisible();
+  await expect(page.locator(".binary-growth-bars")).toContainText("1,048,576");
+  await expect(page.locator(".binary-growth-bars")).toContainText("21");
+  expect(new URL(page.url()).searchParams.get("source")).toBe("binary-pilot");
+  expect(new URL(page.url()).searchParams.get("algorithm")).toBe("binary");
+  await page.getByLabel("Experiment", { exact: true }).selectOption("boundary");
+  await expect(page.locator(".step-meter span").first()).toHaveText("1");
+  await expect(page.getByRole("button", { name: "Play", exact: true })).toBeVisible();
+});
+
+test("Binary Search starts with the explanation and preserves direct experiment links", async ({ page }) => {
+  await page.goto(labPath + "?source=lesson-entry#visualizer");
+  await ready(page);
+  await expect(page.getByRole("button", { name: "Context", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".binary-context-copy h3")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next", exact: true })).toBeHidden();
+  await expect(page.locator(".stage-head")).toContainText("without checking every record");
+  await page.getByRole("link", { name: "Try the algorithm", exact: true }).press("Enter");
+  await expect(page.getByRole("button", { name: "Next", exact: true })).toBeVisible();
+  await expect(page.locator(".code-panel pre")).toBeVisible();
+  await page.getByRole("link", { name: "Read the explanation", exact: true }).press("Enter");
+  const experimentLink = page.getByRole("link", { name: "Try it in Run: Break the assumption", exact: true });
+  const directLink = await experimentLink.getAttribute("href");
+  await experimentLink.press("Enter");
+  await expect(page.getByLabel("Experiment", { exact: true })).toHaveValue("counterexample");
+  await expect(page.getByLabel("Threshold (£)", { exact: true })).toHaveValue("6");
+  expect(new URL(page.url()).searchParams.get("source")).toBe("lesson-entry");
+  await page.reload();
+  await ready(page);
+  await expect(page.getByLabel("Experiment", { exact: true })).toHaveValue("counterexample");
+  await expect(page.getByLabel("Threshold (£)", { exact: true })).toHaveValue("6");
+  await page.goBack();
+  await expect(page.getByRole("button", { name: "Context", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.goto(labPath + directLink);
+  await ready(page);
+  await expect(page.getByLabel("Experiment", { exact: true })).toHaveValue("counterexample");
+  await page.locator(".algorithm-list").getByText("BFS", { exact: true }).click();
+  await ready(page, "BFS");
+  await expect(page.getByRole("button", { name: "Next", exact: true })).toBeVisible();
+  await page.locator(".algorithm-list").getByText("Binary Search", { exact: true }).click();
+  await ready(page);
+  await expect(page.getByRole("button", { name: "Context", exact: true })).toHaveAttribute("aria-pressed", "true");
+});
+
+test.describe("Binary Search static reading", () => {
+  test.use({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+  test("Context and constructive solution read without JavaScript", async ({ page }) => {
+    await page.goto(labPath + "?algorithm=binary#visualizer", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Binary Search: How Much Can One Comparison Tell Us?", exact: true })).toBeVisible();
+    await expect(page.locator(".binary-context-copy h4")).toHaveCount(6);
+    await page.getByText("Reveal suggested solution", { exact: true }).click();
+    await expect(page.locator(".binary-solution pre")).toBeVisible();
+    await page.getByText("Could any Boolean-query search do better?", { exact: true }).click();
+    await expect(page.locator('.binary-mathematical-note [role="math"]')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth === document.documentElement.clientWidth)).toBe(true);
+  });
 });
 
 test("filters and Back/Forward restore selection and reset playback", async ({ page }) => {
@@ -189,6 +320,7 @@ for (const hash of ["", "#visualizer"]) {
     for (const query of ["", "?algorithm=unknown", "?algorithm=bfs"]) {
       await page.goto(`${labPath}${query}${hash}`);
       await ready(page, query.includes("bfs") ? "BFS" : "Binary Search");
+      await page.getByRole("button", { name: "Run", exact: true }).click();
       const active = page.locator('.algorithm-list button[aria-pressed="true"]');
       await page.getByRole("button", { name: "Next", exact: true }).click();
       await expect(page.locator(".step-meter span").first()).toHaveText("2");

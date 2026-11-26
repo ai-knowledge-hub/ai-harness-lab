@@ -10,14 +10,12 @@ async function expectReadingSetup(page) {
   await expect(requirements).toHaveText("No installation is needed to read this guide.");
 }
 
-async function expectLabSetup(page) {
-  const requirements = page.locator('[data-task-requirements="lab"]');
-  await expect(requirements).toBeVisible();
-  await expect(requirements).toContainText("JavaScript is needed to select a visualizer and use playback.");
-  await expect(requirements).toContainText("No installation, account or API key is needed.");
-  await expect(requirements).toContainText("Without JavaScript, you can read the default Binary Search example below");
-  await expect(requirements.getByRole("link", { name: "pattern summaries in Algorithms & Data" }))
-    .toHaveAttribute("href", "/learn/algorithms");
+async function expectLabIntroduction(page) {
+  await expect(page.locator('[data-task-requirements="lab"]')).toHaveCount(0);
+  const choose = page.getByRole("link", { name: "Choose a visualizer", exact: true });
+  await expect(choose).toBeVisible();
+  await expect(choose).not.toHaveAttribute("aria-describedby");
+  await expect(page.locator(".algorithm-hero")).toContainText("compare each change in the animation with the code that produces it");
 }
 
 async function expectNoCompanions(page) {
@@ -48,7 +46,7 @@ test("a reader can start with a principle or go directly to the featured case", 
     }
     await next.click();
     if (mode === "guide") await expectReadingSetup(page);
-    else await expectLabSetup(page);
+    else await expectLabIntroduction(page);
   }
   await page.goto("/");
   await page.getByRole("link", { name: "Explore the tracks", exact: true }).click();
@@ -92,7 +90,7 @@ test.describe("production discovery on a phone without JavaScript", () => {
         await page.goto(route);
         await expectShellOrientation(page);
         if (route.includes("/system-design/")) await expectReadingSetup(page);
-        if (route.endsWith("/visualizers")) await expectLabSetup(page);
+        if (route.endsWith("/visualizers")) await expectLabIntroduction(page);
         if (route.endsWith("/attribution-and-lift")) await expectNoCompanions(page);
       }
     }
