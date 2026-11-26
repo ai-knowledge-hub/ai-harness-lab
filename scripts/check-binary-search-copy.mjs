@@ -35,16 +35,31 @@ export async function checkBinarySearchCopy() {
     assert.equal([...source.matchAll(pattern)].length, 1, `Newcomer review passage must occur exactly once: ${reason}`);
     source = source.replace(pattern, () => after);
   }
+  const supplements = novice.revisions.filter(revision => revision.scope === "supplement").map(revision => ({ ...revision }));
+  const followup = JSON.parse(await readFile("tests/fixtures/binary-search-followup-edits.json", "utf8"));
+  for (const { before, after, reason, scope } of followup.revisions) {
+    if (scope === "supplement") {
+      const matches = supplements.filter(revision => revision.after.includes(before));
+      assert.equal(matches.length, 1, `Follow-up supplement passage must occur exactly once: ${reason}`);
+      assert.equal(matches[0].after.split(before).length, 2);
+      matches[0].after = matches[0].after.replace(before, () => after);
+    } else {
+      const expression = before.split(/\s+/).map(word => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s+");
+      const pattern = new RegExp(expression, "g");
+      assert.equal([...source.matchAll(pattern)].length, 1, `Follow-up source passage must occur exactly once: ${reason}`);
+      source = source.replace(pattern, () => after);
+    }
+  }
   const processor = await createSatteriMarkdownProcessor({ syntaxHighlight: false, smartypants: false });
   const expected = new JSDOM((await processor.render(source)).code).window.document;
   const built = new JSDOM(await readFile("dist/learn/algorithms/visualizers/index.html", "utf8")).window.document;
-  for (const { after, reason } of novice.revisions.filter(revision => revision.scope === "supplement")) {
+  for (const { after, reason } of supplements) {
     const supplement = new JSDOM((await processor.render(after)).code).window.document;
     assert.ok(readingText(built.querySelector(".binary-context-copy")).includes(readingText(supplement.body)), `Constructive solution or optional proof retains the reviewed explanation: ${reason}`);
   }
   assert.ok(!readingText(built.querySelector("#visualizer")).includes("—"), "Binary Search reader-facing copy contains no em dashes");
   const context = built.querySelector(".binary-context-copy").cloneNode(true);
-  context.querySelectorAll("[data-binary-asset], .binary-mathematical-note, .binary-related").forEach(node => node.remove());
+  context.querySelectorAll("[data-binary-asset], .binary-mathematical-note").forEach(node => node.remove());
   const solution = context.querySelector(".binary-solution");
   assert.ok(solution?.textContent.includes("[80, 120, 250, 250, 250, 300, 300]"), "Constructive solution is included");
   const solutionLabel = built.createElement("p");
@@ -72,7 +87,16 @@ export async function checkBinarySearchCopy() {
   assert.equal(built.querySelectorAll("[data-binary-asset]").length, 6);
   assert.equal(built.querySelectorAll(".binary-context-copy h4").length, 6);
   assert.equal(built.querySelectorAll(".binary-context-copy h1, .binary-context-copy h2").length, 0);
-  assert.ok(built.querySelector('.binary-related a[href$="#why-yesterday-changes"]'));
+  const reportingLinks = built.querySelectorAll('.binary-context-copy a[href="/learn/system-design/chatgpt-ads-reporting#why-yesterday-changes"]');
+  assert.equal(reportingLinks.length, 1, "One contextual reporting connection replaces the old ending block");
+  const connection = reportingLinks[0].closest("p");
+  assert.ok(connection.previousElementSibling.textContent.includes("concurrent revisions"), "Reporting link immediately follows the data-stability caveat");
+  const next = connection.nextElementSibling;
+  assert.ok(next.matches('a[data-binary-scenario="counterexample"]') || next.querySelector('a[data-binary-scenario="counterexample"]'));
+  assert.equal(built.querySelectorAll(".binary-related").length, 0);
+  const invariantFigure = built.querySelector('[data-binary-asset="invariant"]');
+  assert.equal(invariantFigure.querySelectorAll(".binary-state p").length, 1, "Static status identifies preservation without repeating the numerical snapshot");
+  assert.ok(invariantFigure.querySelector("figcaption").textContent.includes("With one record left to inspect, two answers remain possible"));
   const report = new JSDOM(await readFile("dist/learn/system-design/chatgpt-ads-reporting/index.html", "utf8")).window.document;
   assert.ok(report.getElementById("why-yesterday-changes"));
   for (const pre of built.querySelectorAll(".binary-context-copy pre")) {

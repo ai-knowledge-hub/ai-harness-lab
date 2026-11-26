@@ -89,6 +89,7 @@ There are no required build or runtime imports between the three sites. Cross-si
 | Heap as entry point | Retain the current practical starting action during pilots | Existing behaviour; reconsider after pilot evidence |
 | Full Context presentation | Keep one authored explanation; make essential reading available as static HTML | Binary Search uses one static MDX slot/native disclosure; test suitability in subsequent pilots |
 | Larger navigation or visual redesign | Change only after the pilots expose a specific reader need | Deferred |
+| Phase 6: shared module framing | Reconcile the marketing-agent shell, sources and mappings with the pilots' broader computational foundations | Intentional editorial debt; revisit after the pilots and broader track architecture are approved |
 | Weighted score and word ranges | Use for editorial calibration, not automated proof or publication authority | Provisional research suggestions |
 
 The [Binary Search pilot](binary-search-pilot.md) records the first reading-format decision and its evidence. Its implementation does not establish that the same format is appropriate for every mechanism or authorize publication of the remaining proposals.

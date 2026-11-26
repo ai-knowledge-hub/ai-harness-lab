@@ -119,7 +119,7 @@ export const binarySearch = {
 
 /** Shared by Run and static Context. Never reveal an unobserved value unless
  * requested, or explicitly identified as the verifier's counterexample. */
-export function renderBinary(step: BinarySearchStep, reveal = false, presentation: "search" | "observation" = "search"): string {
+export function renderBinary(step: BinarySearchStep, reveal = false, presentation: "search" | "observation" | "invariant" = "search"): string {
   const observationOnly = presentation === "observation";
   const width = Math.max(740, step.values.length * 100 + 70);
   const cell = (width - 70) / Math.max(step.values.length, 1);
@@ -175,8 +175,8 @@ export function renderBinary(step: BinarySearchStep, reveal = false, presentatio
   </svg>
   ${observationOnly ? "" : `<div class="binary-state" data-invariant="${failure ? "violated" : "preserved"}">
     <p><strong>${failure ? "Invalid elimination" : step.monotonic ? "Boundary invariant preserved" : "Boundary still possible; monotonicity is not guaranteed"}</strong></p>
-    <p>Remaining elements: [${step.lo}, ${step.hi}). Possible boundaries: [${step.lo}, ${step.hi}].</p>
-    <p>Search evaluations completed: ${step.evaluations}. Solid outlines mark observations; dotted outlines are unresolved; dashed outlines mark ${failure || !step.monotonic ? "assumptions" : "inferences"}.</p>
+    ${presentation === "invariant" ? "" : `<p>Remaining elements: [${step.lo}, ${step.hi}). Possible boundaries: [${step.lo}, ${step.hi}].</p>
+    <p>Search evaluations completed: ${step.evaluations}. Solid outlines mark observations; dotted outlines are unresolved; dashed outlines mark ${failure || !step.monotonic ? "assumptions" : "inferences"}.</p>`}
     ${failure ? `<p>Verifier counterexample: index ${step.actualBoundary}, £${step.values[step.actualBoundary]}. The verifier scans the dataset separately; its work is excluded from the search count.</p>` : ""}
   </div>`}`;
 }

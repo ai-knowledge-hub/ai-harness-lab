@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-26",
+  "scope": "Agreed post-publication editorial corrections: append complexity, decision-tree reasoning, invariant compression and contextual reporting integration. Original approved source and earlier revision records remain frozen.",
+  "revisions": [
+    {
+      "issue": "01",
+      "scope": "supplement",
+      "reason": "Separate constant-time maximum calculation from amortised Python-list append, defining the new term while preserving preparation, query and correction costs.",
+      "before": "Building and storing the additional sequence costs O(n) time and O(n) space: we process every measurement and store one extra value for each. Subsequent threshold searches take O(log n) evaluations. Adding a measurement at the end, called an **append**, extends the sequence in constant time. Correcting an earlier measurement can require recalculating values from that position onwards. For one query, a linear scan can be the better choice.",
+      "after": "Building and storing the additional sequence costs O(n) time and O(n) space: we process every measurement and store one extra value for each. Subsequent threshold searches take O(log n) evaluations.\n\nCalculating the next prefix maximum takes O(1) time. Adding it to the end of a Python list, called an **append**, takes **amortised O(1)** time: over many appends, the total work grows in proportion to the number of additions, although an individual append may take longer when the list's storage grows. Correcting an earlier measurement can require recalculating values from that position onwards. For one query, a linear scan can be the better choice."
+    },
+    {
+      "issue": "03",
+      "scope": "supplement",
+      "reason": "Count distinguishable decision-tree leaves, defining the tree and leaf vocabulary while retaining the existing lower-bound equation and model assumptions.",
+      "before": "There are n + 1 possible boundary positions. A **Boolean query** is a question with two possible answers, true or false. One query can distinguish two possibilities; two queries can distinguish four. In general, k such queries distinguish at most 2ᵏ possibilities.",
+      "after": "There are n + 1 possible boundary positions. A **Boolean query** has two possible outcomes, true or false. A **decision tree** represents the checks and the paths their answers can take: each check branches into at most two outcomes, and each final answer is a **leaf**. A tree of depth k, allowing at most k checks along any path, has at most 2ᵏ leaves. To identify every possible boundary, it needs at least n + 1 leaves, one for each answer."
+    },
+    {
+      "issue": "04",
+      "reason": "Use the narrative to explain why updates preserve the invariant; leave the numerical snapshot to the figure and the one-record/two-answer distinction to its caption.",
+      "before": "An **invariant** is a fact that remains true after every step of an algorithm. Here, it is that the correct boundary stays between our bounds. After two comparisons, `lo = 3` and `hi = 4`. Only the record at index 3 remains to check: if it qualifies, the answer is 3; otherwise, the answer is 4. Dashed outlines mark information we can infer from other checks rather than values we have read.",
+      "after": "An **invariant** is a fact that remains true after every step of an algorithm. Here, it is that the correct boundary stays between our bounds. A true check keeps the inspected position as a possible answer; a false check skips it because it cannot qualify. Monotonicity extends these conclusions to the other positions we discard."
+    },
+    {
+      "issue": "04",
+      "reason": "Keep the full interval definitions and let the caption explain the significance of having one unchecked record.",
+      "before": "An **interval** is a range of positions. The remaining records occupy `[lo,hi)`: this includes `lo` but stops before `hi`, so it is called **half-open**. The possible answers occupy `[lo,hi]`, which includes both bounds. This is why one record can remain to inspect while two answers are still possible.",
+      "after": "An **interval** is a range of positions. The remaining records occupy `[lo,hi)`: this includes `lo` but stops before `hi`, so it is called **half-open**. The possible answers occupy `[lo,hi]`, which includes both bounds."
+    },
+    {
+      "issue": "04",
+      "reason": "Continue the correctness argument with progress and termination after preservation has been explained.",
+      "before": "Every update preserves the true boundary. Every iteration reduces the interval. When the markers meet, exactly one possible boundary remains. That establishes correctness. Watching the algorithm succeed illustrates the reasoning; it does not replace it.",
+      "after": "Every iteration reduces the interval. When the markers meet, exactly one possible boundary remains. That establishes correctness. Watching the algorithm succeed illustrates the reasoning; it does not replace it."
+    },
+    {
+      "issue": "05",
+      "reason": "Place the existing reporting destination immediately after the data-stability caveat; distinguish changes between reporting versions from concurrent changes during a search.",
+      "before": "Even cumulative expenditure requires care in a production reporting system: credits and corrections may invalidate the monotonicity of our simplified model, while concurrent revisions can invalidate deductions already made during a search. A correctly implemented algorithm can return an incorrect answer when applied outside its assumptions.",
+      "after": "Even cumulative expenditure requires care in a production reporting system: credits and corrections may invalidate the monotonicity of our simplified model, while concurrent revisions can invalidate deductions already made during a search. A correctly implemented algorithm can return an incorrect answer when applied outside its assumptions.\n\n[How Advertising Reporting Systems Work](/learn/system-design/chatgpt-ads-reporting#why-yesterday-changes) explains why historical measurements change between reporting versions as late events, credits and corrections are incorporated."
+    }
+  ]
+}

@@ -223,10 +223,18 @@ test.describe("Binary Search static reading", () => {
     await page.goto(labPath + "?algorithm=binary#visualizer", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Binary Search: How Much Can One Comparison Tell Us?", exact: true })).toBeVisible();
     await expect(page.locator(".binary-context-copy h4")).toHaveCount(6);
+    const reportingLink = page.locator('.binary-context-copy a[href="/learn/system-design/chatgpt-ads-reporting#why-yesterday-changes"]');
+    await expect(reportingLink).toHaveCount(1);
+    expect(await reportingLink.evaluate(link => link.closest("p").previousElementSibling.textContent)).toContain("concurrent revisions");
+    await expect(page.locator('[data-binary-asset="invariant"] .binary-state p')).toHaveCount(1);
+    await expect(page.locator('[data-binary-asset="invariant"] svg')).toHaveAccessibleName(/Remaining elements \[3, 4\); possible boundaries \[3, 4\]/);
     await page.getByText("Reveal suggested solution", { exact: true }).click();
     await expect(page.locator(".binary-solution pre")).toBeVisible();
+    await expect(page.locator(".binary-solution")).toContainText("amortised O(1)");
+    await expect(page.locator(".binary-solution")).toContainText("an individual append may take longer");
     await page.getByText("Could any Boolean-query search do better?", { exact: true }).click();
     await expect(page.locator('.binary-mathematical-note [role="math"]')).toBeVisible();
+    await expect(page.locator(".binary-mathematical-note")).toContainText("at most 2ᵏ leaves");
     expect(await page.evaluate(() => document.documentElement.scrollWidth === document.documentElement.clientWidth)).toBe(true);
   });
 });

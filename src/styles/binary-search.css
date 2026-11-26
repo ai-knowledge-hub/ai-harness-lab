@@ -80,7 +80,6 @@ html:has(.binary-context) { scroll-behavior: auto; }
 .binary-growth-bars p { display: flex; justify-content: space-between; gap: 1rem; margin-block: 1rem .5rem; }
 .binary-growth-track { block-size: .75rem; border: 1px solid var(--line); }
 .binary-growth-track span { display: block; block-size: 100%; background: var(--viz-info); }
-.binary-related { border-block-start: 1px solid var(--line); padding-block-start: 1.5rem; }
 @media (max-width: 640px) {
   .binary-settings { display: grid; grid-template-columns: minmax(0, 1fr); }
   .binary-settings form { gap: .75rem; }

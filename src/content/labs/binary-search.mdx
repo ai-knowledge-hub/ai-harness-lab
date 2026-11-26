@@ -65,13 +65,13 @@ The algorithm accumulates knowledge as it executes. Every valid position before 
 
 <BinarySearchEquation kind="invariant" />
 
-An **invariant** is a fact that remains true after every step of an algorithm. Here, it is that the correct boundary stays between our bounds. After two comparisons, `lo = 3` and `hi = 4`. Only the record at index 3 remains to check: if it qualifies, the answer is 3; otherwise, the answer is 4. Dashed outlines mark information we can infer from other checks rather than values we have read.
+An **invariant** is a fact that remains true after every step of an algorithm. Here, it is that the correct boundary stays between our bounds. A true check keeps the inspected position as a possible answer; a false check skips it because it cannot qualify. Monotonicity extends these conclusions to the other positions we discard.
 
-An **interval** is a range of positions. The remaining records occupy `[lo,hi)`: this includes `lo` but stops before `hi`, so it is called **half-open**. The possible answers occupy `[lo,hi]`, which includes both bounds. This is why one record can remain to inspect while two answers are still possible.
+An **interval** is a range of positions. The remaining records occupy `[lo,hi)`: this includes `lo` but stops before `hi`, so it is called **half-open**. The possible answers occupy `[lo,hi]`, which includes both bounds.
 
 <BinarySearchFigure kind="invariant" />
 
-Every update preserves the true boundary. Every iteration reduces the interval. When the markers meet, exactly one possible boundary remains. That establishes correctness. Watching the algorithm succeed illustrates the reasoning; it does not replace it.
+Every iteration reduces the interval. When the markers meet, exactly one possible boundary remains. That establishes correctness. Watching the algorithm succeed illustrates the reasoning; it does not replace it.
 
 For our expenditure dataset, the algorithm returns index 3, corresponding to Day 4. If no record qualifies, it returns `n`, the end sentinel beyond the final record.
 
@@ -126,6 +126,8 @@ The red mark below comes from a **verifier**, a separate check that reads all th
 <BinarySearchFigure kind="invalid" />
 
 Even cumulative expenditure requires care in a production reporting system: credits and corrections may invalidate the monotonicity of our simplified model, while concurrent revisions can invalidate deductions already made during a search. A correctly implemented algorithm can return an incorrect answer when applied outside its assumptions.
+
+[How Advertising Reporting Systems Work](/learn/system-design/chatgpt-ads-reporting#why-yesterday-changes) explains why historical measurements change between reporting versions as late events, credits and corrections are incorporated.
 
 <a href="?algorithm=binary&view=run&experiment=counterexample#visualizer" data-binary-scenario="counterexample">Try it in Run: Break the assumption</a>
 
@@ -217,7 +219,9 @@ For `[80, 120, 250, 90, 180, 300, 100]`, this produces `[80, 120, 250, 250, 250,
 
 The prefix maximum never decreases. Its first value at or above a threshold occurs at exactly the first raw measurement at or above that threshold: before that position no earlier value qualifies; at that position the newly observed value qualifies. For a threshold of 200 ms, both first qualify at index 2.
 
-Building and storing the additional sequence costs O(n) time and O(n) space: we process every measurement and store one extra value for each. Subsequent threshold searches take O(log n) evaluations. Adding a measurement at the end, called an **append**, extends the sequence in constant time. Correcting an earlier measurement can require recalculating values from that position onwards. For one query, a linear scan can be the better choice.
+Building and storing the additional sequence costs O(n) time and O(n) space: we process every measurement and store one extra value for each. Subsequent threshold searches take O(log n) evaluations.
+
+Calculating the next prefix maximum takes O(1) time. Adding it to the end of a Python list, called an **append**, takes **amortised O(1)** time: over many appends, the total work grows in proportion to the number of additions, although an individual append may take longer when the list's storage grows. Correcting an earlier measurement can require recalculating values from that position onwards. For one query, a linear scan can be the better choice.
 
 This transformation finds the **first historical crossing**, the first time the threshold was ever reached in these records. It does not answer every later crossing or report the current latency.
 
@@ -230,12 +234,10 @@ Sometimes the necessary structure already exists. Sometimes we must construct an
 <details className="binary-mathematical-note">
 <summary>Could any Boolean-query search do better?</summary>
 
-There are n + 1 possible boundary positions. A **Boolean query** is a question with two possible answers, true or false. One query can distinguish two possibilities; two queries can distinguish four. In general, k such queries distinguish at most 2ᵏ possibilities.
+There are n + 1 possible boundary positions. A **Boolean query** has two possible outcomes, true or false. A **decision tree** represents the checks and the paths their answers can take: each check branches into at most two outcomes, and each final answer is a **leaf**. A tree of depth k, allowing at most k checks along any path, has at most 2ᵏ leaves. To identify every possible boundary, it needs at least n + 1 leaves, one for each answer.
 
 <BinarySearchEquation kind="lower-bound" />
 
 This is a **lower bound**, the fewest checks any search could guarantee in the worst case if it learns only from these true-or-false answers. Binary search reaches that bound. A precomputed answer or an additional representation supplies other information and changes the comparison.
 
 </details>
-
-<p className="binary-related">Related worked example · Preview: <a href="/learn/system-design/chatgpt-ads-reporting#why-yesterday-changes">How Advertising Reporting Systems Work</a> explains why reported measurements can change and what that means for algorithms that rely on stable data.</p>
