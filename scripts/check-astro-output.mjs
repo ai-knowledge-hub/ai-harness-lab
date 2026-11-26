@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { JSDOM } from "jsdom";
 import { readingText } from "./reading-text.mjs";
 import { checkChatGPTReviewedCopy } from "./check-chatgpt-reviewed-copy.mjs";
+import { checkBinarySearchCopy } from "./check-binary-search-copy.mjs";
 
 const baseline = JSON.parse(await readFile("tests/fixtures/reading-baseline.json", "utf8"));
 const markdownBaseline = JSON.parse(await readFile("tests/fixtures/markdown-migration-baseline.json", "utf8"));
@@ -30,6 +31,7 @@ function historicalEditorialReferences(value) {
 // Reviewed #60 copy changes are asserted before restoring their historical
 // wording for #42 parity. This is a bounded list, not a skipped content region.
 const companionCopy = [
+  ['.algorithm-hero .intro-copy > p', "Explore how algorithms search records, organise tasks and control actions in an agent system. Step through the examples and compare each change in the animation with the code that produces it.", "Step through the deterministic core behind skills, MCP tools, plugins, CLIs, agent orchestration, and governed control planes. Each animation uses marketing system shapes: campaigns, crawls, reports, tool paths, incident clusters, approvals, permission graphs, and audit logs."],
   ['#related-reading > .eyebrow', "Optional companions", "The wider context"],
   ['#related-reading-title', "Related reading and resources", "Related reading"],
   ['#related-reading .resource-kind', "Resource · Skills", "Related guide · Skills"],
@@ -65,16 +67,16 @@ for (const [path, historical] of Object.entries(baseline.routes)) {
   }
   // #59 deliberately adds requirements context. Keep the independent #42
   // fixture frozen and compare its retained body; discovery browser assertions
-  // separately check the new notes, descriptions and reading-alternative link.
-  const requirementKind = !path.startsWith("/learn/") || path === "/learn/ai-engineering/control-plane"
-    ? null : path === "/learn/algorithms/visualizers" ? "lab" : path.split("/").length === 3 ? "start" : "guide";
+  // separately check the retained notes and descriptions. The user removed
+  // the lab's browser-requirements note and circular reading link on 25 Nov.
+  const requirementKind = !path.startsWith("/learn/") || path === "/learn/ai-engineering/control-plane" || path === "/learn/algorithms/visualizers"
+    ? null : path.split("/").length === 3 ? "start" : "guide";
   const requirements = main.querySelectorAll("[data-task-requirements]");
   assert.equal(requirements.length, requirementKind ? 1 : 0, `${path}: requirements context count`);
   for (const element of requirements) {
     const selector = {
       start: '#start-here > p#start-requirements[data-task-requirements="start"]',
       guide: '.lesson-orientation p[data-task-requirements="guide"]',
-      lab: '.algorithm-hero .intro-copy > div#lab-requirements[data-task-requirements="lab"]',
     }[requirementKind];
     assert.ok(element.matches(selector), `${path}: requirements context location`);
     assert.ok(element.textContent.trim(), `${path}: requirements context must have text`);
@@ -88,7 +90,18 @@ for (const [path, historical] of Object.entries(baseline.routes)) {
     draft.remove();
   }
   main.querySelectorAll("script,style,template").forEach((element) => element.remove());
-  const actualText = historicalEditorialReferences(readingText(main));
+  let actualText = historicalEditorialReferences(readingText(main));
+  // Only Binary Search is deliberately replaced by the approved v2 pilot.
+  // Its complete prose/code/figure contract is independently checked below;
+  // retain #42 parity for the shell, catalogue, bridges and every other lab.
+  if (path === "/learn/algorithms/visualizers") {
+    const historicalStart = historical.text.indexOf("Find Binary Search ");
+    const historicalEnd = historical.text.indexOf("Sources The Deterministic Core");
+    assert.ok(historicalStart >= 0 && historicalEnd > historicalStart);
+    const currentStage = historicalEditorialReferences(readingText(main.querySelector("#visualizer")));
+    assert.ok(actualText.includes(currentStage));
+    actualText = actualText.replace(currentStage, historical.text.slice(historicalStart, historicalEnd).trim());
+  }
   // The full replacement article is checked against its editorial snapshot
   // below; this pass still checks its infrastructure and historical anchors.
   if (!replacementArticles[path] && actualText !== expected.text) {
@@ -98,7 +111,7 @@ for (const [path, historical] of Object.entries(baseline.routes)) {
   const ids = new Set([...main.querySelectorAll("[id]")].map((element) => element.id));
   // Removing the sole related guide also removes its now-empty wrapper.
   for (const id of historical.ids.filter(id => !retirement.removedAnchors[path]?.includes(id))) assert.ok(ids.has(id), `${path}: missing anchor ${id}`);
-  if (!replacementArticles[path]) assert.deepEqual([...main.querySelectorAll("a[href]")].map((element) => element.getAttribute("href")), expected.hrefs, `${path}: reading links`);
+  if (!replacementArticles[path]) assert.deepEqual([...main.querySelectorAll("a[href]")].filter(element => path !== "/learn/algorithms/visualizers" || !element.closest("#visualizer")).map((element) => element.getAttribute("href")), expected.hrefs, `${path}: reading links`);
 }
 const sitemap = await readFile("dist/sitemap.xml", "utf8");
 const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
@@ -157,3 +170,4 @@ for (const [path, expected] of Object.entries({ ...markdownBaseline.routes, ...m
 }
 console.log("Migrated guides retain their original content; marketplace, reporting, platform and ChatGPT Ads rewrites match their editorial snapshots and retain historical anchors and indexing.");
 await checkChatGPTReviewedCopy();
+await checkBinarySearchCopy();

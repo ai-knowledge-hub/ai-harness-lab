@@ -1475,20 +1475,6 @@ html:has(.pilot-track-page) {
   display: block;
   margin-top: 8px;
 }
-.intro-copy .lab-requirements {
-  margin-top: 22px;
-}
-.intro-copy .lab-requirements p {
-  font-size: 15px;
-  line-height: 1.6;
-}
-.lab-requirements p + p {
-  margin-top: 8px;
-}
-.lab-requirements a {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
 .track-start h3 {
   font-size: clamp(24px, 3vw, 38px);
   max-width: 26ch;

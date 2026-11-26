@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState, type SetStateAction } from "react";
+import { useEffect, useMemo, useState, type SetStateAction, type ReactNode } from "react";
 import { algorithms, operations, type Algorithm } from "../visualizers/algorithms-data";
 import { renderVisualization } from "../visualizers/render-visualization";
+import { binaryScenarios, boundaryTrace, renderBinary, type BinaryExperiment } from "../visualizers/binary-search";
+import { BinarySearchSettings, BinarySearchGrowth } from "../components/BinarySearchTools";
 import {
   useLocation,
   useNavigate,
@@ -64,7 +66,7 @@ function ContextView({ context }: { context: Algorithm["context"] }) {
   );
 }
 
-export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQueryUntilMounted?: boolean }) {
+export function AlgorithmLabPage({ deferQueryUntilMounted = false, binaryContext }: { deferQueryUntilMounted?: boolean; binaryContext?: ReactNode }) {
   const [filter, setFilter] = useState("All");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -81,24 +83,55 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
   const [playback, setPlayback] = useState<"ready" | "playing" | "paused" | "complete">("ready");
   const playing = playback === "playing";
   const [speed, setSpeed] = useState(1050);
-  const [viewMode, setViewMode] = useState("run");
+  const [otherViewMode, setOtherViewMode] = useState("run");
+  // Existing algorithm query links are invitations to run a visualizer.
+  // The ordinary lesson entry and catalogue selection start with Context.
+  const requestedView = queryReady ? searchParams.get("view") : null;
+  const binaryView = requestedView === "run" || requestedView !== "context" && requestedId === "binary" ? "run" : "context";
+  const viewMode = currentId === "binary"
+    ? binaryView : otherViewMode;
+  const requestedExperiment = queryReady ? searchParams.get("experiment") : null;
+  const binaryExperiment: BinaryExperiment = requestedExperiment === "counterexample" || requestedExperiment === "growth"
+    ? requestedExperiment : "boundary";
+  const [binaryThreshold, setBinaryThreshold] = useState(650);
+  const [revealBinary, setRevealBinary] = useState(false);
+  const [prediction, setPrediction] = useState<"lo" | "hi" | null>(null);
+  const binarySteps = useMemo(() => boundaryTrace(
+    binaryScenarios[binaryExperiment === "counterexample" ? "counterexample" : "boundary"].values,
+    binaryThreshold,
+  ), [binaryExperiment, binaryThreshold]);
 
   const currentAlgorithm = useMemo(
-    () => algorithms.find((item) => item.id === currentId) ?? algorithms[0],
-    [currentId],
+    () => {
+      const item = algorithms.find((item) => item.id === currentId) ?? algorithms[0];
+      return item.id === "binary" ? { ...item, steps: binarySteps } : item;
+    },
+    [currentId, binarySteps],
   );
 
   const currentStep =
     currentAlgorithm.steps[stepIndex] ?? currentAlgorithm.steps[0];
+  const binaryStep = currentAlgorithm.id === "binary" ? currentAlgorithm.steps[stepIndex] ?? currentAlgorithm.steps[0] : null;
+  const scaling = currentId === "binary" && binaryExperiment === "growth";
 
   useEffect(() => {
     setStepIndex(0);
     setPlayback("ready");
+    setPrediction(null);
   }, [currentId]);
+
+  useEffect(() => {
+    setBinaryThreshold(binaryExperiment === "counterexample" ? 6 : 650);
+    setRevealBinary(false);
+    setPrediction(null);
+    setStepIndex(0);
+    setPlayback("ready");
+  }, [binaryExperiment]);
 
   useEffect(() => {
     if (!playing) return undefined;
     const timer = window.setInterval(() => {
+      setPrediction(null);
       setStepIndex((previous) => {
         if (previous >= currentAlgorithm.steps.length - 1) {
           setPlayback("complete");
@@ -122,6 +155,9 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
     if (currentId !== id) {
       const next = new URLSearchParams(searchParams);
       next.set("algorithm", id);
+      next.delete("experiment");
+      if (id === "binary") next.set("view", "context");
+      else next.delete("view");
       navigate(
         {
           pathname: location.pathname,
@@ -133,11 +169,49 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
     }
     setStepIndex(0);
     setPlayback("ready");
+    setPrediction(null);
   }
 
   function setManualStep(update: SetStateAction<number>) {
     setPlayback("paused");
     setStepIndex(update);
+    setPrediction(null);
+  }
+
+  function chooseBinaryExperiment(experiment: BinaryExperiment, jump = false) {
+    navigateBinary("run", experiment, jump);
+    setBinaryThreshold(experiment === "counterexample" ? 6 : 650);
+    setRevealBinary(false);
+    setPrediction(null);
+    setStepIndex(0);
+    setPlayback("ready");
+  }
+
+  function binaryHref(mode: "run" | "context", experiment?: BinaryExperiment) {
+    const next = new URLSearchParams(searchParams);
+    next.set("algorithm", "binary");
+    next.set("view", mode);
+    if (experiment) next.set("experiment", experiment);
+    return `${location.pathname}?${next.toString()}#visualizer`;
+  }
+
+  function navigateBinary(mode: "run" | "context", experiment?: BinaryExperiment, jump = false) {
+    const href = binaryHref(mode, experiment);
+    const destination = jump ? href : href.replace(/#visualizer$/, location.hash);
+    if (destination !== `${location.pathname}${location.search}${location.hash}`) {
+      navigate(destination, { preventScrollReset: true });
+    }
+    setPlayback("paused");
+    if (jump) requestAnimationFrame(() => {
+      const stage = document.getElementById("visualizer");
+      stage?.focus({ preventScroll: true });
+      stage?.scrollIntoView({ block: "start" });
+    });
+  }
+
+  function setViewMode(mode: "run" | "context") {
+    if (currentId === "binary") navigateBinary(mode);
+    else setOtherViewMode(mode);
   }
 
   return (
@@ -156,23 +230,11 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
         <div className="intro-copy">
           <h1 id="page-title">Algorithms inside marketing agents</h1>
           <p>
-            Step through the deterministic core behind skills, MCP tools,
-            plugins, CLIs, agent orchestration, and governed control planes.
-            Each animation uses marketing system shapes: campaigns, crawls,
-            reports, tool paths, incident clusters, approvals, permission
-            graphs, and audit logs.
+            Explore how algorithms search records, organise tasks and control
+            actions in an agent system. Step through the examples and compare
+            each change in the animation with the code that produces it.
           </p>
-          <div className="lab-requirements" id="lab-requirements" data-task-requirements="lab">
-            <p>
-              Prepared examples in your browser. JavaScript is needed to select a visualizer and use playback.
-              No installation, account or API key is needed.
-            </p>
-            <p>
-              Without JavaScript, you can read the default Binary Search example below or the{" "}
-              <a href={trackPath(tracks[1])}>pattern summaries in Algorithms &amp; Data</a>.
-            </p>
-          </div>
-          <a className="action-link" href="#catalogue" aria-describedby="lab-requirements">
+          <a className="action-link" href="#catalogue">
             Choose a visualizer
           </a>
         </div>
@@ -230,16 +292,33 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
           </div>
         </aside>
 
-        <section className="stage" id="visualizer">
+        <section className="stage" id="visualizer" tabIndex={-1}
+          onClick={event => {
+            if (currentId !== "binary" || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            const link = (event.target as Element).closest<HTMLAnchorElement>("a[data-binary-view], a[data-binary-scenario]");
+            if (!link) return;
+            const experiment = link.dataset.binaryScenario;
+            event.preventDefault();
+            if (experiment === "boundary" || experiment === "counterexample" || experiment === "growth") chooseBinaryExperiment(experiment, true);
+            else navigateBinary(link.dataset.binaryView === "context" ? "context" : "run", undefined, true);
+          }}>
           <div className="stage-head">
             <div>
               <p className="eyebrow">{currentAlgorithm.operation}</p>
               <h2>{currentAlgorithm.title}</h2>
               <p>{currentAlgorithm.summary}</p>
+              {currentId === "binary" && <div className="binary-introduction">
+                <p>In the spending example, we want to find when a campaign’s cumulative spending first reaches £650. Because the total never decreases, checking a day near the middle lets us rule out earlier or later days. Repeating this process finds the first qualifying day or establishes that the threshold was never reached.</p>
+                <p>Step through the search, then test what happens when the values rise and fall.</p>
+                <p><a className="inline-link" data-binary-view={viewMode === "context" ? "run" : "context"}
+                  href={binaryHref(viewMode === "context" ? "run" : "context")}>
+                  {viewMode === "context" ? "Try the algorithm" : "Read the explanation"}
+                </a></p>
+              </div>}
             </div>
             <div className="stage-meta">
               <div className="mode-tabs" aria-label="Algorithm view">
-                {["run", "context"].map((mode) => (
+                {(currentId === "binary" ? ["context", "run"] as const : ["run", "context"] as const).map((mode) => (
                   <button
                     key={mode}
                     type="button"
@@ -254,7 +333,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                   </button>
                 ))}
               </div>
-              {viewMode === "run" && (
+              {viewMode === "run" && !scaling && (
                 <div className="step-meter">
                   <span>{stepIndex + 1}</span>
                   <span>/</span>
@@ -264,8 +343,12 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
             </div>
           </div>
 
-          {viewMode === "run" ? (
-            <>
+          {(viewMode === "run" || currentId === "binary") && (
+            <div hidden={viewMode !== "run"}>
+              {currentId === "binary" && <BinarySearchSettings experiment={binaryExperiment} threshold={binaryThreshold} reveal={revealBinary}
+                onExperiment={chooseBinaryExperiment} onReveal={setRevealBinary}
+                onThreshold={value => { setBinaryThreshold(value); setManualStep(0); }} />}
+              {scaling ? <BinarySearchGrowth /> : <>
               <div className="controls" aria-label="Animation controls">
                 <div className="control-group">
                   <button type="button" onClick={() => setManualStep(0)}>
@@ -319,6 +402,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                     <span id="animation-label">Animation</span>
                     <strong>{currentStep.label}</strong>
                   </div>
+                  {binaryStep && <p className="binary-reading-key">Each card shows a day and its index: Day 1 is index 0. T means the threshold is met; F means it is not. The dots below are possible answers; <code>lo</code> and <code>hi</code> mark their limits.</p>}
                   <div
                     key={currentAlgorithm.id}
                     className="visualization"
@@ -326,7 +410,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                     role="region"
                     aria-labelledby="animation-label"
                     dangerouslySetInnerHTML={{
-                      __html: renderVisualization(currentAlgorithm, stepIndex),
+                      __html: binaryStep ? renderBinary(binaryStep, revealBinary) : renderVisualization(currentAlgorithm, stepIndex),
                     }}
                   />
                 </article>
@@ -336,12 +420,20 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                     <span id="reference-code-label">Reference code</span>
                     <strong>{currentAlgorithm.complexity}</strong>
                   </div>
-                  <CodeView
-                    lines={currentAlgorithm.code}
-                    activeLine={currentStep.line}
-                  />
+                  {binaryStep && <>
+                    <p className="binary-reading-key">In this Python code, <code>n</code> counts the records and <code>predicate(mid)</code> checks whether the value at index <code>mid</code> is at least £{binaryThreshold}. <code>//</code> divides and rounds down. Each check and its bound update appear in separate frames.</p>
+                    <p className="binary-code-values"><code>n = {binaryStep.values.length}; lo = {binaryStep.lo}; hi = {binaryStep.hi}{binaryStep.mid !== null ? `; mid = ${binaryStep.mid}; predicate(mid) = ${binaryStep.matched ? "True" : "False"}` : binaryStep.result !== null ? `; return ${binaryStep.result}` : "; mid not yet chosen"}</code></p>
+                  </>}
+                  <CodeView lines={currentAlgorithm.code} activeLine={currentStep.line} />
+                  {binaryStep && <p className="binary-instrumentation">The costs above describe the search procedure. Recorded frames and the independent verifier use additional work and memory.</p>}
                 </article>
               </div>
+
+              {binaryStep?.phase === "inspect" && <fieldset className="binary-prediction">
+                <legend>Predict the next update</legend>
+                <p>Which bound moves after this observation?</p>
+                {(["lo", "hi"] as const).map(bound => <button key={bound} type="button" aria-pressed={prediction === bound} onClick={() => { setPlayback("paused"); setPrediction(bound); }}>Move {bound}</button>)}
+              </fieldset>}
 
               <div className="explain-row">
                 <article className="panel">
@@ -356,6 +448,7 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                   >
                     {playback === "paused" ? "Paused. " : playback === "complete" ? "Playback complete. " : ""}
                     {currentStep.note}
+                    {prediction && binaryStep?.phase === "inspect" && ` ${prediction === (binaryStep.matched ? "hi" : "lo") ? "Correct" : "Reconsider"}: the algorithm moves ${binaryStep.matched ? "hi to mid" : "lo to mid + 1"}. The inference requires a monotonic predicate.`}
                   </p>
                 </article>
                 <article className="panel">
@@ -365,10 +458,19 @@ export function AlgorithmLabPage({ deferQueryUntilMounted = false }: { deferQuer
                   <p>{currentAlgorithm.agentUse}</p>
                 </article>
               </div>
-            </>
-          ) : (
-            <ContextView context={currentAlgorithm.context} />
+              </>}
+            </div>
           )}
+          {viewMode === "context" && currentId !== "binary" && <ContextView context={currentAlgorithm.context} />}
+          {currentId === "binary" && <details className="binary-context" id="binary-search-context" open={viewMode === "context"}
+            onToggle={event => {
+              const open = event.currentTarget.open;
+              if (open && viewMode !== "context") { setViewMode("context"); setPlayback("paused"); }
+              else if (!open && viewMode === "context") setViewMode("run");
+            }}>
+            <summary>Read Binary Search context</summary>
+            <div className="binary-context-copy">{binaryContext ?? <p>Why it exists: use monotonicity to eliminate possible answers safely.</p>}</div>
+          </details>}
         </section>
       </section>
 

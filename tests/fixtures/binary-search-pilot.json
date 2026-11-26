@@ -1,0 +1,26 @@
+{
+  "source": "User-approved Context v2.0, 24 November 2026; replaces only Binary Search's #42 trace. Original baseline files stay frozen.",
+  "values": [100, 250, 400, 650, 650, 850, 1100, 1250],
+  "code": [
+    "def first_true(n, predicate):",
+    "    lo = 0",
+    "    hi = n",
+    "    while lo < hi:",
+    "        mid = lo + (hi - lo) // 2",
+    "        if predicate(mid):",
+    "            hi = mid",
+    "        else:",
+    "            lo = mid + 1",
+    "    return lo"
+  ],
+  "steps": [
+    { "label": "Initial bounds", "lo": 0, "hi": 8, "evaluations": 0, "observed": [] },
+    { "label": "Inspect index 4", "lo": 0, "hi": 8, "evaluations": 1, "observed": [4] },
+    { "label": "Move hi", "lo": 0, "hi": 4, "evaluations": 1, "observed": [4] },
+    { "label": "Inspect index 2", "lo": 0, "hi": 4, "evaluations": 2, "observed": [4, 2] },
+    { "label": "Move lo", "lo": 3, "hi": 4, "evaluations": 2, "observed": [4, 2] },
+    { "label": "Inspect index 3", "lo": 3, "hi": 4, "evaluations": 3, "observed": [4, 2, 3] },
+    { "label": "Move hi", "lo": 3, "hi": 3, "evaluations": 3, "observed": [4, 2, 3] },
+    { "label": "Return boundary", "lo": 3, "hi": 3, "evaluations": 3, "observed": [4, 2, 3] }
+  ]
+}

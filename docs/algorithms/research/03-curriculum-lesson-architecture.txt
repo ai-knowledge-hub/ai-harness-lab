@@ -1,0 +1,1314 @@
+# **Phase 3 — Curriculum and lesson architecture**
+
+**Objective:** establish a coherent educational architecture for the Algorithms & Data track, define how individual Context modules should teach, and determine how the track connects to the wider Harness curriculum.
+
+In Phase 2, we identified a recurring pattern across the 15 mechanisms: their greatest educational value lies not in their individual implementations, but in the computational principles they reveal.
+
+Binary Search teaches elimination through structure. Heaps teach the value of partial ordering. Bloom Filters teach the economics of uncertainty. Leases teach the limits of ownership in distributed systems.
+
+Phase 3 is where we turn these observations into a curriculum.
+
+I want to make an important distinction before we proceed. **A curriculum is not necessarily a sequence of pages that everyone must read in order.** It is a deliberately constructed network of knowledge, with clear conceptual dependencies and multiple entry points.
+
+Harness should support both the reader who arrives wanting to understand a particular algorithm and the reader who wants to develop a systematic understanding of computer science.
+
+## **1. The intellectual identity of the track**
+
+### **From algorithms to computational reasoning**
+
+Most traditional algorithm courses are organised around a taxonomy of computational techniques: sorting, searching, graph algorithms, greedy algorithms, dynamic programming and so on.
+
+This is a perfectly legitimate approach, particularly for formal computer science education. Harness, however, has a slightly different mission.
+
+We want readers to understand how technology systems work, why their architectures exist and how their behaviour follows from underlying constraints.
+
+That suggests a complementary approach.
+
+| Traditional algorithm learning      | Harness computational learning                                             |
+| ----------------------------------- | -------------------------------------------------------------------------- |
+| How do I implement binary search?   | What properties allow a computer to eliminate possibilities?               |
+| How do I implement a heap?          | How much order does a system actually need?                                |
+| How do I traverse a graph?          | How does a system explore relationships it has not yet discovered?         |
+| How does a Bloom filter work?       | When is approximate knowledge more valuable than exact knowledge?          |
+| How do I implement a state machine? | How can a system constrain its own behaviour?                              |
+| How does a distributed lock work?   | How can independent processes coordinate when ownership becomes uncertain? |
+
+The questions on the right do not replace those on the left. They establish the reason for learning them.
+
+### **Proposed editorial mission**
+
+The Algorithms & Data track explores the computational ideas beneath modern technology systems.
+
+Through interactive experiments, mathematical reasoning and real implementations, readers learn how computers represent information, eliminate unnecessary work, navigate relationships, allocate resources and coordinate behaviour.
+
+The aim is not simply to recognise or implement an algorithm, but to understand the conditions that make it useful, the guarantees it provides and the trade-offs that determine whether it belongs in a particular system.
+
+I would use this as the governing editorial brief for the track rather than necessarily publishing it verbatim.
+
+## **2. The curriculum's conceptual architecture**
+
+I propose organising the curriculum around seven computational ideas, supported by a shared foundations layer.
+
+These are intellectual groupings rather than necessarily seven new navigation categories.
+
+### **Harness computational foundations**
+
+Shared foundations
+
+**Representation, abstraction, invariants and computational cost**
+
+The vocabulary needed to reason about every subsequent mechanism.
+
+01
+
+**Structure and elimination**
+
+Use information about the input to avoid inspecting every possibility.
+
+Binary Search
+
+02
+
+**Selective ordering and reuse**
+
+Maintain only the necessary structure and avoid repeating computations.
+
+Heap · Rabin–Karp
+
+03
+
+**Relationships and exploration**
+
+Represent and discover connections between entities.
+
+BFS · DFS · Union-Find
+
+04
+
+**Dependencies and optimisation**
+
+Determine valid sequences and optimal paths under constraints.
+
+Topological Sort · Dijkstra
+
+05
+
+**Finite resources and uncertainty**
+
+Manage limited memory, precision and processing capacity.
+
+Bloom Filter · Circular Buffer · Token Bucket
+
+06
+
+**State and coordination**
+
+Constrain behaviour and coordinate independent processes.
+
+Approval State Machine · Lease-Based Ownership
+
+07
+
+**Authority and trust**
+
+Determine what is permitted and what evidence can be trusted.
+
+RBAC / ABAC · Audit Hash Chain
+
+System-level application
+
+**Databases · Networks · Advertising · Marketplaces · AI agents · Distributed systems**
+
+The progression moves from reasoning about information inside a computer towards reasoning about interactions between independent components.
+
+At the beginning, we can assume that the input is available, the algorithm executes in isolation and the mathematical model is well defined.
+
+Towards the end, those assumptions gradually disappear. Information becomes incomplete, resources become constrained, processes operate concurrently and the system must establish what it can trust.
+
+This creates a natural intellectual bridge to the System Design track.
+
+## **3. The shared foundations layer**
+
+One of the findings from Phase 2 was that several important concepts recur across almost every mechanism.
+
+If we explain them independently in each Context module, we risk repetition. If we assume readers already understand them, we risk creating an unnecessarily high barrier to entry.
+
+I propose a shared introductory lesson.
+
+### **Proposed lesson: How Computers Turn Problems Into Computation**
+
+This would be a short foundational guide, supported by small experiments rather than another large algorithm visualizer.
+
+Its purpose is to establish five concepts.
+
+### **3.1 Representation — what does the computer actually see?**
+
+A computer does not inherently understand a website, an advertising campaign, a road network or a business transaction.
+
+We choose a representation that preserves the properties relevant to our problem.
+
+### **One problem, different representations**
+
+Illustrative website data
+
+**Sequence**
+
+Preserves an ordering of pages.
+
+**Graph**
+
+Preserves relationships between pages.
+
+The same underlying entities support different computational operations depending on how they are represented.
+
+This establishes why representation is an engineering decision rather than merely a programming detail.
+
+### **3.2 Computational cost — what does efficiency mean?**
+
+Introduce input size, primitive operations, time complexity, space complexity and asymptotic growth.
+
+Rather than beginning with formal Big-O notation, begin with the consequences of increasing input size.
+
+### **Experiment: how computation grows**
+
+Input size
+
+## **1,024**
+
+Constant · O(1)
+
+1
+
+Logarithmic · O(log n)
+
+10
+
+Linear · O(n)
+
+1,024
+
+Linearithmic · O(n log n)
+
+10,240
+
+Quadratic · O(n²)
+
+1,048,576
+
+Illustrative growth functions on a logarithmic bar scale. These are not measured operation counts or execution times.
+
+The reader should understand that complexity describes how computational requirements grow, not how many milliseconds a program will take.
+
+We can subsequently introduce worst-case, expected and amortised complexity when individual lessons make those distinctions necessary.
+
+### **3.3 Invariants — why does a mechanism remain correct?**
+
+An invariant is a property that remains true at the relevant stages of execution.
+
+A heap preserves a parent–child ordering property. Binary Search preserves the region in which an unresolved answer could exist. A state machine preserves constraints on legal transitions when those transitions are correctly enforced.
+
+This concept should become one of the recurring intellectual signatures of the track.
+
+### **3.4 Assumptions — what must be true before the mechanism works?**
+
+Every algorithm operates over a model of the problem.
+
+Dijkstra requires non-negative edge weights. Boundary-finding binary search requires a monotonic predicate. A standard Bloom filter's no-false-negative guarantee depends on correct maintenance of its insertion state.
+
+An implementation can be faithful to an algorithm and still be unsuitable for the problem it has been given.
+
+### **3.5 Guarantees — what can we conclude after execution?**
+
+We should teach readers to distinguish exact results, approximate results, conditional guarantees and system-level outcomes.
+
+This prepares them for later lessons on distributed systems, where correctness is rarely a property of one isolated function.
+
+### **Scope decision**
+
+I would keep this foundations lesson relatively compact, approximately 1,200–1,800 words with a few interactive demonstrations.
+
+We should not turn it into a mandatory computer science prerequisite course. Readers should be able to consult individual concepts as they encounter them in the labs.
+
+## **4. Curriculum progression and conceptual dependencies**
+
+The seven conceptual groups establish the intellectual structure. We also need to understand which lessons depend on others.
+
+For example, Dijkstra becomes much easier to understand once the reader has encountered both graph traversal and priority queues.
+
+Topological Sort builds on graph representation and traversal. Lease-Based Ownership becomes more meaningful once the reader understands state transitions and concurrency.
+
+### **Conceptual dependency map**
+
+Proposed learning dependencies, not mandatory navigation paths.
+
+The map represents broad conceptual progression rather than formal mathematical prerequisites. For instance, understanding Bloom Filters is not required to understand token buckets, and audit hash chains can be studied independently of authorisation models.
+
+During implementation, we should encode only genuine prerequisites and useful related concepts.
+
+### **Proposed learning paths**
+
+Rather than requiring everyone to follow the entire curriculum, we can provide several paths based on what the reader wants to understand.
+
+### **Explore a proposed learning path**
+
+Computational reasoning
+
+For readers developing general computer science foundations.
+
+1. Foundations
+2. Binary Search
+3. Heap
+4. Rabin–Karp
+5. BFS
+6. DFS
+7. Union-Find
+8. Topological Sort
+9. Dijkstra
+10. Bloom Filter
+
+These paths are a proposed editorial enhancement. We do not need to implement them immediately.
+
+Initially, they can guide our production sequence and the cross-links between individual lessons.
+
+## **5. Architecture of an individual lesson**
+
+This is the most important deliverable of Phase 3 because it establishes how we will rewrite the existing Context modules.
+
+The architecture should follow the general Harness teaching progression:
+
+**Concrete problem → First principles → Engineering mechanism → Real implementation → Application → Test.**
+
+However, interactive algorithm lessons introduce an additional opportunity: readers can move repeatedly between explanation and experimentation.
+
+I propose the following lesson model.
+
+01
+
+**Encounter the problem**
+
+*Why is the straightforward approach insufficient?*
+
+A concrete scenario with a measurable or observable constraint.
+
+02
+
+**Discover the principle**
+
+*What property of the problem can we exploit?*
+
+The relevant mathematical or computational idea.
+
+03
+
+**Construct the mechanism**
+
+*How does that property become an algorithm?*
+
+State, operations, representation and invariant.
+
+04
+
+**Observe execution**
+
+*Can I see why each step is necessary?*
+
+A guided experiment using the Run tab.
+
+05
+
+**Account for the cost**
+
+*What work has been saved, and what does it cost?*
+
+Complexity, resource requirements and alternatives.
+
+06
+
+**Challenge the guarantee**
+
+*What happens when the assumptions stop holding?*
+
+A counterexample or failure scenario.
+
+07
+
+**Enter a real system**
+
+*How does an actual implementation use this mechanism?*
+
+One or two verified implementation examples.
+
+08
+
+**Transfer the knowledge**
+
+*Can I recognise this problem somewhere else?*
+
+An unfamiliar application and a reasoning exercise.
+
+### **The architecture should be flexible**
+
+We should not mechanically impose eight headings on every lesson.
+
+Binary Search may need considerable attention to its correctness argument but relatively little discussion of implementation architecture.
+
+Bloom Filters may need more mathematical experimentation.
+
+Lease-Based Ownership may require a longer failure narrative and almost no conventional Big-O analysis.
+
+The structure defines the educational responsibilities of a lesson, not its visible table of contents.
+
+### **Proposed depth by mechanism type**
+
+| Lesson type             | Primary emphasis                                   | Suggested Context length |
+| ----------------------- | -------------------------------------------------- | ------------------------ |
+| Classical algorithm     | Representation, invariant, correctness, complexity | 800–1,300 words          |
+| Data structure          | Operations, representation, memory and trade-offs  | 900–1,400 words          |
+| Probabilistic mechanism | Probability, uncertainty and resource trade-offs   | 1,000–1,600 words        |
+| Coordination mechanism  | State, timing, concurrency and failure             | 1,200–1,800 words        |
+| Security mechanism      | Threat model, enforcement and trust boundaries     | 1,000–1,600 words        |
+
+These are working editorial ranges, not quotas. We should calibrate them against the actual Context interface during the pilot.
+
+## **6. Redesigning the relationship between Run and Context**
+
+I would avoid treating Context as documentation that sits beside the animation.
+
+Instead, the two tabs should form a single learning experience.
+
+The Context explains what to notice. The Run tab makes that idea observable. The reader then returns to the Context with a stronger mental model.
+
+### **Proposed learning loop**
+
+There are three levels of interactive learning we should aim to support.
+
+| Level      | Reader activity                            | Learning outcome                    |
+| ---------- | ------------------------------------------ | ----------------------------------- |
+| Observe    | Step through a prepared execution          | Recognise the mechanism             |
+| Predict    | Anticipate the next state before advancing | Understand the mechanism            |
+| Experiment | Change an input or assumption              | Evaluate when the mechanism applies |
+
+Most algorithm visualizers are effective at the first level. Harness should deliberately develop the second and third.
+
+### **A concrete example: Binary Search**
+
+Rather than simply explaining that binary search halves the search space, we can invite the reader to predict what will happen when the ordering assumption changes.
+
+### **Prototype: challenge the search assumption**
+
+Find the first value greater than or equal to the threshold.
+
+Ordered inputFluctuating input
+
+Threshold
+
+**6**
+
+**Step 1: inspect index 4**\
+Value 7 satisfies the condition.
+
+Predict which region the algorithm will discard before advancing.
+
+&#x20;Reset
+
+BackNext step
+
+Try the fluctuating input with threshold 6. This is a proposed teaching experiment, not the existing Harness implementation.
+
+The important difference is that the interaction teaches the conditions for correctness, rather than merely demonstrating the mechanics of a loop.
+
+We should use this as a design principle for every visualizer.
+
+## **7. The role of mathematics**
+
+I think this deserves explicit editorial consideration.
+
+Harness has an opportunity to introduce mathematics as a language for explaining engineering decisions rather than presenting it as a separate academic subject.
+
+We should neither avoid mathematics to make lessons accessible nor introduce formalism before the reader understands the problem it describes.
+
+### **Proposed progression**
+
+First · Intuition
+
+Each binary search comparison eliminates approximately half the remaining possibilities.
+
+Then · Observable pattern
+
+1,024 → 512 → 256 → 128 → 64 → … → 1
+
+Then · Mathematical relationship
+
+\\[ \frac{n}{2^k}\leq 1 \\]
+
+\\[ k\geq \log_2 n \\]
+
+Finally · Engineering implication
+
+Doubling the size of an ordered, randomly accessible search space adds approximately one halving step.
+
+The mathematics emerges from the reader's investigation.
+
+This approach can be applied throughout the curriculum.
+
+| Mechanism        | Mathematical idea                | Engineering implication       |
+| ---------------- | -------------------------------- | ----------------------------- |
+| Binary Search    | Logarithms                       | Search-space reduction        |
+| Heap             | Tree height and partial ordering | Efficient priority operations |
+| BFS / DFS        | Graph theory                     | Relationship exploration      |
+| Union-Find       | Equivalence relations            | Incremental connectivity      |
+| Bloom Filter     | Probability                      | Approximate membership        |
+| Circular Buffer  | Modular arithmetic               | Reusable bounded storage      |
+| Rabin–Karp       | Polynomial hashing               | Reusable computation          |
+| Topological Sort | Partial orders                   | Dependency constraints        |
+| Dijkstra         | Weighted graphs and optimality   | Cost-aware routing            |
+| Token Bucket     | Rates and accumulation           | Resource allocation over time |
+| State Machine    | Sets and transition relations    | Behavioural constraints       |
+| RBAC / ABAC      | Relations and predicates         | Policy decisions              |
+| Leases           | Temporal validity and ordering   | Distributed ownership         |
+| Audit Hash Chain | Cryptographic commitments        | Detectable modification       |
+
+We should derive mathematical expressions where they materially improve understanding. For results requiring substantial prerequisites, such as Union-Find's inverse Ackermann complexity bound, we can explain the significance and provide an optional deeper treatment rather than pretending to prove the result in a few paragraphs.
+
+## **8. Integrating real implementations**
+
+One of the risks in enriching the Context modules is that we turn each one into a catalogue of possible applications.
+
+For example, a Heap lesson could list operating systems, search engines, databases, AI retrieval, advertising auctions and job schedulers. That would make the lesson appear comprehensive without necessarily teaching anything new.
+
+I propose a more selective evidence model.
+
+### **Three levels of application evidence**
+
+| Level                     | Evidence requirement                                    | Example                                                            |
+| ------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------ |
+| Illustrative application  | Clearly labelled hypothetical scenario                  | A campaign tracker maintains the ten largest observed spend values |
+| Documented implementation | Official documentation or source code                   | Python `heapq` implements binary heap operations                   |
+| System-level application  | Evidence of how the mechanism fits into a larger system | Investigate a database's actual bounded-sort implementation        |
+
+Each lesson should normally contain one strong documented implementation and, where useful, one system-level case.
+
+The illustrative running example remains valuable because it gives us control over the problem's complexity. The documented example then shows where the simplified model meets real engineering.
+
+### **Proposed implementation research targets**
+
+These are candidates for the evidence phase, not newly verified production claims.
+
+| Lesson           | Implementation to investigate                                                                                  | Why it is educationally useful                                    |
+| ---------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Binary Search    | [Python bisect](https://docs.python.org/3/library/bisect.html?utm_source=chatgpt.com)                          | Separates efficient search from expensive insertion               |
+| Heap             | [Python heapq](https://docs.python.org/3/library/heapq.html?utm_source=chatgpt.com), PostgreSQL source         | Connects priority operations to bounded selection                 |
+| BFS / DFS        | [NetworkX](https://networkx.org/documentation/stable/?utm_source=chatgpt.com)                                  | Exposes graph representation and traversal behaviour              |
+| Union-Find       | SciPy DisjointSet                                                                                              | Connects mathematical partitions to a practical API               |
+| Bloom Filter     | RocksDB filter implementation                                                                                  | Investigates how approximate membership can avoid storage lookups |
+| Circular Buffer  | [Linux kernel circular buffers](https://docs.kernel.org/core-api/circular-buffers.html?utm_source=chatgpt.com) | Introduces representation and concurrent access constraints       |
+| Rabin–Karp       | Original paper and reproducible implementation                                                                 | Isolates rolling computation and collision behaviour              |
+| Topological Sort | [Python graphlib](https://docs.python.org/3/library/graphlib.html?utm_source=chatgpt.com)                      | Distinguishes dependency readiness from task execution            |
+| Dijkstra         | NetworkX shortest-path implementation                                                                          | Connects cost assumptions to implementation choices               |
+| Token Bucket     | Linux traffic control, IETF specifications                                                                     | Connects mathematical rates to resource enforcement               |
+| State Machine    | Workflow runtime source or documentation                                                                       | Investigates persistence and transition enforcement               |
+| Leases           | Redis locking, Amazon SQS visibility timeouts                                                                  | Examines recovery and ownership limitations                       |
+| RBAC / ABAC      | NIST, Open Policy Agent                                                                                        | Distinguishes policy evaluation from enforcement                  |
+| Audit Hash Chain | Transparency specifications and log implementations                                                            | Investigates commitments and trust assumptions                    |
+
+Where a real implementation uses a different mechanism from the textbook version, that difference may itself be the most interesting part of the lesson.
+
+We should not simplify the production system until it falsely resembles the algorithm we are teaching.
+
+## **9. Proposed architecture for all 15 Context modules**
+
+We can now establish the editorial brief for each individual lesson.
+
+These are proposed titles and lesson directions, not final approved copy.
+
+### **Group I — Structure and elimination**
+
+**01. Binary Search — How Much Can One Comparison Tell Us?**
+
+Central question
+
+When can a computer safely eliminate half of the possible answers?
+
+Running example
+
+Finding the first point at which cumulative expenditure reaches a budget threshold.
+
+Intellectual outcome
+
+Understand monotonicity, search invariants and logarithmic growth.
+
+Boundary experiment
+
+Replace cumulative expenditure with a fluctuating performance metric.
+
+### **Group II — Selective ordering and reuse**
+
+**02. Heap — Why Sorting Everything Is Sometimes Wasteful**
+
+Central question
+
+How much ordering must a system maintain to retrieve its most important results?
+
+Running example
+
+Maintaining the highest-spending campaigns in a stream of fixed-score records.
+
+Intellectual outcome
+
+Understand partial ordering, priority queues and bounded selection.
+
+Boundary experiment
+
+Allow previously discarded candidates to change their scores.
+
+**03. Rabin–Karp — How Computers Avoid Repeating the Same Work**
+
+Central question
+
+How can overlapping computations share their previous results?
+
+Running example
+
+Searching a stream of document content for a known string.
+
+Intellectual outcome
+
+Understand rolling hashes, reusable computation and candidate verification.
+
+Boundary experiment
+
+Construct different strings with matching hash values.
+
+### **Group III — Relationships and exploration**
+
+**04. Breadth-First Search — How to Explore an Unknown Network**
+
+Central question
+
+How can a system discover reachable entities in increasing distance from a starting point?
+
+Running example
+
+Exploring links between pages on a website.
+
+Intellectual outcome
+
+Understand graph representation, frontiers and shortest unweighted paths.
+
+Boundary experiment
+
+Introduce cycles and weighted edges.
+
+**05. Depth-First Search — How Computers Explore and Backtrack**
+
+Central question
+
+How does a computer explore one possibility while remembering the alternatives?
+
+Running example
+
+Exploring a repository's directory or dependency structure.
+
+Intellectual outcome
+
+Understand stacks, recursion, backtracking and traversal state.
+
+Boundary experiment
+
+Introduce a directed cycle and a very deep branch.
+
+**06. Union-Find — How Systems Discover What Belongs Together**
+
+Central question
+
+How can a system maintain connected groups without repeatedly traversing the entire network?
+
+Running example
+
+Grouping infrastructure incidents according to observed relationships.
+
+Intellectual outcome
+
+Understand equivalence classes, path compression and amortised computation.
+
+Boundary experiment
+
+Add an incorrect relationship, then attempt to remove it.
+
+### **Group IV — Dependencies and optimisation**
+
+**07. Topological Sort — Why Some Work Must Wait**
+
+Central question
+
+How can a system discover which tasks are eligible to execute?
+
+Running example
+
+A reporting pipeline with several independently produced inputs.
+
+Intellectual outcome
+
+Understand partial orders, dependency constraints and parallel readiness.
+
+Boundary experiment
+
+Introduce a dependency cycle and limited worker capacity.
+
+**08. Dijkstra — When the Cheapest Next Step Is Not the Cheapest Journey**
+
+Central question
+
+Under what conditions can local decisions establish a globally optimal path?
+
+Running example
+
+Routing through a network with fixed, non-negative costs.
+
+Intellectual outcome
+
+Understand weighted graphs, relaxation and greedy correctness.
+
+Boundary experiment
+
+Introduce negative weights or changing costs.
+
+### **Group V — Finite resources and uncertainty**
+
+**09. Bloom Filter — When Approximate Knowledge Is Good Enough**
+
+Central question
+
+How much certainty can a system afford to sacrifice to reduce memory and lookup costs?
+
+Running example
+
+Screening URL membership before consulting an exact index.
+
+Intellectual outcome
+
+Understand probabilistic membership and asymmetric error guarantees.
+
+Boundary experiment
+
+Increase filter occupancy until false positives become frequent.
+
+**10. Circular Buffer — How Computers Remember Without Remembering Everything**
+
+Central question
+
+How can a system retain recent information using fixed storage?
+
+Running example
+
+Maintaining a bounded history of telemetry events.
+
+Intellectual outcome
+
+Understand logical versus physical ordering, modular arithmetic and retention.
+
+Boundary experiment
+
+Compare overwrite, reject and block policies when the buffer fills.
+
+**11. Token Bucket — Why Systems Allow Bursts but Limit Sustained Demand**
+
+Central question
+
+How can a system distribute limited processing permission over time?
+
+Running example
+
+Controlling requests to an external API.
+
+Intellectual outcome
+
+Understand burst capacity, refill rates and throughput guarantees.
+
+Boundary experiment
+
+Increase request duration while keeping admission rate constant.
+
+### **Group VI — State and coordination**
+
+**12. State Machine — How Systems Prevent Actions From Happening in the Wrong Order**
+
+Central question
+
+How can a system define and enforce permitted changes in behaviour?
+
+Running example
+
+An operation requiring approval before external execution.
+
+Intellectual outcome
+
+Understand states, events, guards, transitions and atomic enforcement.
+
+Boundary experiment
+
+Allow two workers to attempt the same transition concurrently.
+
+**13. Lease-Based Ownership — How Systems Recover Abandoned Work**
+
+Central question
+
+How can independent workers coordinate when ownership may expire?
+
+Running example
+
+Recovering a job from an apparently unresponsive worker.
+
+Intellectual outcome
+
+Understand temporary authority, recovery, stale execution and fencing.
+
+Boundary experiment
+
+Resume the original worker after another worker acquires ownership.
+
+### **Group VII — Authority and trust**
+
+**14. Access Control — How Systems Decide Who May Do What**
+
+Central question
+
+How can a system derive an authorisation decision from identities, relationships and policy?
+
+Running example
+
+Determining whether an analyst may access a client's report.
+
+Intellectual outcome
+
+Understand role-based, attribute-based and relationship-based decisions.
+
+Boundary experiment
+
+Change resource ownership or contextual policy while keeping the user's role unchanged.
+
+**15. Audit Hash Chain — How Systems Make Changes to History Detectable**
+
+Central question
+
+What evidence allows a system to detect modification of previously recorded information?
+
+Running example
+
+Maintaining a verifiable history of approved operations.
+
+Intellectual outcome
+
+Understand cryptographic commitments, integrity and independent trust anchors.
+
+Boundary experiment
+
+Modify an event and recompute the entire subsequent chain.
+
+Notice that the proposed titles express the computational problem rather than simply repeating the mechanism's name.
+
+I would nevertheless retain the conventional algorithm names prominently in navigation, search metadata and lesson headings. Readers should not have to guess which lesson contains Dijkstra or a Bloom Filter.
+
+## **10. Visual and interaction architecture**
+
+We should establish a common visual language across the module without forcing every mechanism into an identical visual representation.
+
+### **Consistent visual semantics**
+
+### **Proposed shared visual vocabulary**
+
+**Available information**
+
+Unprocessed nodes, records or candidates.
+
+**Active operation**
+
+The current comparison, transition or decision.
+
+**Established result**
+
+A settled distance, retained candidate or verified state.
+
+**Inactive information**
+
+Eliminated candidates or irrelevant state.
+
+**Violation or failure**
+
+An invalid assumption, rejected operation or broken guarantee.
+
+Illustrative semantic palette. Final colours should follow the existing Harness design system and accessibility requirements. Colour must not be the only indicator of state.
+
+If an amber element represents the current operation in Binary Search, it should not represent a completed operation in another lab without a clear reason.
+
+Consistency reduces the cognitive effort required to interpret each new animation.
+
+### **Different mechanisms need different visual models**
+
+| Mechanism family         | Preferred visual representation                      |
+| ------------------------ | ---------------------------------------------------- |
+| Ordered search           | Sequences, intervals and boundaries                  |
+| Graph algorithms         | Nodes, edges, frontiers and distances                |
+| Heaps and Union-Find     | Trees with underlying array or parent representation |
+| Hashing                  | Input transformations and bit or hash state          |
+| Resource management      | Capacity, occupancy and time                         |
+| State machines           | Transition diagrams and event histories              |
+| Distributed coordination | Parallel process timelines                           |
+| Security and integrity   | Policy relationships and evidence chains             |
+
+A distributed lease is particularly poorly served by a simple sequential animation. Its defining failure emerges from the interaction of multiple timelines.
+
+Conversely, a timeline would add unnecessary complexity to a straightforward binary search demonstration.
+
+The visual representation should follow the structure of the problem.
+
+### **What every visualizer should expose**
+
+The current state, the operation being performed, the reason for that operation, and the property that must remain true.
+
+For more advanced mechanisms, it should also expose the assumptions under which the displayed behaviour is valid.
+
+This is a stronger educational standard than highlighting lines of code while an animation progresses.
+
+## **11. Connecting the algorithms and system design tracks**
+
+I propose introducing a consistent relationship between lessons at different levels of abstraction.
+
+### **Example: one computational idea across Harness**
+
+Mathematical foundation
+
+**Sets and membership**
+
+How can we determine whether an element belongs to a collection?
+
+Computational mechanism
+
+**Bloom Filter**
+
+How can we answer membership questions with limited memory and asymmetric uncertainty?
+
+Engineering implementation
+
+**Storage lookup optimisation**
+
+How can a system avoid expensive lookups when an item is definitely absent?
+
+System-level application
+
+**Advertising reporting**
+
+Why must financially significant event deduplication preserve exactness, even when approximate filters can reduce lookup costs?
+
+The reader can travel in either direction.
+
+Someone reading the reporting article might want to understand membership tests. Someone experimenting with a Bloom Filter might want to understand why false positives matter in a financial system.
+
+### **Proposed integration matrix**
+
+| Computational lesson | System design connection                     | Specific question connecting them                           |
+| -------------------- | -------------------------------------------- | ----------------------------------------------------------- |
+| Binary Search        | Database indexing                            | How does ordering reduce search work?                       |
+| Heap                 | Advertising platforms                        | How can a system retain high-ranked candidates efficiently? |
+| Bloom Filter         | Advertising reporting                        | Can approximate membership support exact deduplication?     |
+| Circular Buffer      | Streaming and reporting                      | What information survives bounded retention?                |
+| Topological Sort     | Data and agent pipelines                     | Which operations can proceed independently?                 |
+| Token Bucket         | API Design                                   | How can an API constrain resource consumption?              |
+| State Machine        | Marketplace transactions                     | Which lifecycle transitions are permitted?                  |
+| Leases               | Marketplace transactions and agent execution | What happens when a worker loses ownership?                 |
+| Access Control       | API Design                                   | How does a service enforce an authorised scope?             |
+| Audit Hash Chain     | Governed agent execution                     | What can recorded evidence actually establish?              |
+
+Some destinations, such as a dedicated database indexing lesson, represent future editorial opportunities rather than existing approved articles.
+
+For existing articles, we should add cross-links only after checking the surrounding copy and identifying a genuine explanatory need.
+
+## **12. Proposed landing page architecture**
+
+The existing operation-oriented landing page is worth preserving. I would enrich it rather than replace it with a conventional course index.
+
+The following is a low-fidelity structural proposal, not a finished interface design.
+
+HARNESS
+
+Learn / Algorithms & Data
+
+# **Algorithms & Data**
+
+Explore the computational principles beneath modern technology systems. Understand how computers represent information, avoid unnecessary work and operate under constraints.
+
+15 interactive labs · Computational foundations · Real system applications
+
+Start with the foundations
+
+**How Computers Turn Problems Into Computation**
+
+Representation, complexity, invariants and guarantees.
+
+### **Explore by computational problem**
+
+Search and eliminate
+
+Binary Search
+
+Rank and reuse
+
+Heap · Rabin–Karp
+
+Explore relationships
+
+BFS · DFS · Union-Find
+
+Resolve dependencies
+
+Topological Sort · Dijkstra
+
+Manage finite resources
+
+Bloom Filter · Buffer · Token Bucket
+
+Coordinate behaviour
+
+State Machine · Leases
+
+Establish authority and trust
+
+Access Control · Audit Hash Chain
+
+### **From algorithms to systems**
+
+**How Advertising Reporting Systems Work**
+
+Explore how membership, bounded storage and processing constraints influence the production of reliable metrics.
+
+**How Marketplaces Work When Their Systems Disagree**
+
+Explore state, coordination and evidence when independent systems cannot agree on an outcome.
+
+I would not implement all of these changes immediately.
+
+The priority remains the Context modules. The landing page should reflect the curriculum once we have validated its teaching architecture through the pilots.
+
+We should also preserve existing URLs wherever possible. Editorial improvements should not unnecessarily break links, bookmarks or search indexing.
+
+## **13. Establishing the editorial production contract**
+
+As we move into Phase 4, we need a consistent specification for each lesson.
+
+This is particularly useful because the eventual repository implementation may be performed in a separate coding-agent workflow.
+
+The editorial deliverable for each mechanism should contain the following:
+
+| Deliverable             | Contents                                                            |
+| ----------------------- | ------------------------------------------------------------------- |
+| Lesson brief            | Central question, audience, prerequisites, learning objectives      |
+| Evidence register       | Primary sources, implementation references, claim-to-source mapping |
+| Technical specification | Input model, operations, invariant, guarantees, assumptions         |
+| Context copy            | Complete reviewed lesson text                                       |
+| Visual brief            | Learning objective, states, transitions, scenarios                  |
+| Implementation review   | Required changes to code, data and animation, if any                |
+| Transfer exercise       | Question, expected reasoning and explanation                        |
+| Integration brief       | Related lessons and justified cross-links                           |
+| Approval status         | Draft, technically reviewed, editorially reviewed or approved       |
+
+This separation is important.
+
+The Context copy is the educational artifact. The visual brief specifies what the interactive environment needs to teach. The implementation review identifies discrepancies between the approved explanation and the existing code.
+
+We should avoid asking the coding agent to infer educational requirements from prose alone.
+
+### **Proposed structured lesson specification**
+
+For eventual handoff, a lesson could be represented using a lightweight structure like this:
+
+```
+lesson:
+  id: binary-search
+  mechanism: Binary Search
+  classification: algorithm
+
+  editorial:
+    title: How Much Can One Comparison Tell Us?
+    central_question: >
+      When can a computer safely eliminate
+      half of the possible answers?
+    status: proposed
+
+  concepts:
+    - ordering
+    - monotonicity
+    - invariants
+    - logarithmic growth
+
+  technical_contract:
+    input_model: Monotonic search predicate
+    invariant: Unresolved boundary remains in search interval
+    guarantee: First satisfying position or end sentinel
+    assumptions:
+      - Constant-time indexed access
+      - Constant-time predicate evaluation
+      - Stable input during execution
+
+  experiments:
+    - id: valid-monotonic-input
+      objective: Observe search-space elimination
+    - id: non-monotonic-input
+      objective: Demonstrate loss of correctness guarantee
+
+  integration:
+    prerequisites:
+      - computational-foundations
+    related_concepts:
+      - database-indexing
+      - ordered-data
+
+  evidence:
+    status: requires-review
+
+  implementation:
+    status: requires-source-inspection
+```
+
+This is an illustrative editorial schema, not a proposed mandatory application data model.
+
+It gives us a precise way to communicate the lesson's intent without prematurely committing to a repository architecture.
+
+## **14. Educational evaluation framework**
+
+Since we have been developing the broader Harness editorial methodology, this track gives us an opportunity to establish more concrete educational evaluations.
+
+Algorithms are particularly suitable for this because we can often test understanding through prediction and counterexamples.
+
+I propose six evaluation dimensions.
+
+| Dimension                  | What we evaluate                                         | Weight |
+| -------------------------- | -------------------------------------------------------- | ------ |
+| Technical correctness      | Definitions, implementation, assumptions and guarantees  | 25%    |
+| First-principles reasoning | Whether the mechanism is derived from the problem        | 20%    |
+| Educational progression    | Prerequisites, cognitive load and conceptual transitions | 15%    |
+| Visual learning            | Whether interaction reveals meaningful behaviour         | 15%    |
+| Transferability            | Ability to apply the principle in an unfamiliar context  | 15%    |
+| Evidence quality           | Accuracy and relevance of implementation references      | 10%    |
+
+### **Proposed lesson evaluation rubric**
+
+Score each dimension from 0 (not demonstrated) to 5 (excellent). This is a working editorial tool, not a validated measure of learning effectiveness.
+
+Technical correctness
+
+25% weight
+
+**0/5**
+
+First-principles reasoning
+
+20% weight
+
+**0/5**
+
+Educational progression
+
+15% weight
+
+**0/5**
+
+Visual learning
+
+15% weight
+
+**0/5**
+
+Transferability
+
+15% weight
+
+**0/5**
+
+Evidence quality
+
+10% weight
+
+**0/5**
+
+All material technical claims, reference code and visual behaviours have been verified.
+
+Weighted score
+
+# **0/100**
+
+Proposed review outcome
+
+Further review required
+
+Copy evaluation
+
+The proposed threshold of 85/100 is provisional. We should calibrate it during the pilot phase.
+
+More importantly, technical correctness should be a hard gate. Excellent writing or beautiful animations cannot compensate for a materially incorrect algorithm explanation.
+
+### **Testing actual understanding**
+
+Editorial scoring is only a proxy for educational quality.
+
+The stronger test is whether a reader can answer a question that differs from the running example.
+
+Consider Binary Search.
+
+A weak assessment asks the reader to state its time complexity.
+
+A stronger assessment gives the reader a new dataset and asks whether binary search can be applied, what property is required, and how they would establish that property.
+
+### **Example transfer assessment**
+
+A monitoring system stores hourly server latency measurements in chronological order. An engineer wants to find the first hour when latency exceeded 200 milliseconds.
+
+Can ordinary boundary-finding binary search reliably locate that hour?
+
+Yes, because the records are chronologically sorted.
+
+Yes, provided there are enough records.
+
+Not generally, because the threshold predicate may not be monotonic.
+
+No, because binary search cannot operate on numerical measurements.
+
+This type of assessment tests whether the reader has acquired a transferable computational principle.
+
+It also gives us a potential foundation for future educational evals of the Harness editorial skill.
+
+## **15. Phase 4 — Pilot lesson selection**
+
+I would retain the three pilots proposed during Phase 1.
+
+They deliberately test different kinds of explanation.
+
+**Pilot 1 — Binary Search**
+
+Validates mathematical reasoning, invariants, correctness arguments and the relationship between Context and Run.
+
+Classical algorithm lesson
+
+**Pilot 2 — Bloom Filter**
+
+Validates probabilistic explanation, resource trade-offs, mathematical experiments and approximate guarantees.
+
+Probabilistic data structure lesson
+
+**Pilot 3 — Lease-Based Ownership**
+
+Validates temporal reasoning, concurrent behaviour, failure narratives and system-level guarantees.
+
+Distributed coordination lesson
+
+I considered using Heap as the first pilot because it is currently the recommended entry point. However, Binary Search is the better initial test of the editorial methodology because we already identified a concrete correctness problem.
+
+It will force us to establish whether our revised approach can improve technical accuracy, mathematical understanding and visual learning simultaneously.
+
+Heap can subsequently become the polished entry-point lesson once the methodology has been validated.
+
+### **Pilot production sequence**
+
+| Milestone | Deliverable                                                        |
+| --------- | ------------------------------------------------------------------ |
+| 4.1       | Binary Search evidence register and detailed lesson plan           |
+| 4.2       | Complete Binary Search Context draft and visual specification      |
+| 4.3       | Technical and educational review                                   |
+| 4.4       | Bloom Filter pilot                                                 |
+| 4.5       | Lease-Based Ownership pilot                                        |
+| 4.6       | Comparative evaluation and refinement of the editorial methodology |
+
+We should avoid drafting all three simultaneously. The lessons learned from the first pilot should influence the second, and both should inform the third.
+
+## **16. Overall editorial roadmap**
+
+**Module audit**
+
+Completed
+
+Established the case for editorial optimisation.
+
+2
+
+**Technical and educational inventory**
+
+Conceptual audit completed
+
+All 15 mechanisms reviewed; source-level verification remains outstanding.
+
+3
+
+**Curriculum and lesson architecture**
+
+Proposed — current phase
+
+Established conceptual groups, foundations, lesson structure, visual standards and evaluation criteria.
+
+4
+
+**Three pilot lessons**
+
+Next
+
+Validate the architecture through Binary Search, Bloom Filter and Lease-Based Ownership.
+
+5
+
+**Editorial production**
+
+Planned
+
+Revise the remaining 12 mechanisms in conceptual batches.
+
+6
+
+**Integration and final review**
+
+Planned
+
+Landing page, cross-track links, accessibility, verification and implementation handoff.
+
+## **17. Decisions requiring approval and remaining limitations**
+
+Phase 3 is an architectural proposal. I have made several editorial decisions that go beyond your original request to enrich the Context modules, and I would like us to validate them before committing to production.
+
+### **Phase 3 approval checklist**
+
+All recommendations are selected by default. You can deselect anything you want to reconsider.
+
+Organise the curriculum around seven computational principles.
+
+Introduce one shared computational foundations lesson.
+
+Retain all 15 existing mechanisms and their interactive workbench.
+
+Preserve conventional algorithm names alongside problem-oriented lesson titles.
+
+Use a flexible eight-component lesson architecture.
+
+Introduce assumption-breaking experiments and transfer assessments.
+
+Develop cross-track learning paths without requiring linear progression.
+
+Validate the methodology through three sequential pilot lessons.
+
+Defer major navigation changes and new algorithm labs until after the pilots.
+
+Approve selected decisions and continue
+
+The outstanding blocker from Phase 2 remains: we have not fully inspected the current source definitions, reference implementations and animation generators for all 15 labs. This phase does not resolve that blocker, and I have not performed new primary-source verification here. The implementation candidates, lesson titles, visual experiments, word ranges and evaluation thresholds are proposals rather than approved or tested specifications.
+
+We can proceed with the foundational research for Binary Search, but before finalising its replacement Context and implementation brief, we should inspect its complete existing lesson source.
+
+## **18. The longer-term opportunity for Harness**
+
+There is a broader opportunity emerging from this work.
+
+The algorithms track could eventually become the intellectual foundation of the entire publication.
+
+A product investigation can lead us downwards towards the computational mechanisms that make it possible. A mathematical investigation can lead us upwards towards the architectures and products that exploit its properties.
+
+This also establishes a meaningful distinction between Harness and the AI Knowledge Hub publication. The publication can investigate emerging products and technologies, while Harness develops the enduring knowledge required to understand them.&#x20;
+
+The goal is not to build an encyclopaedia of algorithms. It is to develop a coherent educational environment in which the reader gradually learns to recognise the same underlying ideas across apparently unrelated technology systems.
+
+**My recommendation is to approve this architecture and proceed with Phase 4.1: the Binary Search pilot.** That will be our first opportunity to test whether the proposed curriculum works at the level that ultimately matters — an individual reader encountering a computational problem and learning to reason about it independently.

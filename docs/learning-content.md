@@ -23,6 +23,8 @@ The existing `/learn/` routes and internal `lesson`/`learning` identifiers remai
 
 Cross-track relevance creates relationships, not copies of the guide. A reusable implementation belongs in Skills once that ownership is established; Harness owns the implementation guidance, fixtures and reference build. No runtime or build imports refer to sibling repositories.
 
+For the Algorithms & Data module's editorial refactoring, see [its purpose and working design reference](algorithms/README.md). It applies these ownership and optional-companion rules to the existing labs; its proposed learning architecture does not change public guide terminology or the current content schema.
+
 ## Guide fields
 
 A guide’s frontmatter defines `id`, `trackId`, `title`, optional `shortTitle`, `description`, `kind`, `publicationStatus`, `format`, `readingMinutes`, `updatedAt`, `introduction`, `objectives`, relationship ID arrays, and ordered `sectionIds`. Empty relationship arrays can be omitted. The collection schema validates these fields.

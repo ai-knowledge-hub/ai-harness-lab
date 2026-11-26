@@ -1,0 +1,35 @@
+---
+import { binaryScenarios, boundaryTrace, renderBinary } from "../visualizers/binary-search";
+interface Props { kind: "observation" | "predicate" | "invariant" | "invalid" | "duplicates" | "prefix" }
+const { kind } = Astro.props;
+const valid = boundaryTrace(binaryScenarios.boundary.values, 650);
+const invalid = boundaryTrace(binaryScenarios.counterexample.values, 6);
+const latency = [80, 120, 250, 90, 180, 300, 100];
+const trace = kind === "observation" ? valid[2] : kind === "invariant" ? valid[4] : invalid[2];
+const caption = {
+  observation: "Only Day 5 has been inspected. Because spending never decreases, later days must also meet the target. A question mark hides an unread value; dashed outlines show conclusions about unread records.",
+  invariant: "After two comparisons: lo = 3, hi = 4. Only index 3 remains to inspect, while boundary positions 3 and 4 remain possible. Dashed outlines mark inferences.",
+  invalid: "After the first update, lo = 4 excludes the actual first match at index 1, Day 2. The red value is supplied by the independent verifier, not observed by binary search.",
+  predicate: "For threshold £650, the check is false at positions 0–2 and true at 3–7. Position 3 is the first match; position 8 represents no match.",
+  duplicates: "bisect_left returns 2 and bisect_right returns 5: the half-open interval [2, 5) contains the three occurrences of 30.",
+  prefix: "Chronological latency measurements. The first threshold crossing is a property of time order, even though the values rise and fall.",
+};
+const labels = { observation: "One observation and its inferences", invariant: "Remaining elements and possible boundaries", invalid: "Invalid elimination", predicate: "False–true predicate", duplicates: "Duplicate boundaries", prefix: "Latency measurements" };
+---
+<figure class="binary-figure" data-binary-asset={kind}>
+  {(["observation", "invariant", "invalid"] as string[]).includes(kind) ? (
+    <div class="binary-figure-scroll" tabindex="0" role="region" aria-label={labels[kind]} set:html={renderBinary(trace, false, kind === "observation" ? "observation" : "search")} />
+  ) : (
+    <div class="binary-table-scroll" tabindex="0" role="region" aria-label={labels[kind]}>
+      <table>
+        <caption>{kind === "predicate" ? "Predicate boundary" : kind === "duplicates" ? "Duplicate boundaries" : "Latency measurements"}</caption>
+        <thead><tr><th scope="col">Index</th>{(kind === "predicate" ? binaryScenarios.boundary.values : kind === "duplicates" ? [10, 20, 30, 30, 30, 40, 50] : latency).map((_, i) => <th scope="col">{i}</th>)}</tr></thead>
+        <tbody>
+          <tr><th scope="row">{kind === "predicate" ? "Spend (£)" : kind === "duplicates" ? "Value" : "Latency (ms)"}</th>{(kind === "predicate" ? binaryScenarios.boundary.values : kind === "duplicates" ? [10, 20, 30, 30, 30, 40, 50] : latency).map(v => <td>{v}</td>)}</tr>
+          {kind === "predicate" && <tr><th scope="row">≥ £650?</th>{binaryScenarios.boundary.values.map(v => <td>{v >= 650 ? "True" : "False"}</td>)}</tr>}
+        </tbody>
+      </table>
+    </div>
+  )}
+  <figcaption>{caption[kind]}</figcaption>
+</figure>

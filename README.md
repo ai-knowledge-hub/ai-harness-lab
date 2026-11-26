@@ -60,6 +60,7 @@ The [React lab integration audit](docs/harness-react-lab.md) records the 15-visu
 - `src/views/TrackPage.jsx` renders each track at build time from that catalogue.
 - `styles.css` owns the shared tokens, site shell, homepage, and track layouts. `src/styles/labs.css` retains the existing visualizer and reference-surface rules.
 - `src/visualizers/algorithms-data.ts` retains the existing algorithms, code examples, steps, and practical context.
+- [Algorithms & Data purpose and refactoring reference](docs/algorithms/README.md) distils the editorial research into module responsibilities, learning and interaction principles, pilot briefs, and a bounded source review. It separates current behaviour from proposals to validate through the pilots.
 - `public/brand/provenance.json` records the exact copied optical artwork and its source hashes. No sibling checkout is imported at build or runtime.
 - `docs/brand-tokens.reference.json` captures the selected shared brand foundation, version 0.1.0.
 - [Rebrand implementation and verification](docs/rebrand-2026-11-07.md) records the first slice.

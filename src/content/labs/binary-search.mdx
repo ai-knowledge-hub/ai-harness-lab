@@ -1,0 +1,241 @@
+import BinarySearchFigure from "../../components/BinarySearchFigure.astro";
+import BinarySearchEquation from "../../components/BinarySearchEquation.astro";
+import BinarySearchCode from "../../components/BinarySearchCode.astro";
+
+export const components = { pre: BinarySearchCode };
+
+### Binary Search: How Much Can One Comparison Tell Us?
+
+*How the structure of information allows computers to avoid unnecessary work.*
+
+#### 1. What one comparison reveals
+
+An advertising analyst wants to find the first day on which a campaign's cumulative expenditure, the total spent so far, reached £650. That target value is our **threshold**. There are eight daily records. Which would you inspect first?
+
+We could begin with Day 1 and examine each subsequent record until we reach the threshold. This **algorithm**, or sequence of steps, is called **linear search**. It is reliable, but may need to inspect every record as the dataset grows.
+
+Instead, suppose we inspect Day 5 and discover that cumulative spending is £650. For this hypothetical dataset, we assume that the total never decreases and that the records do not change during the search. So far, we have inspected only this one record.
+
+<BinarySearchFigure kind="observation" />
+
+If expenditure never decreases, every subsequent day must also satisfy the threshold. None can be the first qualifying day. We can exclude them without inspecting their values.
+
+Now suppose we inspect Day 3 and find that spending is £400. Every earlier value must be less than or equal to £400. None can satisfy the condition.
+
+Each observation reveals something about records we have not examined. The sequence has a property called **monotonicity**: each cumulative value is at least as large as the previous one.
+
+A **predicate** is a check that answers true or false. Ours asks whether the total at a given position is at least £650: true means yes, and false means no.
+
+In our code, positions are numbered from zero; each position is called an **index**. Day 1 is at index 0, so Day 5 is at index 4. In the expression below, `i` is an index, `spend[i]` is the total at that position, and `P(i)` is the result of our check.
+
+<BinarySearchEquation kind="predicate" />
+
+The threshold converts the expenditure sequence into a false region followed by a true region. The predicate can change from false to true, but never back again.
+
+<BinarySearchFigure kind="predicate" />
+
+That is the condition binary search needs. Ordered numerical values are one way to obtain it, but ordering alone is insufficient: the particular predicate being searched must be monotonic.
+
+#### 2. Finding the boundary
+
+We now need to find the first true position, the **boundary** between the false and true regions. We keep two limits, or **bounds**, around the positions where the answer could still be. In the code, `lo` names the lower bound and `hi` the upper bound.
+
+With eight records there are nine possible answers: any of the eight positions could be the first match, or none of the records might qualify. We use position 8, just beyond the final record, to represent that last possibility. This special no-match value is an **end sentinel**: a possible answer rather than a record to read. Initially, `lo = 0` and `hi = 8` cover them all.
+
+We inspect the record near the middle of the remaining range. This position is the **midpoint**. If the record satisfies the predicate, the boundary must be at that position or earlier. We move the upper marker to the midpoint.
+
+If it fails, the boundary must be later. We move the lower marker to the position immediately after the midpoint. We repeat until the markers meet.
+
+Here is that process in Python. `n` is the number of records, `predicate` is our true-or-false check, and `mid` is the position we inspect. The `//` operator divides and rounds down, so the midpoint is always a whole-number position.
+
+```python
+def first_true(n, predicate):
+    lo = 0
+    hi = n
+    while lo < hi:
+        mid = lo + (hi - lo) // 2
+        if predicate(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+```
+
+The algorithm accumulates knowledge as it executes. Every valid position before `lo` is known to be false. Every valid position at or after `hi` is known to be true. The correct boundary, `b`, remains between the markers:
+
+<BinarySearchEquation kind="invariant" />
+
+An **invariant** is a fact that remains true after every step of an algorithm. Here, it is that the correct boundary stays between our bounds. After two comparisons, `lo = 3` and `hi = 4`. Only the record at index 3 remains to check: if it qualifies, the answer is 3; otherwise, the answer is 4. Dashed outlines mark information we can infer from other checks rather than values we have read.
+
+An **interval** is a range of positions. The remaining records occupy `[lo,hi)`: this includes `lo` but stops before `hi`, so it is called **half-open**. The possible answers occupy `[lo,hi]`, which includes both bounds. This is why one record can remain to inspect while two answers are still possible.
+
+<BinarySearchFigure kind="invariant" />
+
+Every update preserves the true boundary. Every iteration reduces the interval. When the markers meet, exactly one possible boundary remains. That establishes correctness. Watching the algorithm succeed illustrates the reasoning; it does not replace it.
+
+For our expenditure dataset, the algorithm returns index 3, corresponding to Day 4. If no record qualifies, it returns `n`, the end sentinel beyond the final record.
+
+<a href="?algorithm=binary&view=run&experiment=boundary#visualizer" data-binary-scenario="boundary">Try it in Run: Locate the boundary</a>
+
+Predict which marker should move before advancing each comparison. Notice that the algorithm establishes the relationship of several values to the threshold without reading those values individually.
+
+#### 3. The cost of finding an answer
+
+To see how much work this saves, follow the size of the remaining range. Each comparison reduces it to at most half its previous width. Starting with `n` records, after `k` comparisons the remaining width is at most the expression below. The floor brackets `⌊ ⌋` mean to round down to a whole number:
+
+<BinarySearchEquation kind="width" />
+
+One **predicate evaluation** means checking one position. The **worst case** is the greatest number of these checks needed to find any valid boundary. For this implementation, that count is:
+
+<BinarySearchEquation kind="evaluations" />
+
+The `n + 1` counts all possible answers, including no match. `log₂` is a logarithm to base two: it tells us which power of two gives a number. For example, `log₂(8) = 3` because `2³ = 8`. The ceiling brackets `⌈ ⌉` round up to a whole number. For eight records, this gives at most four checks. Our Day 4 example finishes in three.
+
+| Records   | Linear search | Binary search |
+| --------- | ------------- | ------------- |
+| 100       | 100           | 7             |
+| 1,000     | 1,000         | 10            |
+| 10,000    | 10,000        | 14            |
+| 100,000   | 100,000       | 17            |
+| 1,000,000 | 1,000,000     | 20            |
+
+Worst-case predicate evaluations, not measured execution times.
+
+A million timestamped expenditure records require at most twenty evaluations rather than a million. This is **logarithmic growth**: doubling the number of records adds only one check to the worst case. We write it as `O(log n)`. This **Big O notation** describes how work grows as the input grows, rather than measuring elapsed time.
+
+The algorithm also uses `O(1)` **auxiliary space**. Auxiliary space is the extra memory used during the search, beyond the input records. Here, a fixed set of variables is enough; increasing the number of records does not require more search variables.
+
+The logarithmic time bound assumes that accessing a position and checking its value each take **constant time**: their cost does not grow with the number of records. A predicate involving a network request or expensive computation changes the cost of each evaluation, even though the search still makes logarithmically many checks.
+
+There is another cost to consider: preparing the data. If cumulative expenditure has not already been calculated, constructing the totals requires `O(n)` work. This means the work grows in proportion to the number of records, since we must process each one. For a single threshold query, scanning the original expenditure records may be preferable. For repeated queries, maintaining cumulative totals can make subsequent searches considerably cheaper.
+
+A **representation** is the form in which we organise information, such as daily amounts or cumulative totals. Efficiency depends on that representation, the operation and how frequently it is performed.
+
+<a href="?algorithm=binary&view=run&experiment=growth#visualizer" data-binary-scenario="growth">Try it in Run: Scale the search</a>
+
+Double the number of records. The linear scan's worst-case evaluation count doubles; binary search requires only one additional evaluation.
+
+#### 4. When the reasoning breaks
+
+Suppose the analyst now wants to find the first day on which cost per acquisition (CPA) reached £6. CPA measures expenditure per attributed acquisition. Unlike our simplified cumulative expenditure series, it can rise and fall. The records remain chronologically ordered, but the predicate no longer has a monotonic boundary.
+
+Binary search inspects Day 4, finds a CPA of £4 and discards the earlier region. But Day 2 already meets the £6 threshold, so that update removes the correct answer. The algorithm continues normally and eventually returns Day 5. That day satisfies the condition, but it is not the first one. The error lies in the first update: a low CPA on Day 4 does not tell us whether earlier values were above or below the threshold.
+
+The red mark below comes from a **verifier**, a separate check that reads all the records to find the actual first match. Its work is not part of binary search.
+
+<BinarySearchFigure kind="invalid" />
+
+Even cumulative expenditure requires care in a production reporting system: credits and corrections may invalidate the monotonicity of our simplified model, while concurrent revisions can invalidate deductions already made during a search. A correctly implemented algorithm can return an incorrect answer when applied outside its assumptions.
+
+<a href="?algorithm=binary&view=run&experiment=counterexample#visualizer" data-binary-scenario="counterexample">Try it in Run: Break the assumption</a>
+
+Execute the same algorithm against the fluctuating CPA values. Identify the first update that excludes the actual boundary.
+
+#### 5. Ordering as an engineering resource
+
+Python includes ready-made tools in its **standard library**. One group of tools, the `bisect` module, finds an **insertion boundary**: the position where a value could be inserted while keeping the sequence in order. Consider a sequence containing duplicate values:
+
+```python
+from bisect import bisect_left, bisect_right
+
+values = [10, 20, 30, 30, 30, 40, 50]
+left = bisect_left(values, 30)    # 2
+right = bisect_right(values, 30)  # 5
+```
+
+The left boundary, 2, is the first position containing 30. The right boundary, 5, is the first position containing a larger value. The three positions between them, 2, 3 and 4, contain all the 30s. Subtracting the boundaries gives their count: `5 - 2 = 3`.
+
+<BinarySearchFigure kind="duplicates" />
+
+We can also ask whether a particular value is present at all. This is an **exact membership test**:
+
+```python
+def contains(values, target):
+    i = bisect_left(values, target)
+    return i < len(values) and values[i] == target
+```
+
+The `i < len(values)` check makes sure the returned position is inside the list before we read it. This matters because a boundary search can return the position just beyond the final record.
+
+Python's documentation also highlights a trade-off. Finding an insertion position takes logarithmic time, but inserting into an ordinary list may require shifting subsequent elements. The insertion therefore remains `O(n)` in the worst case.
+
+If exact membership is the only required operation, a **hash table**, which computes a lookup location from a value, may be more suitable. Ordered representations become particularly valuable when we also need boundaries, ranges or neighbouring values.
+
+*Implementation reference: [Python: Array bisection algorithm](https://docs.python.org/3/library/bisect.html).*
+
+This principle extends to database systems. Suppose we want to retrieve transactions recorded during January:
+
+```sql
+SELECT *
+FROM transactions
+WHERE recorded_at >= '2026-01-01'
+  AND recorded_at <  '2026-02-01';
+```
+
+A database **index** is a separate lookup structure that helps locate rows. This differs from the numbered positions we called indices earlier. An appropriate PostgreSQL B-tree index on `recorded_at` gives the database an ordered path to the relevant rows; its query planner, which chooses how to carry out a query, may use that path instead of scanning the whole table.
+
+A **B-tree** organises ordered values into levels of branches that the database can follow to reach a relevant region. Its branching structure is designed around the cost of reading stored data. Both mechanisms use ordering to avoid examining irrelevant information, but a B-tree is not ordinary binary search over a very large list.
+
+Maintaining an index requires storage and additional work when records change. Retrieving matching records also has a cost. The work has not disappeared. Some of it has moved from answering queries to maintaining a representation that makes those queries cheaper.
+
+*System reference: [PostgreSQL: Index types](https://www.postgresql.org/docs/current/indexes-types.html).*
+
+#### 6. Changing the representation
+
+Binary search does not require a stored array, a list of values accessible by numbered position. Imagine determining the smallest processing capacity sufficient to complete a workload before a deadline. We can test whether a proposed capacity finishes the work on time. If our model guarantees that every larger capacity also finishes on time, we can search the ordered range of possible settings.
+
+Go's standard library expresses this generalisation through `sort.Search`: we supply a numbered range of candidates and a true-or-false check whose answers change from false to true, never back again. The search still finds the first qualifying position. That position now represents a capacity setting rather than a day's record.
+
+*Implementation reference: [Go: sort.Search](https://pkg.go.dev/sort#Search).*
+
+But what if the problem does not initially possess the structure we need? Consider the following challenge.
+
+##### Engineering challenge: Make the problem searchable
+
+A monitoring service records server **latency**, the time it takes to receive a response, in chronological order. Measurements are in milliseconds, or thousandths of a second.
+
+<BinarySearchFigure kind="prefix" />
+
+The service frequently needs to find the first measurement that reached a specified threshold. Binary search cannot reliably answer this question using the raw measurements.
+
+**Can you construct an additional sequence that makes binary search valid without changing the original chronological order?**
+
+<details className="binary-solution">
+<summary>Reveal suggested solution</summary>
+
+Walk through the measurements from left to right, keeping the largest value seen so far. The resulting sequence is called the **prefix maximum**: a prefix is the part of a sequence from its start through the current position.
+
+```python
+maxima = []
+highest = float("-inf")
+for value in latency:
+    highest = max(highest, value)
+    maxima.append(highest)
+```
+
+For `[80, 120, 250, 90, 180, 300, 100]`, this produces `[80, 120, 250, 250, 250, 300, 300]`.
+
+The prefix maximum never decreases. Its first value at or above a threshold occurs at exactly the first raw measurement at or above that threshold: before that position no earlier value qualifies; at that position the newly observed value qualifies. For a threshold of 200 ms, both first qualify at index 2.
+
+Building and storing the additional sequence costs O(n) time and O(n) space: we process every measurement and store one extra value for each. Subsequent threshold searches take O(log n) evaluations. Adding a measurement at the end, called an **append**, extends the sequence in constant time. Correcting an earlier measurement can require recalculating values from that position onwards. For one query, a linear scan can be the better choice.
+
+This transformation finds the **first historical crossing**, the first time the threshold was ever reached in these records. It does not answer every later crossing or report the current latency.
+
+</details>
+
+The power of binary search comes not from dividing a collection in half, but from knowing that half of it cannot contain the answer.
+
+Sometimes the necessary structure already exists. Sometimes we must construct and maintain it ourselves. Recognising the difference is where algorithmic knowledge becomes an engineering capability.
+
+<details className="binary-mathematical-note">
+<summary>Could any Boolean-query search do better?</summary>
+
+There are n + 1 possible boundary positions. A **Boolean query** is a question with two possible answers, true or false. One query can distinguish two possibilities; two queries can distinguish four. In general, k such queries distinguish at most 2ᵏ possibilities.
+
+<BinarySearchEquation kind="lower-bound" />
+
+This is a **lower bound**, the fewest checks any search could guarantee in the worst case if it learns only from these true-or-false answers. Binary search reaches that bound. A precomputed answer or an additional representation supplies other information and changes the comparison.
+
+</details>
+
+<p className="binary-related">Related worked example · Preview: <a href="/learn/system-design/chatgpt-ads-reporting#why-yesterday-changes">How Advertising Reporting Systems Work</a> explains why reported measurements can change and what that means for algorithms that rely on stable data.</p>

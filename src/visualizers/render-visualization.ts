@@ -13,7 +13,7 @@ function renderStep<Step extends { label: string }>(
 
 export function renderVisualization(algorithm: Algorithm, stepIndex: number) {
   if (algorithm.id === "binary") {
-    return renderStep(algorithm.steps, stepIndex, renderBinary);
+    return renderBinary(algorithm.steps[stepIndex] ?? algorithm.steps[0]);
   }
   return renderStep(algorithm.steps, stepIndex, renderers[algorithm.id]);
 }

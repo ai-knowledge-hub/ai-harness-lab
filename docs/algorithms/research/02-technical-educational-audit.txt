@@ -1,0 +1,1090 @@
+# **Phase 2 — Technical and educational audit**
+
+The objective of this phase is to establish what needs to change across the 15 existing Harness algorithm labs before we commit to a new curriculum structure or start rewriting individual Context modules.
+
+We will distinguish four kinds of editorial intervention:
+
+| Intervention   | Purpose                                                                                       |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| **Correct**    | Resolve technical inaccuracies, misleading examples and unsupported guarantees.               |
+| **Enrich**     | Develop mathematical foundations, reasoning, complexity analysis and practical understanding. |
+| **Reclassify** | Distinguish algorithms, data structures, coordination mechanisms and security models.         |
+| **Connect**    | Establish meaningful relationships with other Harness lessons and real implementations.       |
+
+An important principle for this audit is that the Context module, reference code and visualizer must agree. A technically accurate explanation cannot compensate for an animation that teaches an incorrect mental model.
+
+We should also resist the temptation to turn every Context module into a miniature textbook. The interactive environment is one of the track's strengths. Our job is to make the interaction intellectually productive.
+
+## **1. Current module inventory and audit boundaries**
+
+The live [Algorithms & Data landing page](https://harness.ai-knowledge-hub.org/learn/algorithms?utm_source=chatgpt.com) confirms that the track currently contains 15 labs organised around four practical operations:
+
+- Finding, exploring and ranking records.
+- Detecting duplicates and retaining recent data.
+- Scheduling and limiting work.
+- Checking access, content and history.
+
+The recommended entry point remains the Top-K campaign tracker, and the principal worked system design example is advertising reporting.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://harness.ai-knowledge-hub.org\&sz=32)
+
+AI Knowledge Hub
+
+
+
+The operation-oriented organisation is a strength. It encourages readers to begin with a problem rather than an algorithm name. I would preserve that philosophy while improving the conceptual organisation underneath it.
+
+There is an evidence limitation: the individual client-rendered lab states are not fully accessible through the current public-page retrieval. This means we can audit the published descriptions, intended mechanisms and technical requirements, but cannot yet certify every line of reference code or animation.
+
+I will distinguish confirmed issues from requirements that need checking against the implementation.
+
+## **2. Technical audit — algorithms and data structures**
+
+### **2.1 Binary Search — reasoning through elimination**
+
+High priority
+
+Correct example · Enrich foundations
+
+**Existing use case:** campaign threshold finder.
+
+The fundamental idea is not searching the middle of an array. It is using information about the problem to eliminate an entire region of possible answers.
+
+This provides an excellent introduction to three foundational concepts: ordering, invariants and logarithmic computational growth.
+
+**Technical requirements**
+
+For boundary-finding binary search, the predicate must divide the search space into two contiguous regions. For example, all values before a boundary fail a condition and all values from that boundary onwards satisfy it.
+
+Under that assumption, each step reduces the remaining search interval by approximately half.
+
+\\[ T(n)=T(n/2)+O(1)=O(\log n) \\]
+
+This assumes constant-time indexed access and predicate evaluation.
+
+As identified in Phase 1, the campaign CPA example needs either a monotonicity guarantee or a different metric. Chronological ordering does not imply monotonic CPA.
+
+Python's `bisect` implementation provides a useful real-world reference: it locates boundaries in sorted sequences, while inserting an element into an array-backed list still costs linear time. This illustrates why the search operation and the surrounding data structure must be analysed separately.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://docs.python.org\&sz=32)
+
+Python 3.15.2 documentation
+
+
+
+**Editorial direction:** *How Much Information Can One Comparison Give Us?*
+
+Use cumulative expenditure under non-negative additions as the primary example. Then introduce fluctuating CPA as a deliberate counterexample.
+
+**Required visual experiment:** allow the reader to switch between monotonic and non-monotonic input and observe when discarding half the search space becomes invalid.
+
+**Transfer test:** can the reader explain why sorting campaign records by date does not make binary search valid for arbitrary performance thresholds?
+
+### **2.2 Breadth-First Search — discovering the shape of a graph**
+
+Substantial enrichment
+
+Graph foundations · Shortest paths
+
+**Existing use case:** website crawling by depth.
+
+The crawler is a useful running example, but the lesson should start with why websites, networks and dependencies can be represented as graphs.
+
+Breadth-first search explores vertices in increasing distance from a starting vertex. A FIFO queue preserves this exploration order.
+
+The important property is that, in an unweighted graph, the first discovery of a vertex establishes its shortest distance in number of edges from the source.
+
+For an adjacency-list representation:
+
+- Time: \\(O(V+E)\\)
+- Auxiliary space: \\(O(V)\\)
+
+The lesson needs to explain why vertices and edges are separate quantities, and why graph representation affects computational cost.
+
+**Editorial direction:** *How to Explore a Network Without Knowing Its Shape.*
+
+The website crawler should remain, but readers should learn that production crawling also involves URL canonicalisation, politeness policies, crawl prioritisation and distributed queues. BFS is an exploration mechanism, not a complete crawler architecture.
+
+**Required visual experiment:** introduce a cycle, multiple paths to the same vertex and a disconnected component. Show the effect of removing the visited set.
+
+**Transfer test:** would BFS minimise the cost of a network path when different edges have different costs?
+
+That question provides a natural bridge to Dijkstra.
+
+### **2.3 Depth-First Search — exploration with unfinished work**
+
+Substantial enrichment
+
+Stacks · Recursion · Backtracking
+
+**Existing use case:** repository scanner.
+
+DFS and BFS should be developed as a paired lesson rather than two unrelated demonstrations.
+
+The underlying graph may be identical. What changes is the decision about which vertex to explore next.
+
+**BFS**
+
+Explore by layer.
+
+FIFO queue
+
+**DFS**
+
+Explore a branch before another.
+
+Stack or recursion
+
+Illustrative left-to-right traversal of the same tree. Numbering indicates visit order.
+
+The deeper lesson is how a computer remembers work that remains unfinished.
+
+A recursive DFS stores that information in call frames. An iterative implementation maintains an explicit stack. The two approaches expose a useful connection to programming languages and operating system memory.
+
+DFS also establishes prerequisites for understanding cycle detection, topological sorting and several graph analysis algorithms.
+
+**Technical requirements:** distinguish a visited vertex from a vertex on the current recursion path. In directed graph cycle detection, that distinction matters. Encountering a previously visited vertex does not automatically establish a cycle.
+
+Both standard BFS and DFS have linear traversal cost in the size of an adjacency-list graph, but their exploration order and practical memory behaviour differ.
+
+**Editorial direction:** *How a Computer Explores One Possibility Before Returning to Another.*
+
+**Required visual experiment:** synchronise BFS and DFS over the same graph, including the live queue or stack.
+
+**Transfer test:** why might recursive DFS fail on an extremely deep repository tree even when no cycle exists?
+
+### **2.4 Heap — maintaining only as much order as necessary**
+
+Retain and enrich
+
+Core entry-point lesson
+
+**Existing use case:** Top-K campaign tracker.
+
+This is one of the strongest existing choices for introducing computational trade-offs.
+
+A heap illustrates an important distinction between fully ordering a collection and maintaining enough structure to answer a specific question.
+
+The Context module should establish:
+
+| Operation                | Binary heap cost      |
+| ------------------------ | --------------------- |
+| Inspect the minimum      | O(1)                  |
+| Insert a value           | O(log n)              |
+| Remove the minimum       | O(log n)              |
+| Build a heap bottom-up   | O(n)                  |
+| Maintain streaming Top-K | O(n log K), for K ≥ 2 |
+| Storage for Top-K        | O(K)                  |
+
+The linear-time heap construction result is particularly interesting because it challenges the reader's intuition that every element must travel the full height of the tree.
+
+Python's `heapq` is an excellent documented implementation reference. It represents a binary heap using an ordinary list, preserving the parent–child ordering invariant without requiring explicit tree objects.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://docs.python.org\&sz=32)
+
+Python 3.15.2 documentation
+
+
+
+**Editorial direction:** *Why Sorting Everything Is Sometimes a Waste of Work.*
+
+**Required visual experiment:** show the tree and its array representation simultaneously. Make the parent–child invariant visible during insertion and replacement.
+
+We should also introduce an important boundary: streaming Top-K with immutable scores is not the same problem as maintaining Top-K when previously seen scores can change.
+
+**Transfer test:** would retaining a ten-element heap be sufficient to maintain the ten most profitable products if every product's profitability is recalculated throughout the day?
+
+### **2.5 Bloom Filter — trading certainty for resources**
+
+High priority
+
+Probability · Correctness boundaries
+
+**Existing use case:** URL duplicate gate.
+
+This lesson is an opportunity to introduce probabilistic computation, which is essential to understanding large-scale data systems.
+
+A Bloom filter does not store the original objects. It stores evidence of their insertion through a shared array of bits.
+
+A membership query therefore has asymmetric semantics:
+
+| Result            | Meaning                                                                     |
+| ----------------- | --------------------------------------------------------------------------- |
+| Definitely absent | The item has not been inserted into the correctly maintained filter.        |
+| Possibly present  | The item may have been inserted, or other items may have set the same bits. |
+
+The crucial guarantee is conditional: standard insertion-only Bloom filters have no false negatives when their state and hashing configuration are correctly maintained. False positives are possible.
+
+The probability of a false positive can be approximated by:
+
+\\[ p\approx(1-e^{-kn/m})^k \\]
+
+Where \\(m\\) is the number of bits, \\(n\\) is the number of inserted items and \\(k\\) is the number of hash functions.
+
+### **Experiment: the cost of approximate membership**
+
+Standard Bloom filter probability approximation under idealised hashing assumptions.Bits allocated per planned item
+
+481016
+
+Hash functions
+
+**7**
+
+Items inserted relative to planned capacity
+
+**100%**
+
+False-positive probability
+
+# **0.819%**
+
+Expected false positives per 10,000 absent-item queries
+
+# **82**
+
+Try increasing the number of hash functions or exceeding planned capacity. More hashing is not always better.
+
+The existing URL deduplication example needs careful examination. If a crawler skips every URL for which the filter returns a positive result, it can omit previously unseen pages.
+
+Depending on the application, this may be an acceptable approximation or a correctness failure.
+
+**Editorial direction:** *When Knowing Something Probably Exists Is Good Enough.*
+
+Compare the filter with an exact hash set and explain when a positive response must trigger an authoritative lookup.
+
+**Required visual experiment:** deliberately construct a false positive by allowing several different inputs to set overlapping bits.
+
+**Transfer test:** should a billing system discard a payment event solely because a Bloom filter says it might already have processed it?
+
+### **2.6 Union-Find — discovering connections without repeatedly exploring them**
+
+Substantial enrichment
+
+Disjoint sets · Equivalence relations · Amortised cost
+
+**Existing use case:** incident clustering.
+
+Union-Find, also known as Disjoint Set Union (DSU), is particularly interesting because it solves a problem that initially looks like graph traversal.
+
+Imagine monitoring a distributed application. Evidence suggests that incidents A and B are related. Later, another observation connects B and C.
+
+We want to know whether A and C belong to the same connected group without repeatedly traversing the entire graph.
+
+Union-Find maintains a partition of the elements into disjoint sets. It supports two principal operations:
+
+- `find(x)` identifies the representative of the set containing x.
+- `union(x, y)` merges the sets containing x and y.
+
+A single connection merges two previously separate connected components.
+
+The mathematical foundation is an equivalence relation. The connectedness relation in an undirected graph is reflexive, symmetric and transitive.
+
+The computational innovation is representing these groups as forests and using two optimisations:
+
+**Union by rank or size** prevents unnecessarily deep trees. **Path compression** shortens future searches by redirecting visited nodes towards the root.
+
+Together, they yield an amortised operation cost of approximately:
+
+\\[ O(\alpha(n)) \\]
+
+Here, \\(\alpha\\) is the inverse Ackermann function. It grows exceptionally slowly, but the complexity is not literally constant.
+
+This is a valuable opportunity to introduce amortised analysis: an individual operation can be expensive while a sequence of operations remains inexpensive on average per operation.
+
+**Correctness boundary:** connectivity is not the same as semantic similarity or shared root cause. If two incidents are incorrectly linked, Union-Find can merge otherwise unrelated groups through transitivity.
+
+Ordinary Union-Find also does not efficiently support arbitrary removal of connections.
+
+**Editorial direction:** *How Systems Keep Track of What Belongs Together.*
+
+**Required visual experiment:** show parent pointers before and after path compression, then introduce an incorrect connection between two groups.
+
+**Transfer test:** can Union-Find maintain accurate groups when relationships are continuously created and deleted?
+
+### **2.7 Circular Buffer — reasoning about bounded memory**
+
+Retain and enrich
+
+Memory representation · Capacity · Retention
+
+**Existing use case:** recent activity window.
+
+This lesson should become a foundational explanation of how systems handle a continuous stream of information with finite memory.
+
+An application receives events indefinitely, but it only needs to retain the most recent five. Instead of shifting every element whenever a new event arrives, it can reuse existing storage.
+
+### **Experiment: five slots, an ongoing stream**
+
+Events received
+
+# **7**
+
+Retained
+
+# **5**
+
+Overwritten
+
+# **2**
+
+Logical event order, oldest to newest
+
+E3
+
+E4
+
+E5
+
+E6
+
+E7
+
+Reset
+
+Append event
+
+This simulation uses an overwrite-oldest policy. Other ring buffers reject, block or drop writes when full.
+
+The mathematical foundation is modular arithmetic:
+
+\\[ \text{next index}=(\text{current index}+1)\bmod C \\]
+
+Where \\(C\\) is the capacity.
+
+The physical storage never needs to rotate. Only the interpretation of the indexes changes.
+
+The lesson should distinguish:
+
+| Concept          | Meaning                                                         |
+| ---------------- | --------------------------------------------------------------- |
+| Circular buffer  | A bounded storage representation                                |
+| Queue            | An abstract ordering of operations                              |
+| Sliding window   | A logical subset of recent observations                         |
+| Retention policy | A decision about which information to preserve                  |
+| Backpressure     | A mechanism for slowing producers when consumers cannot keep up |
+
+These concepts frequently appear together, but they are not interchangeable.
+
+**Correctness boundary:** a circular buffer retaining the last 100 events does not necessarily retain the last ten minutes of activity. Event count and elapsed time describe different windows.
+
+Concurrent producers and consumers also introduce synchronisation requirements. A modulo operation alone does not make a buffer thread-safe.
+
+**Editorial direction:** *How Computers Remember Recent Information Without Remembering Everything.*
+
+**Application candidates:** operating system I/O, telemetry collection, streaming audio, network buffers and agent working memory.
+
+**Transfer test:** what happens when a producer continuously generates events faster than a consumer can process them?
+
+### **2.8 Rabin–Karp — avoiding repeated computation through hashing**
+
+Substantial enrichment
+
+String matching · Rolling hashes · Collisions
+
+**Existing use case:** multi-pattern scanner.
+
+This mechanism has considerable educational potential because it demonstrates a general optimisation principle: when adjacent computations overlap, reuse the work already performed.
+
+Suppose a system searches a long document for a prohibited phrase of length seven.
+
+The straightforward approach compares the phrase against every seven-character window. Most adjacent windows share six of their seven characters.
+
+Rabin–Karp exploits this overlap.
+
+Remove the outgoing character's contribution, preserve the overlapping computation and incorporate the incoming character.
+
+A polynomial rolling hash can represent a window as:
+
+\\[ H=\sum\_{i=0}^{m-1}c_i b^{m-1-i}\bmod q \\]
+
+The next window's hash can be calculated from the previous one:
+
+\\[ H'=\big((H-c_0b^{m-1})b+c_m\big)\bmod q \\]
+
+With the required power precomputed, a window shift requires constant-time arithmetic under a conventional fixed-width arithmetic model.
+
+However, matching hashes do not prove that the strings are equal. Candidate matches need verification if the result must be exact.
+
+**Technical requirements:**
+
+| Property                   | Explanation                                                     |
+| -------------------------- | --------------------------------------------------------------- |
+| Window hash update         | O(1) under the stated arithmetic model                          |
+| Initialisation             | O(m)                                                            |
+| Typical search             | O(n + m) under suitable hashing and match-frequency assumptions |
+| Worst-case verified search | O(nm)                                                           |
+| Exactness                  | Requires verification of candidate matches                      |
+
+The current multi-pattern framing also requires qualification. A collection of equal-length patterns can share rolling-hash windows. Patterns of different lengths require additional handling.
+
+For large collections of arbitrary-length keywords, Aho–Corasick may be a more suitable mechanism.
+
+**Editorial direction:** *Why Repeating Almost the Same Calculation Is Wasteful.*
+
+**Required visual experiment:** show the outgoing character, incoming character, rolling hash calculation and a deliberate collision.
+
+**Transfer test:** why would a content moderation system be unsafe if it treated every matching hash as proof of matching content?
+
+### **2.9 Topological Sort — discovering which work is ready**
+
+Substantial enrichment
+
+Partial orders · Dependencies · Scheduling
+
+**Existing use case:** pipeline scheduler.
+
+This lab bridges classical graph algorithms and real engineering architecture particularly well.
+
+A data pipeline cannot aggregate a report before its required inputs have been produced. But it may have several independent inputs that can be processed simultaneously.
+
+The computational problem is to find an ordering that respects dependencies without inventing unnecessary dependencies.
+
+After the inputs are fetched, A and B become independently eligible. Aggregation remains blocked until both finish.
+
+Kahn's algorithm maintains the number of unresolved incoming dependencies for each vertex. Vertices with none remaining become eligible for processing.
+
+The alternative DFS-based approach uses finishing order and cycle detection.
+
+Both approaches have standard time complexity \\(O(V+E)\\).
+
+But a valid topological ordering does not itself optimise a schedule. It does not minimise execution duration, allocate workers, estimate resource contention or retry failed tasks.
+
+Python's `graphlib.TopologicalSorter` makes this distinction tangible through its interface for obtaining ready tasks and subsequently marking them complete. It also detects dependency cycles.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://docs.python.org\&sz=32)
+
+Python 3.15.2 documentation
+
+
+
+**Editorial direction:** *Why Dependencies Determine What Can Happen Next.*
+
+**Required visual experiment:** distinguish ready, running, completed, failed and blocked tasks. Introduce a dependency cycle and vary the number of available workers.
+
+The task lifecycle is an extension of the sorting mechanism, not part of the mathematical algorithm itself.
+
+**Transfer test:** if two valid topological orderings exist, will they necessarily produce the same execution duration on a limited number of workers?
+
+### **2.10 Dijkstra — making locally useful decisions with global guarantees**
+
+High priority
+
+Greedy algorithms · Weighted graphs · Cost modelling
+
+**Existing use case:** cheapest tool path.
+
+Dijkstra offers an opportunity to introduce greedy algorithms and explain why a locally attractive decision sometimes — but not always — leads to a globally optimal result.
+
+The central question is how a system discovers the least expensive path through a network whose connections have different costs.
+
+Cheapest first edge
+
+S → A → T
+
+# **11**
+
+Cheapest complete path
+
+S → B → T
+
+# **6**
+
+Dijkstra selects the smallest accumulated tentative distance, not simply the cheapest outgoing edge.
+
+This distinction is critical. A reader who understands Dijkstra as merely selecting the cheapest available edge has learned the wrong algorithm.
+
+The correctness argument relies on non-negative edge weights. Once the vertex with the smallest tentative distance is settled, a path through an unsettled vertex cannot improve that distance.
+
+A binary-heap implementation with decrease-key support has complexity commonly expressed as:
+
+\\[ O((V+E)\log V) \\]
+
+Implementations using duplicate queue entries instead of decrease-key need separate analysis.
+
+The tool-routing example introduces deeper problems. What exactly does an edge's cost represent?
+
+Latency, price, probability of failure, information quality and available permissions cannot always be combined into a meaningful fixed additive weight.
+
+**Correctness boundary:** classical Dijkstra solves a shortest-path problem over a graph with fixed, non-negative, additive edge costs. It does not automatically solve uncertain, changing or multidimensional planning problems.
+
+**Editorial direction:** *When the Cheapest Next Step Is Not the Cheapest Journey.*
+
+**Required visual experiment:** compare edge-greedy routing, BFS and Dijkstra on the same graph. Include a separate negative-weight counterexample.
+
+**Transfer test:** when would an AI agent's tool-selection problem need a richer model than shortest-path search?
+
+## **3. Technical audit — system coordination and control**
+
+These three mechanisms need a somewhat different editorial treatment.
+
+Unlike classical algorithms, their correctness often depends on concurrent actions, persistent state, timing assumptions and interactions with external systems.
+
+We should not force them into a purely computational complexity template.
+
+### **3.1 Approval State Machine — controlling what a system is allowed to do next**
+
+High priority
+
+State · Transitions · Concurrency
+
+**Existing use case:** action lifecycle gate.
+
+The core idea is that a system's behaviour should depend on both the action requested and its current state.
+
+An approved operation and a completed operation are not equivalent. Neither are a failed request and a confirmed failed business outcome.
+
+Illustrative action lifecycle. An unknown execution outcome requires reconciliation rather than an automatic retry. This is a simplified, proposed teaching model.
+
+The Context module should separate four ideas:
+
+| Concept    | Responsibility                               |
+| ---------- | -------------------------------------------- |
+| State      | Describes the current lifecycle position     |
+| Event      | Represents something that happened           |
+| Guard      | Determines whether a transition is permitted |
+| Transition | Changes the state according to defined rules |
+
+The important engineering boundary is that defining legal transitions does not guarantee that concurrent processes respect them.
+
+Suppose two workers both read an approved action. Both subsequently change it to executing. Unless the transition is enforced atomically, both may attempt the external operation.
+
+A production implementation may need transactions, optimistic concurrency control, idempotency keys and reconciliation.
+
+**Editorial direction:** *How Systems Prevent Actions From Happening in the Wrong Order.*
+
+**Required visual experiment:** compare a normal lifecycle with two workers racing to execute the same approved operation.
+
+**Harness integration:** particularly strong connection to *How Marketplaces Work When Their Systems Disagree*.
+
+**Transfer test:** does successfully moving an action to `EXECUTING` prove the external operation will happen exactly once?
+
+### **3.2 Token Bucket — distributing permission to consume resources over time**
+
+Retain and enrich
+
+Rate · Capacity · Resource allocation
+
+**Existing use case:** tool-call rate limiter.
+
+Rate limiting is often taught as an arbitrary infrastructure rule: allow a certain number of requests per second.
+
+The more interesting question is how a system permits bursts of activity while constraining sustained resource consumption.
+
+A token bucket maintains a balance of available tokens. Tokens arrive over time, up to a maximum capacity. Requests consume tokens according to their cost.
+
+### **Experiment: demand versus permitted throughput**
+
+Bucket capacity
+
+**5 tokens**
+
+Refill rate
+
+**1/second**
+
+Incoming demand
+
+**3/second**
+
+Accepted
+
+Rejected
+
+Total accepted
+
+# **16**
+
+Total rejected
+
+# **20**
+
+Illustrative discrete-time model with a full initial bucket, one token per request and immediate rejection of excess demand.
+
+For a bucket with capacity \\(B\\) and refill rate \\(r\\), the admitted token consumption over an interval of duration \\(t\\) is bounded by:
+
+\\[ B+rt \\]
+
+The initial budget permits a burst; the refill rate constrains sustained use.
+
+The lesson should compare token buckets with fixed windows, sliding-window limits, queue-based shaping and concurrency limits.
+
+**Critical distinction:** rate limiting is not concurrency limiting. A system may admit ten requests per second while accumulating hundreds of simultaneous unfinished requests.
+
+Distributed implementations also need an appropriate shared or partitioned accounting strategy if the limit must apply globally.
+
+**Editorial direction:** *Why Systems Allow Bursts but Cannot Sustain Unlimited Demand.*
+
+**Required visual experiment:** vary capacity, refill rate, request cost and arrival pattern independently.
+
+**Transfer test:** does limiting an LLM service to ten requests per second guarantee a maximum of ten concurrent requests?
+
+### **3.3 Lease-Locked Queue — coordinating work when ownership can expire**
+
+Critical correction
+
+Distributed ownership · Fault tolerance · Stale workers
+
+**Existing use case:** single executor guarantee.
+
+This is the most consequential confirmed terminology problem in the current module. The landing page explicitly describes the mechanism as providing a single executor guarantee.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://harness.ai-knowledge-hub.org\&sz=32)
+
+AI Knowledge Hub
+
+
+
+A lease grants authority for a limited period. It enables another worker to recover abandoned work after that period expires.
+
+But lease expiry does not physically stop the original worker.
+
+### **When ownership changes but a worker keeps running**
+
+A lease may expire while a process is paused or disconnected. That process can subsequently resume with stale assumptions about ownership.
+
+A common engineering response is fencing.
+
+Each successive ownership grant receives a monotonically increasing token. The protected resource tracks the latest accepted token and rejects operations carrying older tokens.
+
+This only works where the protected resource actually enforces the token comparison. It does not automatically protect arbitrary external side effects.
+
+Redis's distributed locking documentation explicitly discusses fencing and the assumptions required for lease-based mutual exclusion. Amazon SQS similarly documents visibility timeouts without promising duplicate-free execution.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://redis.io\&sz=32)
+
+Docs+1
+
+
+
+The lesson must distinguish these guarantees:
+
+| Guarantee                                     | Provided by a lease alone?                |
+| --------------------------------------------- | ----------------------------------------- |
+| Temporary, coordinator-managed ownership      | Under appropriate coordinator assumptions |
+| Recovery of abandoned work                    | Possible through expiration               |
+| Prevention of simultaneous physical execution | No                                        |
+| Prevention of stale writes                    | Requires further enforcement              |
+| Exactly-once external business outcome        | No                                        |
+
+**Proposed replacement label:** *Lease-Based Work Ownership.*
+
+**Editorial direction:** *How Systems Recover Abandoned Work Without Trusting the Previous Worker.*
+
+**Required visual experiment:** pause a worker, expire its lease, transfer ownership, resume the original worker and compare behaviour with and without fencing.
+
+This lab is likely to require more than editorial copy changes. If its animation currently depicts lease expiration as automatically terminating execution, the demonstration itself must be revised. That remains an implementation check, not a confirmed observation.
+
+**Transfer test:** why does extending the lease duration reduce some risks without fundamentally eliminating stale-worker failures?
+
+## **4. Technical audit — security and integrity**
+
+### **4.1 RBAC / ABAC Permission Graph — deciding who may do what**
+
+High priority
+
+Policy models · Relationships · Authorisation
+
+**Existing use case:** scope resolver.
+
+The principal issue here is conceptual classification.
+
+RBAC and ABAC are authorisation models, not individual algorithms. Graph traversal may help implement aspects of permission resolution, but traversal and policy evaluation are different operations.
+
+The mathematical relationship between users, roles and permissions makes RBAC a valuable computational lesson. However, it needs to be distinguished from evaluating arbitrary attributes and contextual conditions.
+
+**RBAC**
+
+Permissions mediated through assigned roles.
+
+**ABAC**
+
+Permissions determined by attributes and policy.
+
+NIST SP 800-162 formally describes ABAC in terms of evaluating subject, resource, operation and relevant environmental attributes against policy.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://csrc.nist.gov\&sz=32)
+
+csrc.nist.gov
+
+
+
+We should also introduce relationship-based access control (ReBAC), particularly if the current visualizer uses ownership, group membership and inherited resource relationships as its principal graph.
+
+**Technical requirements:** distinguish authentication, authorisation, policy decision and policy enforcement.
+
+A permission resolver producing the correct answer is insufficient if a service can bypass it or if the system evaluates outdated policy information.
+
+**Editorial direction:** *How Computers Decide Whether an Action Is Permitted.*
+
+**Required visual experiment:** start with a role-based decision, then introduce a resource ownership condition and contextual restriction that change the outcome.
+
+**Transfer test:** if a user has the analyst role, why might they still be prohibited from accessing a particular company's report?
+
+### **4.2 Audit Hash Chain — proving that recorded history has not silently changed**
+
+High priority
+
+Cryptographic commitments · Verification · Trust
+
+**Existing use case:** tamper-evident action log.
+
+This lesson provides a natural introduction to cryptographic hashing through an understandable engineering problem.
+
+A system records a sequence of important actions. An auditor needs to detect whether someone subsequently modified the records.
+
+A chained hash commits each record to the previous chain state:
+
+\\[ h_i=H(h\_{i-1}\parallel \operatorname{encode}(e_i)) \\]
+
+Here, \\(e_i\\) is the event, and the encoding must be consistent and unambiguous.
+
+### **Experiment: what does the chain actually prove?**
+
+Modify a previously recorded event
+
+NoneEvent 1Event 2Event 3
+
+Attacker recomputes the affected hashes
+
+Verify chain internally
+
+Pass
+
+Compare against trusted original final hash
+
+Pass
+
+Conceptual simulation, not actual cryptographic computation. Assumes the verifier has an independently trusted original checkpoint.
+
+The essential distinction is between internal consistency and authenticity.
+
+An attacker who can change a log and recompute all its hashes may create an internally consistent alternative history. Detecting that rewrite requires a trusted commitment, signature, independently stored checkpoint or equivalent protection.
+
+The lesson should also distinguish cryptographic integrity from factual accuracy. A perfectly preserved log may still contain a false statement that was recorded by the system in the first place.
+
+A natural follow-on topic is Merkle trees. Certificate Transparency's RFC 9162 provides a formal example of using tree-based commitments and consistency proofs to verify append-only history efficiently. It is a related construction, not the same mechanism as a linear hash chain.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://www.rfc-editor.org\&sz=32)
+
+RFC Editor
+
+
+
+**Editorial direction:** *How a System Makes Changes to Its History Detectable.*
+
+**Required visual experiment:** modify an event, recompute the chain and compare validation with and without a trusted checkpoint.
+
+**Transfer test:** does a valid audit chain establish that the recorded campaign changes actually happened on the advertising platform?
+
+## **5. Consolidated editorial inventory**
+
+We now have a technical and educational direction for all 15 mechanisms.
+
+The priorities below represent my proposed editorial judgement. They are not completed implementation test results.
+
+| Mechanism              | Priority | Principal intervention                | Visual review                  |
+| ---------------------- | -------- | ------------------------------------- | ------------------------------ |
+| Binary Search          | High     | Correct search assumptions            | Counterexample needed          |
+| BFS                    | Medium   | Develop graph foundations             | Cycles and queue state         |
+| DFS                    | Medium   | Explain traversal and recursion       | Stack and cycle detection      |
+| Heap                   | Medium   | Develop partial ordering              | Tree–array relationship        |
+| Bloom Filter           | High     | Explain probabilistic guarantees      | False-positive experiment      |
+| Union-Find             | Medium   | Explain equivalence and amortisation  | Path compression               |
+| Circular Buffer        | Medium   | Explain bounded storage               | Overflow policies              |
+| Rabin–Karp             | Medium   | Explain rolling computation           | Collision experiment           |
+| Topological Sort       | Medium   | Separate ordering from scheduling     | Cycles and parallel readiness  |
+| Dijkstra               | High     | Establish optimisation assumptions    | Alternative routing strategies |
+| Approval State Machine | High     | Separate transitions from enforcement | Concurrent execution           |
+| Token Bucket           | Medium   | Explain temporal resource allocation  | Bursts and sustained demand    |
+| Lease-Locked Queue     | Critical | Correct execution guarantees          | Stale-worker scenario          |
+| RBAC / ABAC            | High     | Separate policy models and algorithms | Contextual decisions           |
+| Audit Hash Chain       | High     | Establish trust boundaries            | Chain rewriting                |
+
+### **Proposed editorial workload by priority**
+
+Critical correction
+
+**1**
+
+High priority
+
+**6**
+
+Foundational enrichment
+
+**8**
+
+All 15 mechanisms have sufficient educational value to justify retention. I have not identified a candidate that should be removed outright.
+
+The problem is primarily how the mechanisms are framed, explained and connected.
+
+## **6. Cross-cutting findings**
+
+Looking across the individual audits, six recurring intellectual themes emerge. These are more significant than the individual algorithm names.
+
+### **6.1 Problem representation determines the solution**
+
+Binary Search, BFS, DFS and Dijkstra demonstrate that the same real-world problem can become computationally different depending on how it is represented.
+
+A sequence sorted by time is not the same as a sequence sorted by value. An unweighted graph is not the same as a weighted graph. A graph of observed relationships is not necessarily a graph of causal relationships.
+
+Before teaching the algorithm, we need to teach the abstraction.
+
+### **6.2 Invariants explain correctness**
+
+Several lessons can be connected through a common idea: a property that remains true as the mechanism executes.
+
+| Mechanism        | Relevant invariant or maintained property                             |
+| ---------------- | --------------------------------------------------------------------- |
+| Binary Search    | Any unresolved first match remains within the search interval         |
+| BFS              | The frontier is processed in non-decreasing distance order            |
+| Heap             | Every parent satisfies the required ordering relative to its children |
+| Union-Find       | Each element belongs to exactly one represented set                   |
+| Topological Sort | A ready vertex has no unresolved predecessors                         |
+| Dijkstra         | A settled distance is optimal under the algorithm's assumptions       |
+
+Instead of presenting each algorithm as a sequence of instructions, we should teach readers to observe the property preserved by those instructions.
+
+This is also an excellent organising principle for the animations.
+
+### **6.3 Efficiency comes from avoiding unnecessary work**
+
+Heap, Binary Search, Rabin–Karp and Union-Find all avoid computational work, but in different ways.
+
+**Binary Search**
+
+Eliminate candidates
+
+Discard regions that cannot contain the answer.
+
+**Heap**
+
+Maintain partial order
+
+Avoid fully ordering information you do not need.
+
+**Rabin–Karp**
+
+Reuse computation
+
+Preserve the contribution of overlapping input.
+
+**Union-Find**
+
+Improve representation
+
+Restructure data to make later operations cheaper.
+
+These strategies recur throughout database engines, operating systems, compilers and distributed infrastructure.
+
+The reader who learns the strategies rather than merely memorising implementations develops much more transferable knowledge.
+
+### **6.4 Every optimisation preserves some information and discards other information**
+
+The Bloom Filter sacrifices exact membership information for memory efficiency.
+
+The Circular Buffer sacrifices historical retention for bounded storage.
+
+The Top-K Heap discards candidates that cannot improve the current selection under its stated assumptions.
+
+These are excellent opportunities to introduce the economics of computation: what information is worth storing, what precision is necessary, and what costs are acceptable?
+
+Not all optimisations are simply faster versions of the same operation. Some deliberately change the guarantees.
+
+### **6.5 Local correctness does not establish system correctness**
+
+This theme connects directly to our revised system design articles.
+
+A correct state machine does not guarantee atomic execution. A correct permission evaluator does not guarantee enforcement. A valid lease does not guarantee exactly-once business outcomes. A valid hash chain does not guarantee truthful records.
+
+The algorithm may perform its defined operation perfectly while the larger system still fails.
+
+That distinction should become a recurring Harness teaching principle.
+
+### **6.6 Computational complexity is not infrastructure performance**
+
+An \\(O(\log n)\\) search is not automatically faster than an \\(O(n)\\) scan in every practical situation.
+
+Data locality, network latency, disk reads, representation costs, concurrency and the size of the input all matter.
+
+The module should teach complexity as a model of resource growth rather than a benchmark or universal performance promise.
+
+## **7. How the Context and Run tabs should complement each other**
+
+The technical audit suggests that we need a clearer educational division between these two existing surfaces.
+
+| Run tab                            | Context tab                          |
+| ---------------------------------- | ------------------------------------ |
+| Observe execution                  | Understand the reason for execution  |
+| Inspect changing variables         | Understand invariants                |
+| Read reference implementation      | Understand implementation choices    |
+| Step through prepared inputs       | Understand input requirements        |
+| Observe an output                  | Understand correctness guarantees    |
+| Experiment with alternative inputs | Understand applicability and failure |
+
+I would introduce two conceptual modes within the existing learning experience.
+
+**Normal execution**
+
+Observe why the mechanism works when its assumptions hold.
+
+Build the mental model.
+
+**Challenge the assumptions**
+
+Modify an input or constraint and predict whether the guarantee survives.
+
+Test the mental model.
+
+This does not necessarily require new interface tabs. It might be implemented through selectable scenarios in the existing visualizer.
+
+The important educational decision is to include at least one meaningful counterexample or boundary experiment per lesson.
+
+Watching a correct algorithm execute teaches recognition. Predicting when it fails teaches reasoning.
+
+## **8. Proposed primary-source research register**
+
+In Phase 3 and during individual lesson production, we should develop a claim-to-source map.
+
+The following register identifies suitable foundational material and real implementation candidates. Some sources have been verified in this phase; others remain research targets.
+
+| Mechanism              | Foundational source or reference      | Implementation candidate                     |
+| ---------------------- | ------------------------------------- | -------------------------------------------- |
+| Binary Search          | Knuth; sorted-sequence search         | Python `bisect`                              |
+| BFS                    | Graph traversal theory                | NetworkX                                     |
+| DFS                    | Graph traversal and graph colouring   | NetworkX                                     |
+| Heap                   | Williams, 1964; Floyd, 1964           | Python `heapq`, PostgreSQL                   |
+| Bloom Filter           | Bloom, 1970                           | RocksDB                                      |
+| Union-Find             | Tarjan, 1975                          | SciPy disjoint sets                          |
+| Circular Buffer        | Modular arithmetic and bounded queues | Linux kernel circular buffers                |
+| Rabin–Karp             | Karp and Rabin, 1987                  | Educational reference implementation         |
+| Topological Sort       | Kahn, 1962                            | Python `graphlib`, workflow engines          |
+| Dijkstra               | Dijkstra, 1959                        | NetworkX                                     |
+| Approval State Machine | Harel's statecharts, 1987             | Workflow runtimes                            |
+| Token Bucket           | IETF traffic-metering specifications  | Linux traffic control                        |
+| Lease-Locked Queue     | Gray and Cheriton, 1989               | Redis locking, SQS                           |
+| RBAC / ABAC            | NIST access-control models            | Policy engines                               |
+| Audit Hash Chain       | Cryptographic hashing and commitments | Tamper-evident logs and transparency systems |
+
+### **Sources verified during this phase**
+
+[image](https://www.google.com/s2/favicons?domain=https://docs.python.org\&sz=32)
+
+**Python standard library**\
+[Bisect](https://docs.python.org/3/library/bisect.html?utm_source=chatgpt.com) · [Heapq](https://docs.python.org/3/library/heapq.html?utm_source=chatgpt.com) · [Graphlib](https://docs.python.org/3/library/graphlib.html?utm_source=chatgpt.com)
+
+Documented implementation properties and operation semantics.
+
+[image](https://www.google.com/s2/favicons?domain=https://redis.io\&sz=32)
+
+**Redis**\
+[Distributed Locks](https://redis.io/docs/latest/develop/use/patterns/distributed-locks/?utm_source=chatgpt.com)
+
+Lease validity assumptions, locking limitations and fencing.
+
+[image](https://www.google.com/s2/favicons?domain=https://aws.amazon.com\&sz=32)
+
+**Amazon SQS**\
+[Visibility Timeout](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html?utm_source=chatgpt.com)
+
+Recovery and duplicate-delivery boundaries.
+
+[image](https://www.google.com/s2/favicons?domain=https://nist.gov\&sz=32)
+
+**NIST**\
+[SP 800-162 — Attribute Based Access Control](https://csrc.nist.gov/pubs/sp/800/162/upd2/final?utm_source=chatgpt.com)
+
+Formal access-control model definitions.
+
+[image](https://www.google.com/s2/favicons?domain=https://www.rfc-editor.org\&sz=32)
+
+**IETF**\
+[RFC 9162 — Certificate Transparency](https://www.rfc-editor.org/rfc/rfc9162.html?utm_source=chatgpt.com)
+
+Cryptographic commitments and append-only consistency verification.
+
+The evidence register is intentionally selective at this stage. There is little benefit in researching every possible production application before we approve what each lesson should teach.
+
+## **9. Integration opportunities across Harness**
+
+Our existing lessons can begin functioning as an interconnected curriculum.
+
+| Existing Harness article                          | Supporting computational mechanisms              | Teaching connection                           |
+| ------------------------------------------------- | ------------------------------------------------ | --------------------------------------------- |
+| How Marketplaces Work When Their Systems Disagree | State machines, leases, audit chains             | Coordination, uncertain outcomes and evidence |
+| API Design                                        | Token buckets, policy evaluation, state machines | Contracts, capacity and enforcement           |
+| How Advertising Reporting Systems Work            | Bloom filters, buffers, binary search            | Membership, completeness and changing data    |
+| Advertising Platforms                             | Heaps, graphs, ranking mechanisms                | Selection and constrained computation         |
+| Future database lessons                           | Binary search, Bloom filters, heaps              | Indexing, storage and query processing        |
+| Future AI engineering lessons                     | Traversal, ranking, state machines, dependencies | Retrieval, planning and orchestration         |
+
+One rule should govern cross-linking: the destination lesson must answer a question that the current lesson has made meaningful.
+
+We should not add links simply to increase navigation between pages.
+
+## **10. Remaining implementation audit**
+
+There is one important blocker preventing me from marking Phase 2 as fully complete.
+
+I retrieved the Binary Search reference code directly from the published visualizer and verified the problematic date-order explanation. I also followed the Lease-Locked Queue URL, but its publicly retrievable representation returned the default Binary Search state rather than the selected lab.&#x20;
+
+[image](https://www.google.com/s2/favicons?domain=https://harness.ai-knowledge-hub.org\&sz=32)
+
+AI Knowledge Hub+1
+
+
+
+Consequently, the full Context copy, animation states and reference implementations of the remaining labs still require inspection.
+
+We should access the source material containing:
+
+- The 15 Context text definitions.
+- Reference code snippets.
+- Input datasets.
+- Animation step generators and state definitions.
+- Existing complexity labels and source references.
+
+We do not need to begin repository implementation. Access to these files would allow us to finish the editorial and technical inventory without guessing what the current lessons contain.
+
+For that final audit, I would test each implementation against a normal input, a boundary case and an assumption-breaking input where meaningful. Security and distributed coordination mechanisms need additional failure scenarios rather than just conventional unit tests.
+
+## **11. Phase 2 outcome and recommendation for Phase 3**
+
+Module scope and inventory
+
+Conceptual audit of all 15 mechanisms
+
+Technical requirements and correctness boundaries
+
+Educational direction for each lesson
+
+Proposed visual experiments
+
+Initial primary-source verification
+
+Complete inspection of current Context copy
+
+Reference code and animation verification
+
+We have completed the conceptual and editorial inventory, with implementation-level verification outstanding.
+
+The decisions I propose, subject to your approval, are:
+
+1. Retain all 15 mechanisms and the existing interactive workbench.
+2. Correct misleading assumptions and guarantees before general copy optimisation.
+3. Introduce a small shared computational foundations layer rather than repeatedly explaining the same mathematical concepts.
+4. Reclassify the mechanisms without necessarily changing the existing navigation architecture.
+5. Preserve marketing as a useful application domain, but remove it as the governing intellectual identity of the track.
+6. Introduce normal-execution and assumption-breaking experiments.
+7. Avoid adding new algorithm labs until the existing curriculum is coherent.
+
+**For Phase 3, I would focus on curriculum and lesson architecture.**
+
+In particular, I think we should investigate an idea that emerged from this audit: organising the intellectual journey around computational principles rather than individual mechanisms.
+
+The journey could begin with representation and computational cost, progress through ordering, exploration and optimisation, introduce probabilistic computation, and eventually reach coordination, policy and trust.
+
+The individual algorithms would become demonstrations of these broader ideas.
+
+That would give Harness something more valuable than fifteen improved algorithm explanations. It would establish a coherent way of learning how computers transform constraints into mechanisms — and how those mechanisms become the systems we study in the other tracks.
