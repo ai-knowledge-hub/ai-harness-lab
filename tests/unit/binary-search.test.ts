@@ -100,6 +100,19 @@ describe("first-true boundary search", () => {
     expect(root.querySelector('[data-record="8"]')).toBeNull();
   });
 
+  it("compresses static invariant annotation while retaining the full diagram and Run explanation", () => {
+    const step = boundaryTrace(binaryScenarios.boundary.values, 650)[4];
+    const root = document.createElement("div");
+    root.innerHTML = renderBinary(step);
+    const diagram = root.querySelector("svg")!.outerHTML;
+    expect(root.querySelector(".binary-state")?.textContent).toContain("Remaining elements: [3, 4)");
+    expect(root.querySelector(".binary-state")?.textContent).toContain("Search evaluations completed: 2");
+    root.innerHTML = renderBinary(step, false, "invariant");
+    expect(root.querySelector("svg")!.outerHTML).toBe(diagram);
+    expect(root.querySelectorAll(".binary-state p")).toHaveLength(1);
+    expect(root.querySelector(".binary-state")?.textContent?.trim()).toBe("Boundary invariant preserved");
+  });
+
   it("preserves first crossings when constructing prefix maxima", () => {
     const raw = [80, 120, 250, 90, 180, 300, 100];
     const maxima = prefixMaximum(raw);

@@ -8,7 +8,7 @@ const latency = [80, 120, 250, 90, 180, 300, 100];
 const trace = kind === "observation" ? valid[2] : kind === "invariant" ? valid[4] : invalid[2];
 const caption = {
   observation: "Only Day 5 has been inspected. Because spending never decreases, later days must also meet the target. A question mark hides an unread value; dashed outlines show conclusions about unread records.",
-  invariant: "After two comparisons: lo = 3, hi = 4. Only index 3 remains to inspect, while boundary positions 3 and 4 remain possible. Dashed outlines mark inferences.",
+  invariant: "With one record left to inspect, two answers remain possible: its own position if it qualifies, or the next position if it does not. Solid outlines mark checked values; dashed outlines mark deductions.",
   invalid: "After the first update, lo = 4 excludes the actual first match at index 1, Day 2. The red value is supplied by the independent verifier, not observed by binary search.",
   predicate: "For threshold £650, the check is false at positions 0–2 and true at 3–7. Position 3 is the first match; position 8 represents no match.",
   duplicates: "bisect_left returns 2 and bisect_right returns 5: the half-open interval [2, 5) contains the three occurrences of 30.",
@@ -18,7 +18,7 @@ const labels = { observation: "One observation and its inferences", invariant: "
 ---
 <figure class="binary-figure" data-binary-asset={kind}>
   {(["observation", "invariant", "invalid"] as string[]).includes(kind) ? (
-    <div class="binary-figure-scroll" tabindex="0" role="region" aria-label={labels[kind]} set:html={renderBinary(trace, false, kind === "observation" ? "observation" : "search")} />
+    <div class="binary-figure-scroll" tabindex="0" role="region" aria-label={labels[kind]} set:html={renderBinary(trace, false, kind === "observation" ? "observation" : kind === "invariant" ? "invariant" : "search")} />
   ) : (
     <div class="binary-table-scroll" tabindex="0" role="region" aria-label={labels[kind]}>
       <table>
